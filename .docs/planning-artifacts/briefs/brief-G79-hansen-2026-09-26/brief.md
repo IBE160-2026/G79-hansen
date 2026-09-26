@@ -9,54 +9,66 @@ updated: 2026-09-26
 
 ## Purpose
 
-AI Study Buddy helps students turn their own course material into summaries, flashcards, and quizzes with references back to the source. It is a simple IBE160 project at Høyskolen i Molde, developed using BMAD in VS Code, and an opportunity to learn how AI supports text processing.
+AI Study Buddy helps students process course material by generating summaries, flashcards, and quiz questions from uploaded notes. It provides practical study support while giving students experience with AI for text processing.
 
-This is a complete first draft for user review. The assignment establishes the concept and output types. Items marked **[ASSUMPTION]** are proposed choices, not confirmed requirements or lecturer expectations.
+The application is an IBE160 project at Høyskolen i Molde, developed using BMAD in VS Code. The assignment specifies a simple difficulty level. This brief separates confirmed assignment requirements from proposed implementation choices; the proposed choices remain open to revision.
 
-## Users and problem
+## Confirmed assignment requirements
 
-**[ASSUMPTION]** The first users are fellow students preparing for a lecture recap or an exam. They have notes but need help identifying the main ideas and turning passive reading into practice. Creating study aids manually is the problem hypothesis; no interviews or evidence of time savings have been collected.
+| Area | Requirement |
+| --- | --- |
+| Users | Students processing and studying course material. |
+| Uploaded material | Lecture notes, slides, and course material in PDF or text format. |
+| Additional inputs | Course code or subject, desired detail level, language and preferences. |
+| Study outputs | Summaries, flashcards, quiz questions and answers, and key concepts. |
+| Source references | Pointers to the sources or pages supporting the generated material. |
+| Security and login | Required if the user's material is stored or shared. |
+| Online commerce | No online buying or selling. |
 
-The intended benefit is a short route from course material to active practice, with a way to check the generated content. Improved grades or learning outcomes are not established claims.
+The assignment leaves these decisions open: LLM selection and confidence level, summary granularity, treatment of tables and figures, and local versus cloud processing. It does not prescribe a web app, a particular model, fixed numbers of cards or questions, or the absence of accounts.
 
-## Proposed student experience
+## Student experience
 
-**[ASSUMPTION]** A browser-based application supports one document and one study session at a time:
+A student uploads course material, enters the course or subject, and chooses the desired detail level and language preferences. The application generates a summary, key concepts, flashcards, and quiz questions with answers. Source references let the student return to the original material to check the generated content.
 
-1. Upload a text-based PDF or paste plain text. Optionally enter the course code or subject.
-2. Choose Norwegian or English and a short or detailed summary.
-3. Generate a study set: a summary with key concepts, five flashcards, and five multiple-choice questions, where the source contains enough material.
-4. Read the summary, reveal flashcard answers, and answer quiz questions before seeing the correct answer and explanation.
-5. Check PDF page references or numbered text sections for summary points, flashcards, and quiz answers. Start a new session when finished.
+The intended benefit is a convenient route from course material to study and practice. Time savings and improved learning outcomes have not been measured.
 
-**[ASSUMPTION]** Outputs use only the supplied material. If it cannot support a requested answer or enough distinct questions, the app explains the limitation instead of filling gaps. Source references enable checking; they do not guarantee correctness.
+## Proposed first version
 
-## First-version scope
+These are recommendations for a manageable student project, not additional assignment requirements:
 
-**[ASSUMPTION]** The first release includes the flow above, a visible generation state, and useful messages for unsupported files, unreadable or empty input, oversized input, and generation failures. Exact upload limits will be defined before implementation.
+- Build a browser-based application that processes one document per study session.
+- Accept uploaded text-based PDFs and text files; optionally support pasting text. Explain clearly when scanned pages or visual content cannot be processed.
+- Offer Norwegian and English output and short or detailed summaries as initial options.
+- Generate five flashcards and five multiple-choice questions when the material supports that many distinct items. Reveal flashcard answers on request and show quiz answers with explanations after submission.
+- Attach PDF page references or numbered text-section references to generated content. Explain insufficient source support instead of inventing missing information.
+- Show generation progress and useful messages for unsupported, empty, unreadable, or oversized input and generation failures.
+- Keep uploads and results temporary, without saved history or sharing. Define what ends a session and how temporary data is removed. Confirm this design before deciding whether accounts are needed under the assignment's conditional login requirement.
+- Defer scanned-document recognition, table and figure interpretation, multiple-document synthesis, exports, and spaced repetition unless the lecturer requires them.
 
-**[ASSUMPTION]** The app does not retain uploads or study sets beyond the active session and has no accounts, saved history, sharing, or database of student material. Temporary server data must have a defined cleanup policy. The assignment requires security/login if material is stored or shared; adding either feature reopens that decision.
+## Decisions to resolve before implementation
 
-**[ASSUMPTION]** Scanned PDFs, image interpretation, table extraction, multiple-document synthesis, exports, spaced repetition, and mobile apps are deferred. Text-based slides are supported only when their text can be extracted reliably; omitted visual content must be made clear. Online buying and selling are excluded by the assignment.
-
-## AI and delivery choices
-
-**[ASSUMPTION]** Use one cloud LLM through a backend, with credentials kept off the client. This depends on course rules, available access, cost, and provider data handling. Temporary storage in our app does not imply that a provider retains nothing. Provider and model selection remain open; no paid service is approved by this brief.
-
-**[ASSUMPTION]** Do not display a numeric confidence score without a validated basis. Instead, show source references and identify insufficient source support. Keep the initial implementation focused on text; choose the programming language and framework during technical planning.
+| Decision | Current proposal or open question |
+| --- | --- |
+| LLM and confidence level | Select a model after checking access, output quality, and budget. Define what confidence means and how uncertainty is communicated; do not treat an unvalidated percentage as a reliability measure. |
+| Summary granularity | Start with short and detailed summaries; define their length and coverage in the requirements. |
+| Tables and figures | Start with extractable text and identify omitted visual content. Confirm whether the demonstration must handle tables or figures. |
+| Local versus cloud | Compare feasible options before selecting one. If using a cloud service, establish data handling and cost; temporary app storage does not establish provider retention behavior. |
+| Storage, sharing, and login | Temporary sessions are proposed. If material is stored or shared, include the required security and login. |
+| Platform and implementation | A web app is proposed. Programming language, framework, upload limits, and session cleanup remain to be specified. |
+| Project constraints | Confirm the deadline, grading rubric, available development time, and any required technology or AI-service access. |
 
 ## Proposed demonstration and success criteria
 
-These **[ASSUMPTION]** targets are project checks, not the lecturer's grading rubric:
+These checks are proposed for evaluating the application; they are not the lecturer's grading rubric:
 
-- Complete the upload-to-practice flow on three short sample documents with sufficient material, including a text-based PDF and plain text, covering Norwegian and English output.
-- For each sample, manually check five summary points, five flashcards, and five quiz answers against their cited pages or sections. Correct unsupported claims and incorrect references before the demonstration.
-- Ensure quiz answers stay hidden until the student submits, and that feedback matches the selected answer.
-- Demonstrate a clear response to an unreadable input and an AI-service failure, followed by a successful retry or replacement upload.
-- Have two fellow students complete a session without guidance and record any obstacles and whether they find the study aids useful. This is exploratory feedback, not proof of learning effectiveness.
+- Complete the upload-to-practice flow using a text-based PDF and a text file, including course, detail-level, and language inputs.
+- Confirm that the application produces every required output: summaries, flashcards, quiz questions and answers, key concepts, and source references.
+- Manually compare generated claims and answers with their cited source locations. Correct unsupported claims and incorrect references before the demonstration.
+- Demonstrate the proposed card and quiz interactions, a clear response to unreadable input, and recovery from an AI-service failure.
+- Verify the chosen storage behavior and, if storage or sharing is included, the security and login behavior.
+- Ask two fellow students to complete a study session and record obstacles and perceived usefulness. Treat this as exploratory feedback, not evidence of improved grades.
 
-## Context and next decisions
+## Next step
 
-Comparable workflows already exist: Google describes document-based flashcards, quizzes, and source-linked explanations in [NotebookLM](https://blog.google/innovation-and-ai/models-and-research/google-labs/notebooklm-student-features/). The project makes no novelty claim; its purpose is a focused learning aid and a manageable exercise in developing and evaluating AI software.
-
-Before implementation, confirm the deadline, lecturer's assessment and technology requirements, available development time, API budget/access, and whether temporary sessions meet the assignment. These are open constraints, not reasons to delay reviewing this draft. The next planning artifact should turn the agreed scope into precise requirements and acceptance criteria.
+Use this brief to create detailed requirements and acceptance criteria. Resolve the open decisions before treating the proposed implementation choices as agreed scope.
