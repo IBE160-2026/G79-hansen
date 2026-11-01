@@ -50,3 +50,19 @@ Kontrollrapporter og samlet validation-report.html/.md er skrevet i UX-mappen. R
 ### ?pne punkter
 - Bekreft om spesifiserte feil-/PDF-/mangelfull-kilde-tilstander trenger visuelle eksempelvisninger foer UX ferdigstilles.
 - Faktisk tastatur-, zoom- og skjermlesertest i nettleseren gjenstaar foer appakseptanse.
+
+## 2026-11-01 - Klikkbare eksempeltilstander
+
+### Oppgave
+Lag lokale eksempler for feil/retry, PDF-varsler og utilstrekkelig kilde, med tilstandsvelger utenfor produktgrensesnittet.
+
+### Plan
+- Utvid eksisterende key-study.html med adskilte prototypekontroller og faste tilstander.
+- Bevar materialet/innstillingene og verifiser retry, PDF-referanser og mangelfullt grunnlag.
+
+### Resultat
+Fem valg: vanlig resultat, genereringsfeil, delvis lesbar PDF, helt ulesbar PDF og utilstrekkelig materiale. Retry viser lokal suksess uten aa miste input; PDF-eksempel viser manglende sider 2/4 og opprinnelig side 3 som referanse. Alle faner forklarer utilstrekkelig kilde uten falske kort/spoersmaal. JavaScript-syntaks og utvidede Node-tilstandssjekker bestod. Ingen backend, AI-kall eller pakker. UX-dokumenter og beslutningslogg oppdatert.
+
+### ?pne punkter
+- Visuell gjennomgang av de nye eksempeltilstandene foer UX ferdigstilles.
+- Faktisk nettleser-/zoom-/skjermlesertesting gjenstaar.
