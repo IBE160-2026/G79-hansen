@@ -30,3 +30,18 @@ Commit c3d2a02: Legg til refleksjonsgrunnlag for AI Study Buddy. Inneholder refl
 
 ### ?pne punkter
 Ingen nye.
+
+## 2026-11-01 - Versjonering av BMAD
+
+### Oppgave
+Commit de stagede BMAD-filene med passende melding.
+
+### Plan
+- Kontroller staging, unngaa personlige konfigurasjoner og commit delt oppsett.
+- Oppdater refleksjonsgrunnlaget med gjennomfoert beslutning.
+
+### Resultat
+Commit bf6544a: Versjoner delt BMAD-oppsett. 262 delte BMAD-filer (242 skills-filer og 20 rammeverksfiler) samt oppdatert refleksjonsnotat. Personlige user-konfigurasjoner og renderfiler forblir ignorert. Eksisterende whitespace-/linjeskiftvarsler i installerte filer er registrert og filene beholdt uendret. Ingen push.
+
+### ?pne punkter
+Ingen nye; versjonering av BMAD er gjennomfoert.
