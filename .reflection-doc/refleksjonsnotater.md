@@ -116,7 +116,7 @@ Flashcards og quiz viser ett element om gangen, med teller, navigasjon og skjult
 - Midlertidige økter uten lagret historikk/deling er valgt for første versjon. Faktisk sletting, logging og eventuell leverandørbehandling må kontrolleres i implementeringen.
 - Prototypen bruker eksempeldata uten KI-kall. Ikke skriv at ekte kursmateriale allerede er analysert av et modell-API.
 - Leverandør/modell, API-tilgang og budsjett gjenstår. Ikke oppgi en tjeneste eller kostnad som allerede brukt uten dokumentasjon.
-- `.agents/` og `_bmad/` er anbefalt vurdert for versjonering av delte BMAD-filer, men er foreløpig utenfor Git. Ikke fremstille anbefalingen som gjennomført.
+- 01.11.2026: Studenten godkjente versjonering av det delte BMAD-oppsettet: 242 filer i `.agents/` og 20 i `_bmad/`. Personlige konfigurasjoner og genererte renderfiler holdes fortsatt utenfor Git. Dette bevarer rammeverk, maler og arbeidsflyter brukt i prosjektet. Git-kontrollen viste noen eksisterende mellomroms-/linjeskiftvarsler i installerte BMAD-filer; filene ble beholdt uendret.
 
 ## Korte originale promptutdrag fra denne samtalen
 
