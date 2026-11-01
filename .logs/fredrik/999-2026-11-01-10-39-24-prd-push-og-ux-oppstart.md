@@ -33,3 +33,20 @@ Registrert lys bakgrunn, moerk tekst, bla aksent, kompakte inndata over fire fan
 ### ?pne punkter
 - Brukerens gjennomgang av UX-utkast, skisse og foreslaatte designverdier.
 - Brukeren velger om valgfri UX-validering skal kjoeres foer ferdigstilling.
+
+## 2026-11-01 - UX-kontroll og prototypejusteringer
+
+### Oppgave
+Fortsett etter visuell gjennomgang med avtalt kontroll av kravdekning og tilgjengelighet.
+
+### Plan
+- Samkjoer UX-dokumentene med de bekreftede prototypeendringene.
+- Kjoer krav- og tilgjengelighetsgjennomgang parallelt og rett konkrete funn.
+- Skriv samlet rapport og kontroller lokal JavaScript uten pakker.
+
+### Resultat
+Kontrollrapporter og samlet validation-report.html/.md er skrevet i UX-mappen. Rettet synlig fokus etter sammenfolding, aapen oppstart, aapen kildetekst ved redigering, tastaturnavigasjon/annonsering, smal overskriftsrad og feltkobling ved valideringsfeil. Dokumentene bruker siste knappetekst, hjelpetekster og sammenfolding av hele panelet. Ingen nye produktavklaringer hindrer arkitektur. Node DOM-stub sjekker for tilstander bestod; dette er ikke nettleser-/skjermleser- eller WCAG-sertifisering. Ingen pakker, backend eller KI-kall.
+
+### ?pne punkter
+- Bekreft om spesifiserte feil-/PDF-/mangelfull-kilde-tilstander trenger visuelle eksempelvisninger foer UX ferdigstilles.
+- Faktisk tastatur-, zoom- og skjermlesertest i nettleseren gjenstaar foer appakseptanse.
