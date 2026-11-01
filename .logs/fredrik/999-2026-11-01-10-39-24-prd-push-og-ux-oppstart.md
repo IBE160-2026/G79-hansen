@@ -66,3 +66,20 @@ Fem valg: vanlig resultat, genereringsfeil, delvis lesbar PDF, helt ulesbar PDF 
 ### ?pne punkter
 - Visuell gjennomgang av de nye eksempeltilstandene foer UX ferdigstilles.
 - Faktisk nettleser-/zoom-/skjermlesertesting gjenstaar.
+
+## 2026-11-01 - UX ferdigstilt og arkitektur aktivert
+
+### Oppgave
+Ferdigstill og commit godkjent UX foer arkitekturarbeid.
+
+### Plan
+- Sett begge UX-kontrakter til final og oppdater rapportenes dekning.
+- Kjoer tilstandssjekker, lenkekontroll og staged diff-kontroll.
+- Commit kun UX-mappen og aktiver bmad-architecture.
+
+### Resultat
+Commit 74c660e: Ferdigstill UX for AI Study Buddy. Elleve filer med kontrakter, prototype, beslutningslogg, kontroller og rapporter. Tilstandssjekker og git diff --cached --check bestod. Ingen push. BMAD-mappene er fortsatt ikke staget. Arkitekturskill og konfigurasjon lest; eksisterende PRD/UX arves som grunnlag. Arkitektur er ikke skrevet foer arbeidsform og leveranseformaal avklares.
+
+### ?pne punkter
+- Avklar om kort arkitekturkontrakt alene dekker behovet, eller om en separat forklaring for sensor trengs.
+- Faktisk nettleser-/zoom-/skjermlesertesting foer appakseptanse.
