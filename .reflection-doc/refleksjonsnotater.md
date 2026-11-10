@@ -130,6 +130,12 @@ Disse er et utvalg, ikke alle utviklingssteg. Ta vare på hele relevante samtale
 
 ## Ta vare på dette i kommende arbeid
 
+### 01.11.2026 – Arkitekturarbeidet startet
+
+Arbeidsformen er én beslutning om gangen, med kort teknisk arkitektur og enkel forklaring til student/sensor. Første valg er teknologistakk. Tidligere foreslått Python/Streamlit sammenlignes med Python/FastAPI som serverer HTML/CSS/JavaScript, siden en godkjent klikkbar prototype nå finnes. Streamlits øktmodell og faner og FastAPIs støtte for statiske filer ble kontrollert mot offisiell dokumentasjon. Ingen stakk er valgt, ingen pakker er installert og ingen backend er implementert på dette tidspunktet.
+
+Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/architecture/session-state), [Streamlit tabs](https://docs.streamlit.io/develop/api-reference/layout/st.tabs), [FastAPI Static Files](https://fastapi.tiangolo.com/tutorial/static-files/). Studentens valg og begrunnelse registreres når beslutningen tas.
+
 - Arkitektur: alternativer som vurderes, studentens valg og hva som verifiseres mot dokumentasjon.
 - Implementering: faktiske feil, hvordan de ble oppdaget, KI-forslag som ble forkastet eller korrigert og resultater av kontroller.
 - KI-integrasjon: faktisk leverandør/modell, hvilke data som sendes, kostnader og testfunn.
