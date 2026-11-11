@@ -9,19 +9,22 @@
 .reset-action{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}
 .material-heading{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}.material-heading h2{margin:0}.material-heading:has(+div:not([hidden])){margin-bottom:12px}[hidden]{display:none!important}
 .prototype-controls{max-width:912px;margin:24px auto;padding:16px;border:2px dashed #64748b;background:#f1f5f9}.prototype-controls select{max-width:480px;margin-right:12px}.prototype-controls button{margin-top:8px}.state-notice{padding:12px 16px;border-left:3px solid #315f91;background:#eef4fa;margin:16px 0}.state-notice.error{border-color:#9b1c1c}.state-notice h2{font-size:18px}@media(max-width:650px){.prototype-controls{margin:16px}.prototype-controls select{max-width:100%}}
+.document-list{padding:0;list-style:none}.document-list li{padding:16px 0;border-bottom:1px solid #cbd5e1}.document-list .row{margin:8px 0}.document-list strong{overflow-wrap:anywhere}#delete-confirm{color:#9b1c1c;border-color:#9b1c1c}
 </style>
-<aside class="prototype-controls" aria-label="Prototypekontroller"><strong>Prototypekontroller</strong><p class="source">Kun for gjennomgang. Ikke en del av produktgrensesnittet. Faste eksempler uten backend.</p><label for="example-state">Eksempeltilstand</label><select id="example-state"><option value="normal">Vanlig resultat</option><option value="error">Generering feiler</option><option value="partial">PDF: noen sider uten lesbar tekst</option><option value="unreadable">PDF: ingen lesbar tekst</option><option value="insufficient">Utilstrekkelig materiale</option></select><button id="preview-state" type="button">Vis eksempeltilstand</button></aside>
-<main><header><h1>AI Study Buddy <span class="demo-label">Demo – eksempeldata</span></h1><p class="muted">Fra kursmateriale til oversikt og øving.</p></header>
+<aside class="prototype-controls" aria-label="Prototypekontroller"><strong>Prototypekontroller</strong><p class="source">Kun for gjennomgang. Ikke en del av produktgrensesnittet. Faste eksempler uten backend.</p><label for="example-state">Eksempeltilstand</label><select id="example-state"><option value="normal">Vanlig resultat</option><option value="error">Generering feiler</option><option value="partial">PDF: noen sider uten lesbar tekst</option><option value="unreadable">PDF: ingen lesbar tekst</option><option value="insufficient">Utilstrekkelig materiale</option></select><button id="preview-state" type="button">Vis eksempeltilstand</button><button id="resume-demo" type="button" hidden>Åpne lagret eksempel</button></aside>
+<main><header><h1>AI Study Buddy <span class="demo-label">Demo – eksempeldata</span></h1><p class="muted">Fra kursmateriale til oversikt og øving.</p><div class="row"><span id="account-status" class="source">Demomodus</span><button id="library-open" type="button">Mine dokumenter</button><button id="login-open" type="button">Logg inn</button><button id="logout" type="button" hidden>Logg ut</button></div></header>
+<section id="auth-panel" class="panel" hidden aria-labelledby="auth-heading"><h2 id="auth-heading" tabindex="-1">Logg inn</h2><p class="source">Kun eksempeldata. Ingen konto opprettes, ingen e-post sendes, og opplysningene sendes ikke noe sted.</p><label for="auth-email">E-post</label><input id="auth-email" type="email" value="student@example.com" readonly autocomplete="off"><div id="auth-password-row"><label for="auth-password">Passord</label><input id="auth-password" type="password" value="Eksempelpassord123!" readonly autocomplete="off"></div><p id="auth-message" role="status" aria-live="polite"></p><div class="row"><button id="auth-submit" class="primary" type="button">Logg inn</button><button id="auth-cancel" type="button">Tilbake til demo</button></div><div class="row"><button id="auth-signup" type="button">Opprett konto</button><button id="auth-forgot" type="button">Glemt passord</button><button id="auth-back-login" type="button" hidden>Tilbake til innlogging</button></div></section>
+<div id="study-workspace">
 
 <section class="panel material-panel"><div class="material-heading"><h2>Materiale og innstillinger</h2><button id="edit-material" type="button" aria-controls="material-body" aria-expanded="false">Vis/rediger</button></div><div id="material-body" hidden><label for="method">Legg inn materiale</label><select id="method"><option>Lim inn tekst</option><option>Last opp tekstfil</option><option>Last opp PDF</option></select><p class="source">Bruk én inndatamåte om gangen. Maks 30 000 tegn og 40 PDF-sider.</p>
 <details class="source-disclosure"><summary>Vis materialet</summary><div id="paste-input"><label for="material">Tekst</label><textarea id="material">Arbeidsminnet holder og bearbeider informasjon i en kort periode. Langtidsminnet lagrer informasjon over tid. Aktiv gjenhenting betyr å forsøke å huske informasjon uten å se på kilden.</textarea></div><div id="upload-input" hidden><label for="file-input">Velg fil (kun lokal demonstrasjon)</label><input id="file-input" type="file" accept=".txt,.pdf"><p class="source">Filen analyseres ikke. Resultatene bruker alltid eksempelmaterialet.</p></div>
 </details>
-<div class="row"><div><label for="subject">Fag/emnekode (valgfritt)</label><input id="subject" placeholder="For eksempel læringspsykologi"></div><div><label for="language">Språk</label><select id="language"><option>Norsk</option><option>Engelsk</option></select></div><div><label for="detail">Sammendrag</label><select id="detail"><option>Kort</option><option>Detaljert</option></select></div></div><p id="generate-help" class="source">Lager sammendrag, begreper, flashcards og quiz.</p><div class="row"><button id="generate" class="primary" type="button" aria-describedby="generate-help">Lag læringsmateriale</button><span class="reset-action"><button id="reset" type="button" aria-describedby="reset-help">Ny økt</button><span id="reset-help" class="source">Ny økt tømmer materialet og resultatene.</span></span></div></div></section>
+<div class="row"><div><label for="subject">Fag/emnekode (valgfritt)</label><input id="subject" placeholder="For eksempel læringspsykologi"></div><div><label for="language">Språk</label><select id="language"><option>Norsk</option><option>Engelsk</option></select></div><div><label for="detail">Sammendrag</label><select id="detail"><option>Kort</option><option>Detaljert</option></select></div></div><p id="generate-help" class="source">Lager sammendrag, begreper, flashcards og quiz.</p><div class="row"><button id="generate" class="primary" type="button" aria-describedby="generate-help">Lag læringsmateriale</button><span class="reset-action"><button id="reset" type="button" aria-describedby="reset-help">Ny økt</button><span id="reset-help" class="source">Ny økt tømmer arbeidsflaten, men sletter ikke lagrede dokumenter.</span></span></div></div></section>
 <section id="state-notice" class="state-notice" hidden aria-labelledby="state-heading"><h2 id="state-heading"></h2><p id="state-message"></p><button id="retry" type="button" hidden>Prøv igjen</button></section>
 <p id="status" role="status" aria-live="polite"></p>
-<section class="panel" id="results"><nav class="tabs" role="tablist" aria-label="Læringsdeler">
+<section class="panel" id="results"><div class="row"><button id="save" type="button">Lagre</button><span id="save-note" class="source">Lagring skjer bare når du trykker Lagre.</span></div><nav class="tabs" role="tablist" aria-label="Læringsdeler">
 <button id="tab-summary" role="tab" aria-controls="content" data-tab="summary">Sammendrag</button><button id="tab-concepts" role="tab" aria-controls="content" data-tab="concepts">Begreper</button><button id="tab-cards" role="tab" aria-controls="content" data-tab="cards">Flashcards</button><button id="tab-quiz" role="tab" aria-controls="content" data-tab="quiz">Quiz</button></nav><div id="content" role="tabpanel" tabindex="0" style="margin-top:24px"></div></section>
-<footer>Lokal prototype med faste eksempeldata. DESIGN.md og EXPERIENCE.md er førende ved avvik. Kort- og spørsmålstall er eksempler, ikke faste krav.</footer></main>
+</div><section id="library-panel" class="panel" hidden aria-labelledby="library-heading"><div class="material-heading"><h2 id="library-heading" tabindex="-1">Mine dokumenter</h2><button id="library-back" type="button">Tilbake til arbeidsflaten</button></div><p class="source">Demo: bare eksempler lagret i denne sidelastingen. Ingen ekte konto eller varig lagring.</p><p id="library-empty">Du har ingen lagrede dokumenter. Lag læringsmateriale og trykk Lagre for å beholde et eksempel.</p><ul id="library-list" class="document-list"></ul><section id="delete-panel" class="state-notice" hidden aria-labelledby="delete-heading"><h3 id="delete-heading" tabindex="-1">Slett dokument?</h3><p id="delete-message"></p><button id="delete-cancel" type="button">Avbryt</button><button id="delete-confirm" type="button">Slett dokument</button></section><p id="library-status" role="status" aria-live="polite"></p></section><footer>Lokal prototype med faste eksempeldata. DESIGN.md og EXPERIENCE.md er førende ved avvik. Kort- og spørsmålstall er eksempler, ikke faste krav.</footer></main>
 <script>
 const $=id=>document.getElementById(id);
 function setMaterialOpen(open){const focusInside=$('material-body').contains(document.activeElement);$('material-body').hidden=!open;$('edit-material').setAttribute('aria-expanded',String(open));$('edit-material').hidden=open;if(!open&&focusInside)$('edit-material').focus();}
@@ -30,7 +33,7 @@ const sample=$('material').value;
 const cards=[['Hva gjør arbeidsminnet?','Det holder og bearbeider informasjon i en kort periode.'],['Hva gjør langtidsminnet?','Det lagrer informasjon over tid.'],['Hva betyr aktiv gjenhenting?','Å forsøke å huske informasjon uten å se på kilden.']];
 const quiz=[['Hva skiller arbeidsminnet fra langtidsminnet?','Arbeidsminnet bearbeider informasjon kortvarig. Langtidsminnet lagrer informasjon over tid.'],['Hvordan foregår aktiv gjenhenting?','Man prøver å huske uten å se på kilden.']];
 let active='summary', positions={cards:0,quiz:0}, revealed={cards:new Set(),quiz:new Set()}, timer=null, resultState='normal';
-function render(){
+function render(){snapshotProgress();
  document.querySelectorAll('[data-tab]').forEach(b=>{const selected=b.dataset.tab===active;b.classList.toggle('selected',selected);b.setAttribute('aria-selected',selected);b.tabIndex=selected?0:-1;});
  $('content').setAttribute('aria-labelledby','tab-'+active);
  if(resultState==='insufficient'){$('content').innerHTML='<h2>'+({summary:'Sammendrag',concepts:'Begreper',cards:'Flashcards',quiz:'Quiz'}[active])+'</h2><p>Materialet gir ikke nok grunnlag for denne delen. Legg inn et mer utfyllende utdrag.</p>';return;}
@@ -38,7 +41,7 @@ function render(){
  if(active==='concepts'){$('content').innerHTML='<h2>Begreper</h2>'+cards.map(([q,a],i)=>'<h3>'+['Arbeidsminne','Langtidsminne','Aktiv gjenhenting'][i]+'</h3><p>'+a+'</p><p class="source">Kilde: '+(resultState==='partial'?'Side 3':'Avsnitt 1')+' i eksempelmaterialet</p>').join('');return;}
  const list=active==='cards'?cards:quiz, i=positions[active], shown=revealed[active].has(i);
  $('content').innerHTML='<h2>'+(active==='cards'?'Flashcards':'Quiz')+'</h2><p class="label">'+(active==='cards'?'Kort':'Spørsmål')+' '+(i+1)+' av '+list.length+'</p><h3>'+list[i][0]+'</h3><button id="reveal" aria-expanded="'+shown+'" aria-controls="answer">'+(active==='cards'?'Vis svar':'Vis fasit')+'</button><div id="answer" class="answer" '+(shown?'':'hidden')+'><strong>'+(active==='cards'?'Svar':'Fasit')+'</strong><p>'+list[i][1]+'</p><p class="source">Kilde: '+(resultState==='partial'?'Side 3':'Avsnitt 1')+' i eksempelmaterialet</p></div><div class="nav"><button id="previous" '+(i===0?'disabled':'')+'>Forrige</button><button id="next" '+(i===list.length-1?'disabled':'')+'>Neste</button></div>';
- $('reveal').onclick=()=>{revealed[active].add(i);$('answer').hidden=false;$('reveal').setAttribute('aria-expanded','true');};
+ $('reveal').onclick=()=>{revealed[active].add(i);$('answer').hidden=false;$('reveal').setAttribute('aria-expanded','true');snapshotProgress();};
  $('previous').onclick=()=>{positions[active]--;render();announceItem();($('previous').disabled?$('next'):$('previous')).focus();};
  $('next').onclick=()=>{positions[active]++;render();announceItem();($('next').disabled?$('previous'):$('next')).focus();};
 }
@@ -47,7 +50,17 @@ function announceItem(){const list=active==='cards'?cards:quiz;$('status').textC
 
 function clearNotice(){$('state-notice').hidden=true;$('retry').hidden=true;}
 function showNotice(title,message,error=false){$('state-heading').textContent=title;$('state-message').textContent=message;$('state-notice').classList.toggle('error',error);$('state-notice').hidden=false;}
-function showExample(kind){
+let demoSaved=false, savedDemo=null, usingSavedDemo=false, demoDocuments=[], nextDocumentId=1, deleteTarget=null;
+function snapshotProgress(){if(usingSavedDemo&&savedDemo){savedDemo.positions={...positions};savedDemo.revealed={cards:[...revealed.cards],quiz:[...revealed.quiz]};}}
+$('save').onclick=()=>{
+ const existing=usingSavedDemo&&savedDemo&&demoDocuments.includes(savedDemo)?savedDemo:null;
+ const id=existing?existing.id:nextDocumentId++;
+ const record={id,title:($('method').selectedIndex!==0?$('file-input').files[0]?.name:'')||$('subject').value.trim()||'Læringsmateriale '+id,date:new Date().toLocaleDateString('nb-NO'),kind:resultState,text:$('material').value,subject:$('subject').value,language:$('language').selectedIndex,detail:$('detail').selectedIndex,method:$('method').selectedIndex};
+ if(existing)demoDocuments[demoDocuments.indexOf(existing)]=record;else demoDocuments.push(record);
+ demoSaved=true;usingSavedDemo=true;savedDemo=record;snapshotProgress();$('resume-demo').hidden=false;$('save-note').textContent='Eksempel lagret. Du finner det under Mine dokumenter.';$('status').textContent='Demo: eksempel lagret i denne sidelastingen. Ingen varig lagring.';
+};
+function showExample(kind){$('library-panel').hidden=true;$('auth-panel').hidden=true;$('study-workspace').hidden=false;usingSavedDemo=false;
+ $('save').disabled=false;$('save-note').textContent='Lagring skjer bare når du trykker Lagre.';
  clearTimeout(timer);clearNotice();$('generate').disabled=false;resultState=kind;active='summary';positions={cards:0,quiz:0};revealed={cards:new Set(),quiz:new Set()};
  if(kind==='error'){
   $('results').hidden=true;setMaterialOpen(true);document.querySelector('details').open=true;
@@ -63,10 +76,10 @@ function showExample(kind){
  $('status').textContent='Eksempelresultater klare. Prototypen viser faste norske eksempler; egne filer, språk og detaljnivå behandles ikke.';
 }
 $('preview-state').onclick=()=>showExample($('example-state').value);
-$('retry').onclick=()=>{clearNotice();$('generate').disabled=true;$('status').textContent='Lager læringsmateriale …';timer=setTimeout(()=>showExample('normal'),500);};
+$('retry').onclick=()=>{clearNotice();$('save').disabled=true;$('generate').disabled=true;$('status').textContent='Lager læringsmateriale …';timer=setTimeout(()=>showExample('normal'),500);};
 
 function invalidInput(message){const input=$('method').selectedIndex===0?$('material'):$('file-input');input.setAttribute('aria-invalid','true');input.setAttribute('aria-describedby','status');$('status').textContent=message;input.focus();}
-function invalidate(){clearNotice();$('material').setAttribute('aria-invalid','false');$('file-input').setAttribute('aria-invalid','false');clearTimeout(timer);$('generate').disabled=false;$('results').hidden=true;setMaterialOpen(true);document.querySelector('details').open=true;$('status').textContent='Materialet eller innstillingene er endret. Trykk Lag læringsmateriale for å vise eksempelresultater.';}
+function invalidate(){usingSavedDemo=false;clearNotice();$('material').setAttribute('aria-invalid','false');$('file-input').setAttribute('aria-invalid','false');clearTimeout(timer);$('generate').disabled=false;$('results').hidden=true;setMaterialOpen(true);document.querySelector('details').open=true;$('status').textContent='Materialet eller innstillingene er endret. Trykk Lag læringsmateriale for å vise eksempelresultater.';}
 $('method').onchange=()=>{$('paste-input').hidden=$('method').selectedIndex!==0;$('upload-input').hidden=$('method').selectedIndex===0;$('file-input').accept=$('method').selectedIndex===1?'.txt':'.pdf';invalidate();};
 ['material','subject','language','detail','file-input'].forEach(id=>$(id).addEventListener('input',invalidate));
 $('generate').onclick=()=>{
@@ -75,9 +88,55 @@ $('generate').onclick=()=>{
  setMaterialOpen(true);
  if((pasted&&!$('material').value.trim())||(!pasted&&!$('file-input').files.length)){ invalidInput('Legg inn tekst eller velg en fil.');return;}
  if(pasted&&Array.from($('material').value).length>30000){invalidInput('Materialet er over 30 000 tegn. Bruk et kortere utdrag. Ingen tekst er kuttet.');return;}
- $('generate').disabled=true;$('status').textContent='Lager læringsmateriale …';
+ $('save').disabled=true;$('generate').disabled=true;$('status').textContent='Lager læringsmateriale …';
  timer=setTimeout(()=>showExample($('example-state').value),500);
 };
-$('reset').onclick=()=>{clearNotice();resultState='normal';clearTimeout(timer);$('material').setAttribute('aria-invalid','false');$('file-input').setAttribute('aria-invalid','false');$('material').value='';$('file-input').value='';$('subject').value='';$('method').selectedIndex=0;$('language').selectedIndex=0;$('detail').selectedIndex=0;$('paste-input').hidden=false;$('upload-input').hidden=true;$('generate').disabled=false;$('results').hidden=true;setMaterialOpen(true);document.querySelector('details').open=true;active='summary';positions={cards:0,quiz:0};revealed={cards:new Set(),quiz:new Set()};$('status').textContent='Ny økt. Legg inn materiale for å fortsette.';$('method').focus();};
+$('reset').onclick=()=>{snapshotProgress();usingSavedDemo=false;clearNotice();resultState='normal';clearTimeout(timer);$('material').setAttribute('aria-invalid','false');$('file-input').setAttribute('aria-invalid','false');$('material').value='';$('file-input').value='';$('subject').value='';$('method').selectedIndex=0;$('language').selectedIndex=0;$('detail').selectedIndex=0;$('paste-input').hidden=false;$('upload-input').hidden=true;$('generate').disabled=false;$('results').hidden=true;setMaterialOpen(true);document.querySelector('details').open=true;active='summary';positions={cards:0,quiz:0};revealed={cards:new Set(),quiz:new Set()};$('status').textContent='Ny økt. Legg inn materiale for å fortsette.';$('method').focus();};
+
+$('resume-demo').onclick=()=>{
+ if(!savedDemo)return;
+ const savedPositions={...savedDemo.positions},savedRevealed={cards:[...savedDemo.revealed.cards],quiz:[...savedDemo.revealed.quiz]};
+ showExample(savedDemo.kind);$('material').value=savedDemo.text;$('subject').value=savedDemo.subject;$('language').selectedIndex=savedDemo.language;$('detail').selectedIndex=savedDemo.detail;$('method').selectedIndex=savedDemo.method;
+ $('paste-input').hidden=savedDemo.method!==0;$('upload-input').hidden=savedDemo.method===0;
+ positions=savedPositions;revealed={cards:new Set(savedRevealed.cards),quiz:new Set(savedRevealed.quiz)};usingSavedDemo=true;render();
+ $('status').textContent='Lagret eksempel åpnet der du slapp. Denne demonstrasjonen varer bare til siden lastes på nytt; ekte varig lagring er ikke implementert.';
+};
+
+
+let authMode='login';
+function openAuth(mode){$('library-panel').hidden=true;authMode=mode;$('auth-panel').hidden=false;$('study-workspace').hidden=true;$('auth-password-row').hidden=mode==='forgot';$('auth-signup').hidden=mode!=='login';$('auth-forgot').hidden=mode!=='login';$('auth-back-login').hidden=mode==='login';$('auth-message').textContent='';const title=mode==='signup'?'Opprett konto':mode==='forgot'?'Glemt passord':'Logg inn';$('auth-heading').textContent=title;$('auth-submit').textContent=mode==='forgot'?'Be om ny passordlenke':title;$('auth-heading').focus();}
+function closeAuth(){$('auth-panel').hidden=true;$('study-workspace').hidden=false;$('login-open').focus();}
+$('login-open').onclick=()=>openAuth('login');$('auth-signup').onclick=()=>openAuth('signup');$('auth-forgot').onclick=()=>openAuth('forgot');$('auth-back-login').onclick=()=>openAuth('login');$('auth-cancel').onclick=closeAuth;
+$('auth-submit').onclick=()=>{
+ if(authMode==='signup'){$('auth-message').textContent='Demo: her ville du fått beskjed om å bekrefte e-postadressen. Ingen konto er opprettet eller e-post sendt.';return;}
+ if(authMode==='forgot'){$('auth-message').textContent='Demo: hvis en konto finnes, vil en passordlenke bli sendt. Denne prototypen sender ingen e-post.';return;}
+ $('auth-panel').hidden=true;$('study-workspace').hidden=false;$('login-open').hidden=true;$('logout').hidden=false;$('account-status').textContent='Demobruker: student@example.com';$('status').textContent='Innlogging demonstrert med eksempeldata. Ingen ekte tilgangskontroll er aktiv.';$('logout').focus();
+};
+$('logout').onclick=()=>{$('reset').onclick();savedDemo=null;demoSaved=false;usingSavedDemo=false;demoDocuments=[];$('library-panel').hidden=true;$('study-workspace').hidden=false;$('resume-demo').hidden=true;$('file-input').value='';$('login-open').hidden=false;$('logout').hidden=true;$('account-status').textContent='Demomodus';$('status').textContent='Logget ut av demobrukeren. Aktivt materiale og eksempeltilstand er tømt.';$('login-open').focus();};
+$('auth-panel').hidden=true;$('logout').hidden=true;$('study-workspace').hidden=false;
+
+
+function htmlText(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderLibrary(){
+ $('library-empty').hidden=demoDocuments.length>0;
+ $('library-list').innerHTML=demoDocuments.map(d=>'<li><strong>'+htmlText(d.title)+'</strong><p class="source">Lagret '+htmlText(d.date)+(d.kind==='insufficient'?' · Utilstrekkelig kildegrunnlag':' · Kort '+(d.positions.cards+1)+' av '+cards.length+' · Spørsmål '+(d.positions.quiz+1)+' av '+quiz.length)+'</p><div class="row"><button id="open-document-'+d.id+'" type="button" aria-label="Åpne '+htmlText(d.title)+'">Åpne</button><button id="delete-document-'+d.id+'" type="button" aria-label="Slett '+htmlText(d.title)+'">Slett</button></div></li>').join('');
+ demoDocuments.forEach(d=>{
+  $('open-document-'+d.id).onclick=()=>{savedDemo=d;$('resume-demo').onclick();$('tab-summary').focus();};
+  $('delete-document-'+d.id).onclick=()=>{deleteTarget=d.id;$('delete-panel').hidden=false;$('delete-message').textContent='Slett '+d.title+' og tilhørende læringsmateriale og fremdrift? Dette kan ikke angres.';$('delete-cancel').focus();};
+ });
+}
+$('library-open').onclick=()=>{snapshotProgress();clearTimeout(timer);$('generate').disabled=false;$('save').disabled=false;$('auth-panel').hidden=true;$('study-workspace').hidden=true;$('library-panel').hidden=false;$('delete-panel').hidden=true;$('library-status').textContent='';renderLibrary();$('library-heading').focus();};
+$('library-back').onclick=()=>{$('library-panel').hidden=true;$('study-workspace').hidden=false;$('library-open').focus();};
+$('delete-cancel').onclick=()=>{$('delete-panel').hidden=true;const id=deleteTarget;deleteTarget=null;$('delete-document-'+id).focus();};
+$('delete-confirm').onclick=()=>{
+ const id=deleteTarget, item=demoDocuments.find(d=>d.id===id);if(!item)return;
+ const deletingActive=usingSavedDemo&&savedDemo?.id===id;
+ demoDocuments=demoDocuments.filter(d=>d.id!==id);usingSavedDemo=deletingActive?false:usingSavedDemo;
+ if(deletingActive)$('reset').onclick();
+ if(savedDemo?.id===id){savedDemo=null;demoSaved=false;$('resume-demo').hidden=true;}
+ deleteTarget=null;$('delete-panel').hidden=true;renderLibrary();$('library-status').textContent='Dokumentet og tilhørende eksempelmateriale/fremdrift er slettet.';$('library-heading').focus();
+};
+$('library-panel').hidden=true;$('delete-panel').hidden=true;
+
 render();setMaterialOpen(true);document.querySelector('details').open=true;$('results').hidden=true;
 </script></html>

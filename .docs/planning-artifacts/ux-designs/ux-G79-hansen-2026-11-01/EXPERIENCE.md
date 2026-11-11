@@ -1,12 +1,14 @@
 ---
 name: AI Study Buddy Experience
-status: final
+status: draft
 created: 2026-11-01
-updated: 2026-11-01
+updated: 2026-11-10
 sources:
   - ../../prds/prd-G79-hansen-2026-09-26/prd.md
   - ../../briefs/brief-G79-hansen-2026-09-26/brief.md
 ---
+
+> Scope revision 2026-11-10: login, owner-only saved documents/results, My documents, open/delete are required in v1. This supersedes all temporary-only/no-account statements in the prior UX baseline below. New session clears active workspace only; saved deletion is separate. The approved study layout remains the baseline, but authentication/library/save UX and prototype are not yet designed or validated. Earlier finalization and accessibility reports cover the earlier scope only.
 
 # AI Study Buddy - Experience
 
@@ -159,3 +161,15 @@ The user-approved prototype controls are outside the product workspace, in a sep
 Failure keeps the material-panel open and shows Try again; retry demonstrates success using fixed data while preserving inputs/settings. Partial PDF lists unreadable pages 2 and 4 and uses original page 3 in references, including revealed practice answers. Entirely unreadable PDF keeps input open, explains replacement options and hides results. Insufficient-material results keep all four tabs, explaining the missing source support without fake cards/questions or navigation. New session clears notices and results. No file is actually parsed or sent anywhere.
 
 Finalized 2026-11-01 after user approval of the visual walkthrough and added example states. Remaining numerical implementation defaults and real browser/accessibility checks are owned by the student and implementation assistant before application acceptance; they do not block architecture.
+
+Confirmed save interaction (2026-11-10): use an explicit secondary "Lagre" action for source/settings/generated learning material; no automatic save on upload or generation. New session clears the active workspace without deleting saved items. The current prototype demonstrates the button using fixed fixture state only; durable owner-scoped persistence and login remain implementation work.
+
+Confirmed resume behavior (2026-11-10): reopening a saved document continues from the last flashcard and quiz question, with independent positions per owner/document across visits. New session clears only the active workspace. Progress persistence must not implicitly save previously unsaved material. Exact progress-write timing and reveal-state restoration are not settled by this decision. This requirement is not yet implemented in the fixed-fixture prototype.
+
+Delivery/service update (2026-11-10): live mode supports same-account content/progress across devices using Supabase Auth/Postgres/private Storage. Local demo remains available. Login method and library UX are still being designed; offline cross-device editing/synchronization is not promised. Current prototype remains fixed local examples with no Supabase connection.
+
+Confirmed authentication (2026-11-10): Supabase email/password with Opprett konto, Logg inn, Glemt passord and Logg ut. Use labelled inputs, appropriate password autocomplete in the actual app, understandable failed/expired-link states and generic password-recovery responses. Password changes require a valid recovery session. The local prototype uses read-only fictional credentials and simulated messages; no email is sent and no real authentication is performed. Logout clears active private UI state; saved server-side documents are retained for their owner. The demo fixture is cleared on simulated logout to avoid showing previous local example state as another user's content.
+
+## My documents - prototype refinement (2026-11-10)
+
+A secondary Mine dokumenter action beside the account controls opens an owner-library surface with title, saved date and practice positions, plus Open and Delete per item. Empty state explains how to generate/save the first item. Back returns to the active workspace. Open restores that document's source/settings/results and independent positions without regeneration. Delete first shows an inline confirmation naming the document and including its learning material/progress, with Cancel and Delete document. Confirmed deletion clears the active view if that item is open; cancellation changes nothing. Show no fake exercise counts for insufficient-source items. The prototype supports several in-memory examples only, with no backend or real owner isolation. Actual app requires server/database/storage ownership checks and delete-failure recovery from the PRD.

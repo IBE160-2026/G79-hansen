@@ -130,6 +130,60 @@ Disse er et utvalg, ikke alle utviklingssteg. Ta vare på hele relevante samtale
 
 ## Ta vare på dette i kommende arbeid
 
+### 10.11.2026 – Samlet arkitekturutkast med kontroll
+
+Studenten ba om et samlet utkast med forslag for valgene som gjenstår. Det ble laget en teknisk arkitekturkontrakt, en kort forklaring til student/sensor og et eget kildenotat. Vedtatte valg er markert separat fra foreslåtte mekanismer for innloggingstilstand, fremdrift, PDF og hosting. Utkastet innfører ikke faktisk backend eller eksterne tjenester.
+
+En mekanisk arkitekturlinter ga null funn. Separate KI-agenter vurderte kravdekning, teknologikilder og om selvstendig bygde deler kunne følge dokumentet og likevel bli inkompatible. Funn gjaldt blant annet passordgjenopprettingens callback, koblingen mellom generering og senere eksplisitt lagring, databasetransaksjoner, filenes slettestatus og samtidige fremdriftsoppdateringer. Utkastet ble presisert med en felles callback-flyt, signert genereringskvittering, transaksjonsgrenser og sporbare filoperasjoner. Dette er dokumentkontroll, ikke verifisert implementering eller sikkerhetssertifisering.
+
+Dokumentasjon: [arkitekturutkast](../.docs/planning-artifacts/architecture/architecture-G79-hansen-2026-11-01/ARCHITECTURE-SPINE.md), [enkel forklaring](../.docs/planning-artifacts/architecture/architecture-G79-hansen-2026-11-01/architecture-explained.md), [kilder](../.docs/planning-artifacts/architecture/architecture-G79-hansen-2026-11-01/research-notes.md).
+
+**Egen refleksjon:** Hvilke tekniske valg kan du nå forklare selv? Hjalp den enkle forklaringen deg å forstå hvorfor innlogging og lagring krever mer enn en knapp i prototypen?
+
+### 10.11.2026 – «Mine dokumenter» i prototypen
+
+Studenten ba om å gå videre med dokumentoversikten. Prototypen viser flere lokalt lagrede eksempler med tittel, dato og fremdrift. «Åpne» henter riktig dokument og kort-/spørsmålsplassering. «Slett» viser en bekreftelse med dokumentnavn, avbryt og endelig sletting; sletting av aktivt dokument tømmer også arbeidsvisningen. Tekst som brukes i oversikten escapes, slik at dokumentnavn ikke tolkes som HTML. Node-kontroller for tom liste, flere dokumenter, gjenåpning, avbryt/slett og tømming av aktiv visning bestod. Fortsatt ingen backend, varig lagring eller faktisk tilgangskontroll.
+
+### 10.11.2026 – E-post og passord valgt
+
+Studenten godkjente «Opprett konto», «Logg inn», «Glemt passord» og «Logg ut» med Supabase Auth. Offisiell dokumentasjon for passordbasert innlogging ble kontrollert. Kravene beskriver også gyldig gjenopprettingsøkt, feil/utløpt lenke og generisk svar som ikke avslører om e-postadressen finnes. Prototypen demonstrerer handlingene med faste, skrivebeskyttede eksempelopplysninger. Den sender ingen e-post og oppretter ingen konto. Utlogging tømmer aktiv arbeidsflate og lokal eksempeltilstand. Node-tilstandssjekkene bestod; det er ikke en test av ekte autentisering.
+
+### 10.11.2026 – Supabase valgt
+
+Studenten godkjente Supabase til innlogging (Auth), database (Postgres) og privat fillagring (Storage). Formålet er å gjenbruke samme konto, innhold og fremdrift på flere enheter uten å bygge alle disse tjenestene selv. FastAPI og det eksisterende grensesnittet beholdes. Planen skiller nå mellom en hostet live-app og lokal demomodus for sensor. Kravene omfatter tester for samme bruker på en annen enhet og avvisning av andre brukere også ved direkte forespørsler til filer og data.
+
+Valget er dokumentert, men ingen Supabase-konto/prosjekt, tabeller eller tilgangsregler er opprettet ennå. Innloggingsmetode, hosting, region, kostnadsrammer og detaljert datamodell gjenstår. At en tjeneste tilbyr tilgangsregler betyr ikke at appens data er beskyttet før reglene er konfigurert og testet.
+
+### 10.11.2026 – Tilgang fra flere enheter
+
+Studenten foretrekker å åpne eget lagret innhold fra flere enheter. Arkitekturen må derfor ha felles innlogging og lagring som ikke er bundet til én PC. Supabase Auth, Postgres og privat Storage ble undersøkt som et samlet forslag i offisiell dokumentasjon. Dette er ennå ikke et vedtatt leverandørvalg. Praktisk tilgang gjennom en vanlig nettadresse vil også kreve hosting av appen; lokal demomodus for sensor beholdes som eget krav. Ingen konto, skytjeneste, betalt abonnement eller publisering er opprettet ved denne avklaringen.
+
+Kilder: [Supabase introduksjon](https://supabase.com/docs/guides/getting-started/the-supabase-way-to-build), [radbasert tilgang](https://supabase.com/docs/guides/database/postgres/row-level-security), [tilgang til lagrede filer](https://supabase.com/docs/guides/storage/security/access-control).
+
+### 10.11.2026 – Fortsette der studenten slapp
+
+Studenten valgte at gjenåpning av lagrede dokumenter skal gjenoppta samme flashcard og quizspørsmål. Fremdriften skal knyttes til riktig bruker og dokument. PRD-en har fått konkrete sjekker for gjenåpning, restart og at fremdrift ikke blandes mellom dokumenter/kontoer. Prototypen kan demonstrere gjenåpning av et lagret eksempel etter «Ny økt» med en separat prototypekontroll. Dette er fortsatt bare tilstand i nettleserminnet; varig lagring etter side-/serverrestart er et krav til den fremtidige appen. Tidspunkt for lagring av fremdrift og behandling av tidligere viste svar avklares videre i arkitekturen.
+
+### 10.11.2026 – Studenten velger eksplisitt lagring
+
+Studenten godkjente en «Lagre»-knapp fremfor automatisk lagring. Generering skal ikke i seg selv lagre innholdet permanent. Kilde, innstillinger og læringsmateriale lagres samlet når brukeren velger det; «Ny økt» tømmer arbeidsflaten uten å slette lagrede dokumenter. Krav og akseptansesjekker er oppdatert. Prototypen har en klikkbar demonstrasjon med fast eksempeltilstand, men ingen faktisk varig lagring eller innlogging ennå. Eksisterende tilstandssjekker bestod etter endringen.
+
+### 10.11.2026 – Omfanget utvidet med innlogging og lagring
+
+Studenten ønsket at opplastede dokumenter og læringsmateriale skulle beholdes mellom besøk, og ba om funksjonene etter å ha fått forklart ekstraarbeidet: innlogging, lagring, «Mine dokumenter», åpning, sletting og kontroll av at brukere ikke får tilgang til hverandres innhold. Dette overstyrer tidligere avgrensning til midlertidige økter uten database.
+
+PRD-en ble åpnet igjen som utkast, FR-8 ble endret og FR-10–FR-12 lagt til. Brief, utviklingsplan og arkitekturgrunnlag ble samkjørt. UX ble markert som utkast for nye innloggings-/lagringsflater; den eksisterende prototypen demonstrerer fortsatt den tidligere arbeidsflaten. Tidligere godkjenninger og kontroller validerer ikke de nye funksjonene. Ingen innlogging eller lagring er implementert ennå.
+
+«Ny økt» og «Slett dokument» har nå ulike betydninger: førstnevnte tømmer aktiv arbeidsflate, mens sistnevnte fjerner lagret materiale. Automatisk eller eksplisitt lagring og teknisk lagringsløsning gjenstår. CV-spesifikk behandling er ikke lagt til som eget bruksområde.
+
+**Egen refleksjon:** Hvorfor ble lagring viktig for deg etter prototypen? Hvordan påvirker endringen gjennomførbarhet, testing og din forståelse av tilgangskontroll?
+
+### 10.11.2026 – Teknologistakk valgt
+
+Studenten godkjente Python + FastAPI med vanlig HTML/CSS/JavaScript. Begrunnelsen er å bygge videre på den gjennomgåtte prototypens utseende og oppførsel, i ett lokalt prosjekt uten database. Streamlit var alternativet med mer grensesnitt direkte i Python; FastAPI-alternativet krever mer kode mellom nettleser og backend. Beslutningen velger stakk, men innebærer ikke at backend er implementert eller pakker installert. Eksakte versjoner, PDF-bibliotek og KI-leverandør gjenstår.
+
+**Egen refleksjon:** Hvordan vurderte du fordelen ved å beholde prototypen opp mot at løsningen bruker både Python og JavaScript?
+
 ### 01.11.2026 – Arkitekturarbeidet startet
 
 Arbeidsformen er én beslutning om gangen, med kort teknisk arkitektur og enkel forklaring til student/sensor. Første valg er teknologistakk. Tidligere foreslått Python/Streamlit sammenlignes med Python/FastAPI som serverer HTML/CSS/JavaScript, siden en godkjent klikkbar prototype nå finnes. Streamlits øktmodell og faner og FastAPIs støtte for statiske filer ble kontrollert mot offisiell dokumentasjon. Ingen stakk er valgt, ingen pakker er installert og ingen backend er implementert på dette tidspunktet.

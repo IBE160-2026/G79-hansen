@@ -2,7 +2,7 @@
 title: 'Product Brief: AI Study Buddy'
 status: revised
 created: 2026-09-26
-updated: 2026-11-01
+updated: 2026-11-10
 ---
 
 # AI Study Buddy
@@ -29,16 +29,16 @@ A general chatbot can perform similar tasks. This app's value is a repeatable st
 | --- | --- |
 | Input | Pasted text, one uploaded text file or one text-based PDF (including slide exports), using one input method at a time; optional course code/subject (context only), detail level and language. All factual output must be supported by the supplied material. |
 | Output | Summaries, explained key concepts, flashcards, quiz questions and answers, all with supporting paragraph/page references. |
-| Security/login | Required if user material is persistently stored or shared; neither is part of v1. |
+| Security/login | Required in v1: login, owner-only saved documents/results, My documents, open and delete. |
 | Commerce | No online buying or selling. |
 | AI behavior | Use source-supported answers; state when information is insufficient rather than inventing content or a numerical confidence score. |
 
 ## Scope and decisions
 
-- Use temporary sessions without saved history, sharing or accounts. This keeps v1 manageable and follows the assignment's conditional login requirement. Do not persist or log student material; New session clears pasted text, uploaded file, course/subject and all results, and restores Norwegian/short defaults. Define session expiry/cleanup in the architecture, preserving the PRD reset and no-persistence requirements.
+- Include login and persistent owner-only course documents and learning material in v1, as requested on 2026-11-10. Provide My documents, reopen and delete. New session clears only the active workspace and restores defaults; it does not delete saved material. Check access on the server for every private operation. Storage technology and save trigger remain architecture/UX decisions. This supersedes the earlier temporary-only scope.
 - Support text-based PDFs only, preserving physical page numbers. No OCR or interpretation of tables/figures: these require additional extraction and validation beyond this project's scope. Process readable pages and list original page numbers without readable text. State that results cover extracted text only and retain original physical page references. If no page has readable text, ask for a text-based PDF or pasted text instead of generating.
 - Build text-to-summary first, remaining learning functions next, and integrate PDF last. Run an early PDF extraction/page-number experiment to expose limitations.
-- Keep simple answer reveal. Adapt concept, flashcard and quiz counts to the material; generate only source-supported items. If material is too short or incomplete, explain the limitation in the affected section rather than invent content. Defer libraries, export, spaced repetition, multiple-document analysis and mobile apps.
+- Keep simple answer reveal. Adapt concept, flashcard and quiz counts to the material; generate only source-supported items. If material is too short or incomplete, explain the limitation in the affected section rather than invent content. Defer export, spaced repetition, multiple-document analysis and mobile apps.
 - Keep LLM provider/model and budget open until before live integration. Choose one provider, document cloud data handling, and set request limits before sending course material. Initial document limits are 40 physical PDF pages and 30,000 characters, including PDF-extracted text. Exceeding either limit requires a shorter excerpt; never truncate automatically. Adjust limits only after testing and record changes. No paid subscription or public deployment is authorized by this brief.
 
 These scope decisions respond to the [lecturer feedback](tilbakemelding-product-brief.md). They replace the earlier pending-approval proposals without claiming approval of technical details the lecturer did not assess.
@@ -53,10 +53,14 @@ Provide a clearly labelled demo mode with fixed example material and saved respo
 
 ## Optional extension and vision
 
-After every required capability and the quality checks pass, prioritize one optional extension: multiple-choice quiz with automatic marking and source-supported explanations. Record the decision to include it in the PRD and test it; it is not required for v1 completion. Do not add saved sessions or login in the same extension.
+After every required capability and the quality checks pass, prioritize one optional extension: multiple-choice quiz with automatic marking and source-supported explanations. Record the decision to include it in the PRD and test it; it is not required for v1 completion. Login and saved documents are required core work; the quiz extension remains optional.
 
 Longer term, the app could support repetition over time and help students revisit difficult concepts. This gives direction without expanding v1.
 
 ## Next steps and remaining constraints
 
 The [development plan](development-plan.md) records task order; the [PRD](../../prds/prd-G79-hansen-2026-09-26/prd.md) defines acceptance checks. Finalize provider/model, budget, request limits and technical choices before affected implementation work. Confirm the exact December deadline and consult the actual assessment guidance for delivery evidence; the supplied feedback is not a substitute for the full rubric. Planning can proceed with the decisions above.
+
+Scope update 2026-11-10: storage/login adds account, persistence, deletion and access-control work. Reassess the plan after architecture; preserve the agreed quality goals. CV-specific features are not added.
+
+Service/delivery decision 2026-11-10: use Supabase Auth, Postgres and private Storage to make owner-only saved content/progress available across devices. Keep Python/FastAPI with HTML/CSS/JavaScript and a locally runnable credential-free demo for the assessor. The earlier local-only delivery is superseded for live mode. Hosting provider, account setup and budget remain open; no cloud deployment has occurred.
