@@ -1,0 +1,1 @@
+"""Study Buddy local application."""

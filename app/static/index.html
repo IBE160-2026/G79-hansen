@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Study Buddy – lokal demo</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+<main>
+  <header>
+    <h1>AI Study Buddy <span class="demo-label">Demo – eksempeldata</span></h1>
+    <p class="muted">Fra kursmateriale til oversikt og øving.</p>
+    <p class="source">Faste norske eksempeldata. Egen tekst og filer behandles ikke. Innlogging, lagring og Mine dokumenter kommer senere.</p>
+  </header>
+  <section class="panel material-panel" aria-labelledby="material-heading">
+    <div class="material-heading">
+      <h2 id="material-heading">Materiale og innstillinger</h2>
+      <div class="heading-actions">
+        <button id="edit-material" type="button" aria-controls="material-body" aria-expanded="true" hidden>Vis/rediger</button>
+        <button id="reset" type="button" aria-describedby="reset-help">Ny økt</button>
+      </div>
+    </div>
+    <div id="material-body">
+      <label for="method">Velg fast eksempel</label>
+      <select id="method" aria-describedby="fixture-help" disabled>
+        <option value="">Velg et eksempel</option>
+        <option value="memory-basics-v1">Hukommelse og aktiv gjenhenting</option>
+      </select>
+      <p id="fixture-help" class="source">Kilden og innstillingene er faste i denne demoen.</p>
+      <section class="source-disclosure" aria-labelledby="source-heading">
+        <h3 id="source-heading">Eksempelmateriale</h3>
+        <div id="material"><p>Henter eksempelmaterialet …</p></div>
+      </section>
+      <div class="row settings" aria-label="Faste demoinnstillinger">
+        <div><span class="label">Fag/emnekode</span><p id="subject">Ikke angitt</p></div>
+        <div><span class="label">Språk</span><p id="language">Norsk (fast)</p></div>
+        <div><span class="label">Sammendrag</span><p id="detail">Kort (fast)</p></div>
+      </div>
+      <p id="generate-help" class="source">Lager sammendrag, begreper, flashcards og quiz.</p>
+      <div class="row actions">
+        <button id="generate" class="primary" type="button" aria-describedby="generate-help" disabled>Lag læringsmateriale</button>
+        <span id="reset-help" class="source">Ny økt tømmer materialet og resultatene.</span>
+      </div>
+    </div>
+  </section>
+  <section id="state-notice" class="state-notice error" hidden aria-labelledby="state-heading">
+    <h2 id="state-heading">Kunne ikke lage læringsmaterialet</h2>
+    <p id="state-message"></p>
+    <button id="retry" type="button">Prøv igjen</button>
+  </section>
+  <p id="status" role="status" aria-live="polite"></p>
+  <section class="panel" id="results" aria-label="Læringsmateriale" aria-busy="false" hidden>
+    <nav class="tabs" role="tablist" aria-label="Læringsdeler">
+      <button id="tab-summary" role="tab" aria-selected="true" aria-controls="content" data-tab="summary" type="button">Sammendrag</button>
+      <button id="tab-concepts" role="tab" aria-selected="false" aria-controls="content" data-tab="concepts" tabindex="-1" type="button">Begreper</button>
+      <button id="tab-flashcards" role="tab" aria-selected="false" aria-controls="content" data-tab="flashcards" tabindex="-1" type="button">Flashcards</button>
+      <button id="tab-quiz" role="tab" aria-selected="false" aria-controls="content" data-tab="quiz" tabindex="-1" type="button">Quiz</button>
+    </nav>
+    <div id="content" role="tabpanel" aria-labelledby="tab-summary" tabindex="0"></div>
+  </section>
+  <noscript><p>JavaScript må være aktivert for å bruke studiedemoen.</p></noscript>
+  <footer>Lokal demo uten AI-kall eller varig lagring. Fremdrift beholdes bare i denne åpne siden.</footer>
+</main>
+</body>
+</html>

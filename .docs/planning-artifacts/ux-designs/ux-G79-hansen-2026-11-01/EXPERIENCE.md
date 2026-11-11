@@ -1,20 +1,20 @@
 ---
 name: AI Study Buddy Experience
-status: draft
+status: final
 created: 2026-11-01
-updated: 2026-11-10
+updated: 2026-11-11
 sources:
   - ../../prds/prd-G79-hansen-2026-09-26/prd.md
   - ../../briefs/brief-G79-hansen-2026-09-26/brief.md
 ---
 
-> Scope revision 2026-11-10: login, owner-only saved documents/results, My documents, open/delete are required in v1. This supersedes all temporary-only/no-account statements in the prior UX baseline below. New session clears active workspace only; saved deletion is separate. The approved study layout remains the baseline, but authentication/library/save UX and prototype are not yet designed or validated. Earlier finalization and accessibility reports cover the earlier scope only.
+> Scope revision 2026-11-10: login, owner-only saved documents/results, My documents, open/delete are required in v1. This supersedes all temporary-only/no-account statements in the prior UX baseline below. New session clears active workspace only; saved deletion is separate. The approved study layout and the account/library/save flows below form the reconciled implementation baseline. Browser/accessibility and live backend validation remain acceptance work. Earlier finalization and accessibility reports cover the earlier scope only.
 
 # AI Study Buddy - Experience
 
 ## Foundation
 
-Local browser application started through README. One source and temporary session; no accounts, sharing or saved history. Demo-first development does not replace final live generation. [DESIGN.md](DESIGN.md) owns visual identity. No framework is selected.
+Hosted live application with one active source, authenticated accounts and owner-only saved documents/progress. A separate fixed-data local demo starts through README without keys. Sharing is outside v1. Demo-first development does not replace final live generation. [DESIGN.md](DESIGN.md) owns visual identity. Python/FastAPI with plain HTML/CSS/JavaScript and Supabase is selected.
 
 [ASSUMPTION: exact helper/error wording, source-selector presentation, narrow-window behavior and focus handling below are proposed details. Mock UI is Norwegian; the confirmed output-language choice covers all generated content, not an agreed full UI translation.]
 
@@ -58,7 +58,7 @@ Plain, specific and supportive. Explain the next action without promising correc
 | primary-action | One Generate action creates all four parts. During generation disable Generate and show loading text; re-enable on success/failure. Prevent concurrent submissions. |
 | secondary-action | New session clears pasted text, uploaded file, subject, results, indices and reveal state; restores Norwegian/short. Try again retains source/settings. Previous/Next moves one item. [ASSUMPTION: disable at first/last item, no wraparound.] |
 | result-tabs | Sammendrag selected after generation. Preserve contents, card/quiz indices and per-item revealed state across tab changes. |
-| learning-panel | Item counts depend on source support. One card/question at a time; answers initially hidden. Reveal only the selected answer. Preserve revealed state when returning within a generation; successful new generation/reset starts again hidden. Insufficient parts show an explanation instead of invented items. |
+| learning-panel | Item counts depend on source support. One card/question at a time; answers initially hidden. Reveal only the selected answer. Preserve revealed state on tab switches during the same visit; reopening a saved document restores positions with both answers hidden (confirmed 2026-11-11); successful new generation/reset starts again hidden. Insufficient parts show an explanation instead of invented items. |
 | source-reference | Adjacent to summary/concept content. Card/quiz reference appears together with the answer, in identical styling with original paragraph/page numbers. No embedded source viewer or clickable jump is required. |
 | feedback | Separate validation, technical failure, insufficiency, PDF coverage and demo notices. Errors preserve input. Use {colors.error} with explanatory text and {colors.text-secondary} for helper text. |
 
@@ -164,11 +164,23 @@ Finalized 2026-11-01 after user approval of the visual walkthrough and added exa
 
 Confirmed save interaction (2026-11-10): use an explicit secondary "Lagre" action for source/settings/generated learning material; no automatic save on upload or generation. New session clears the active workspace without deleting saved items. The current prototype demonstrates the button using fixed fixture state only; durable owner-scoped persistence and login remain implementation work.
 
-Confirmed resume behavior (2026-11-10): reopening a saved document continues from the last flashcard and quiz question, with independent positions per owner/document across visits. New session clears only the active workspace. Progress persistence must not implicitly save previously unsaved material. Exact progress-write timing and reveal-state restoration are not settled by this decision. This requirement is not yet implemented in the fixed-fixture prototype.
+Confirmed resume behavior (2026-11-10): reopening a saved document continues from the last flashcard and quiz question, with independent positions per owner/document across visits. New session clears only the active workspace. Progress persistence must not implicitly save previously unsaved material. Update 2026-11-11: position changes are saved automatically only for an already-saved document/generation. Source/settings/new results still require explicit Save; unsaved progress stays in browser memory. Reopening restores the independent positions with flashcard and quiz answers hidden (confirmed 2026-11-11); answers are revealed only on request. Tab switches during the current visit retain revealed state. Confirmed 2026-11-11: an outdated device/tab must not overwrite newer saved progress. Show "Fremdriften er endret på en annen enhet" with "Hent siste fremdrift" and require fetching current progress before further progress writes from that view. Never silently retry the stale position over newer progress. Show pending/failed sync during network problems; only acknowledged updates can resume on another device. The technical revision/locking/idempotent retry protocol is governed by AD-7. This requirement is not yet implemented in the fixed-fixture prototype.
 
-Delivery/service update (2026-11-10): live mode supports same-account content/progress across devices using Supabase Auth/Postgres/private Storage. Local demo remains available. Login method and library UX are still being designed; offline cross-device editing/synchronization is not promised. Current prototype remains fixed local examples with no Supabase connection.
+Delivery/service update (2026-11-10): live mode supports same-account content/progress across devices using Supabase Auth/Postgres/private Storage. Local demo remains available. Email/password login and the library flows below are the implementation baseline; offline cross-device editing/synchronization is not promised. Current prototype remains fixed local examples with no Supabase connection.
 
 Confirmed authentication (2026-11-10): Supabase email/password with Opprett konto, Logg inn, Glemt passord and Logg ut. Use labelled inputs, appropriate password autocomplete in the actual app, understandable failed/expired-link states and generic password-recovery responses. Password changes require a valid recovery session. The local prototype uses read-only fictional credentials and simulated messages; no email is sent and no real authentication is performed. Logout clears active private UI state; saved server-side documents are retained for their owner. The demo fixture is cleared on simulated logout to avoid showing previous local example state as another user's content.
+
+Confirmed login lifecycle (2026-11-11): backend-managed login state lives in memory on one server process for v1. Server restart/redeploy requires login again. Show an understandable sign-in-again message when the application session is no longer valid and block private actions until authenticated. Saved documents, learning material and acknowledged progress remain in Supabase; after login the owner can reopen them at the saved positions with answers hidden. Unsaved work has no durability guarantee. Multiple devices may be signed in simultaneously. This behavior is planned, not implemented in the local fixed-fixture prototype. AD-3 governs secure backend sessions and recovery: initial 30-minute idle / 12-hour absolute expiry, renewed login after restart, recovery restricted to password change and normal login afterward.
+
+## Live account and persistence states — implementation baseline 2026-11-11
+
+Signup uses labelled email/password fields and a check-your-email state when confirmation is required. Login failure retains the email and shows a safe error; passwords are never logged. Recovery requests give the same generic acknowledgment regardless of account existence. Recovery links must be opened in the initiating browser. Expired, reused, wrong-browser or restart-invalidated links explain how to request a new link. A valid recovery view contains only new-password fields; it cannot show documents. After password update require normal login. Logout ends only this device's login and clears its active private UI; other devices retain their sessions.
+
+The first Save captures the current independent practice positions; absent exercise sections have no position. Saving shows pending state, prevents duplicate submissions, and reports success only after the accepted document/source/settings/bundle is ready. On failure preserve active inputs/results and offer retry. After re-login/restart, show the owner any already-admitted pending Save separately from ready documents and allow explicit retry of that same accepted snapshot. If its registered original file is missing, request that same file again; changed content requires new generation/Save. After the 7-day resume window, offer cleanup rather than completion. A Save never admitted by the server has no recovery guarantee and requires fresh generation after loss of its session/receipt. Source/settings edits and New session immediately disable Save and notify the server to invalidate the prior generation receipt; failed invalidation requires retry/reload. A successful new generation enables Save only for its current acknowledged workspace revision. Source/settings/new output changes still require explicit Save. Replacing an existing saved generation resets its saved practice positions only after successful Save. Stale replacement shows a conflict with Reload and Save as new; it does not silently replace another device's content. New session clears the workspace without deleting saved items.
+
+The library distinguishes loading, empty, ready and failed-list states. Pending save/delete operations appear with status/retry for their owner, separate from openable ready items. Delete confirmation names the document; cancel changes nothing. A deleting item cannot reopen; failure remains visible with retry and is never reported as deleted. A confirmed delete clears the active view if it showed that document. Access denial never exposes another owner's title/content. Following reset, logout, source change or account change, late private responses are discarded.
+
+Practice shows pending, saved or failed sync status. A conflict blocks further writes until Hent siste fremdrift; fetching current saved progress restores positions with answers hidden, equivalent to reopening. Fetch failure retains the conflict and offers retry. These states require real browser and backend checks before application acceptance; the fixed fixture remains a demonstration only.
 
 ## My documents - prototype refinement (2026-11-10)
 

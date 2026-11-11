@@ -1,9 +1,9 @@
 ---
 name: AI Study Buddy
 description: A clear study workspace with light surfaces, dark text and a discreet blue accent.
-status: draft
+status: final
 created: 2026-11-01
-updated: 2026-11-10
+updated: 2026-11-11
 sources:
   - ../../prds/prd-G79-hansen-2026-09-26/prd.md
   - ../../briefs/brief-G79-hansen-2026-09-26/brief.md
@@ -37,7 +37,7 @@ components:
   feedback: {foreground: '{colors.text}', error: '{colors.error}'}
 ---
 
-> Scope revision 2026-11-10: login, owner-only saved documents/results, My documents, open/delete are required in v1. This supersedes all temporary-only/no-account statements in the prior UX baseline below. New session clears active workspace only; saved deletion is separate. The approved study layout remains the baseline, but authentication/library/save UX and prototype are not yet designed or validated. Earlier finalization and accessibility reports cover the earlier scope only.
+> Scope revision 2026-11-10: login, owner-only saved documents/results, My documents, open/delete are required in v1. This supersedes all temporary-only/no-account statements in the prior UX baseline below. New session clears active workspace only; saved deletion is separate. The approved study layout and the account/library/save flows below form the reconciled implementation baseline. Browser/accessibility and live backend validation remain acceptance work. Earlier finalization and accessibility reports cover the earlier scope only.
 
 ## Brand & Style
 

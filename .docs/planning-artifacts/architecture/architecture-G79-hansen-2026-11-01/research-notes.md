@@ -2,6 +2,16 @@
 
 This file records evidence and proposal rationale, not installation or deployment results.
 
+## Finalization evidence — 2026-11-11
+
+The user delegated the remaining technical decisions and authorized architecture → stories → sprint → local demo. The layered application, secure server sessions, canonical source/bundle boundary, signed unsaved-generation receipt, atomic revisioned progress, and tracked database/object lifecycle are now build decisions. The user-visible rules remain unchanged. Exact lockfile/schema implementation is code-owned.
+
+- Rechecked [FastAPI static serving](https://fastapi.tiangolo.com/tutorial/static-files/) and [maintainer release history](https://pypi.org/project/fastapi/): 0.162.4 is a valid initial seed, not proof of local compatibility.
+- Rechecked [pypdf releases](https://pypi.org/project/pypdf/): 7.0.1 remains a candidate; the blank/image/physical-page experiment gates its adoption.
+- Rechecked [Supabase PKCE](https://supabase.com/docs/guides/auth/sessions/pkce-flow), [advanced server-side guidance](https://supabase.com/docs/guides/auth/server-side/advanced-guide), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [database functions](https://supabase.com/docs/guides/database/functions) and [Storage policies](https://supabase.com/docs/guides/storage/security/access-control). The opaque application cookie is a deliberate backend-for-frontend design: provider tokens remain in backend memory; it does not copy the browser-SDK refresh-token-cookie design. Logout uses provider local scope so other devices remain signed in. Security-invoker transactional RPCs and Storage RLS still require migration and negative-access tests.
+- Receipt format, 30-minute/12-hour expiry defaults, bounded retry, and single-process deployment are project trade-offs, not vendor requirements. They are verified by affected stories before live data is accepted.
+- Model/provider/cost, hosting/vendor/region/plan/email setup and backup/deletion retention remain milestone gates. No cloud resources, credentials, subscriptions or real private uploads were created.
+
 | Topic | Evidence checked | Outcome |
 | --- | --- | --- |
 | FastAPI | [Official first steps](https://fastapi.tiangolo.com/tutorial/first-steps/), [static files](https://fastapi.tiangolo.com/tutorial/static-files/), [maintainer package](https://pypi.org/project/fastapi/) | Same application can serve API and static UI. Package release 0.162.4 dated 2026-11-10 observed in release history; compatibility/install not yet tested. |
@@ -13,7 +23,7 @@ This file records evidence and proposal rationale, not installation or deploymen
 | Auth callbacks | [PKCE flow](https://supabase.com/docs/guides/auth/sessions/pkce-flow), [Python code exchange](https://supabase.com/docs/reference/python/auth-exchangecodeforsession) | Backend code exchange requires the initiating verifier/browser context. Draft chooses one code flow with restricted recovery-purpose application session rather than mixing browser implicit tokens with backend cookies. |
 | Database transactions | [Database functions](https://supabase.com/docs/guides/database/functions) | Versioned Postgres RPC functions provide the transaction boundary for multi-row changes. SECURITY INVOKER, RLS, execution grants and row locks must be designed and tested, not assumed from separate REST calls. |
 
-## Proposed trade-offs
+## Historical draft trade-offs — 2026-11-10 (superseded by finalization above)
 
 - One layered monolith gives one deployable and shared contracts while keeping extraction/model/storage replaceable. This is a recommendation within the authorized draft.
 - A backend-managed opaque session hides provider credentials from browser JavaScript and gives immediate application logout. Initial in-memory session storage requires one worker/instance and re-login after restart; the saved documents remain in Supabase. Scaling requires a shared session store and a new reviewed decision.

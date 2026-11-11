@@ -1,6 +1,6 @@
 # Arbeidsnotater til refleksjonsrapporten
 
-Opprettet: 01.11.2026. Sist oppdatert: 01.11.2026.
+Opprettet: 01.11.2026. Sist oppdatert: 11.11.2026.
 
 Dette er et løpende kildegrunnlag til [refleksjonsrapportmalen](reflection-report-template.md), ikke den ferdige rapporten. Notatene skiller mellom dokumenterte hendelser og spørsmål studenten må besvare med egne erfaringer. Tidligere arbeid er oppsummert i etterkant fra samtalen, prosjektfiler og Git-historikken; dette er ikke en fullstendig samtaleeksport.
 
@@ -196,6 +196,64 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 - Kildekvalitet: tre dokumenter, fem begreper valgt på forhånd per dokument, faktastøtte, henvisninger og dekning. Dette er planlagt, ikke gjennomført ennå.
 - Studentens egen forståelse: noter fortløpende hva du kan forklare selv og hva du fortsatt trenger hjelp til.
 - Ikke anslå timer spart uten egne målinger eller tydelig merking som subjektivt anslag.
+
+## Beslutninger og kontroll 11.11.2026
+
+### 11.11.2026 – Første kjørbare demo og uavhengig kontroll
+
+**Dokumentert resultat:** FastAPI serverer nå den faktiske studiedemoen og et API for et navngitt syntetisk eksempel. Sammendrag, begreper, flashcards og quiz hentes samlet fra backend. Skjulte svar/referanser, separate posisjoner, fanebytte, materialpanel, nullstilling og feilmeldinger er implementert. Egen tekst/PDF, KI, konto og varig lagring er fortsatt senere arbeid.
+
+**Kontroll og rettelser:** 30 API-/kontrakttester bestod. Tre uavhengige kodelinser fant blant annet manglende tidsavbrudd og manglende dekning av feil ved første innlasting og komplette, men semantisk ugyldige svar. Etter retting bestod 11 nettleserscenarier i Edge, med virkelige 15-sekunders tidsavbrudd, ugyldige svar, retry og forsinkede svar etter reset. Kontrollen omfattet 320/390/480 piksler og 200 % layoutzoom; skjermbilder ble sett på. Dette erstatter ikke manuell skjermleser-/WCAG-kontroll. En upstream TestClient/httpx-advarsel er registrert, uten testfeil.
+
+**Ytterligere arkitekturfunn:** Full-diff-kontrollen presiserte hvordan allerede opptatt eksplisitt lagring kan gjenopptas etter ny innlogging, og hvordan serveren opphever gamle signerte genereringskvitteringer. Dette er dokumentregler som må testes i senere live-oppgaver, ikke funksjoner denne demoen beviser.
+
+**Kilder:** [Byggespesifikasjon og triage](../.docs/implementation-artifacts/spec-1-1-run-the-four-part-study-demo.md), [kvitteringsavklaring](../.docs/planning-artifacts/architecture/architecture-G79-hansen-2026-11-01/reviews/resolution-receipt-admission.md), [oppstart](../README.md).
+
+**Egen refleksjon (ubesvart):** Hvorfor var vellykkede tester av normalflyten utilstrekkelig før oppstartsfeil og tidsavbrudd også ble testet?
+
+### 11.11.2026 – Arkitektur ferdigstilt og første bygg planlagt
+
+**Dokumentert hendelse:** Studenten ba «kjør disse punktene» etter anbefalingen om samlet arkitekturgjennomgang, utviklingsoppgaver, sprintplan og første kjørbare demo. Det gir grunnlag for å avgjøre rutinemessige tekniske forslag og fortsette uten nye delgodkjenninger, innenfor avtalt omfang.
+
+**KI-bidrag og kontroll:** BMAD-arkitekturen og revidert PRD/UX er samkjørt og ferdigstilt som planleggingsgrunnlag. Uavhengig krav-/rubrikk-, teknologi- og adversariell gjennomgang avdekket blant annet forskjellen mellom første Lagre og erstatningslagring, lokal utlogging ved leverandørfeil og filsporing ved avbrutt sletting. Kravene er presisert og etterkontrollert. Arkitekturlinter: 0 funn; 22 relative lenker kontrollert. Dette er dokumentkontroller, ikke live sikkerhetstester.
+
+**Resultat:** Fire epics med 14 konkrete stories og sprintstatus er opprettet. Story 1.1 er startet som lokal FastAPI-demo med faste eksempeldata. Ekte innlogging, varig lagring, PDF, modellvalg og publisering er fortsatt senere arbeid med egne kontrollpunkter. Den historiske utviklingsrekkefølgen er erstattet av den samlede backloggen, uten å fjerne kjernekravene.
+
+**Kilder:** [Arkitekturkontroll](../.docs/planning-artifacts/architecture/architecture-G79-hansen-2026-11-01/review-summary.md), [epics](../.docs/planning-artifacts/epics.md), [implementeringsklarhet](../.docs/planning-artifacts/implementation-readiness.md).
+
+**Egen refleksjon (ubesvart):** Hvilken verdi hadde kontrollen av avbrutt lagring/sletting før funksjonene ble kodet?
+
+### 11.11.2026 – Fortsette på en annen enhet uten overskriving
+
+**Dokumentert hendelse:** Studenten ønsket å fortsette på en annen enhet og svarte «ja» til at en utdatert fane ikke skal overskrive nyere fremdrift. KI foreslo meldingen «Fremdriften er endret på en annen enhet» med «Hent siste fremdrift», og synlig status når nettverksfeil hindrer lagring.
+
+**Resultat:** Brukeroppførselen er vedtatt i AD-7, forklaring, PRD og EXPERIENCE. Akseptansesjekken beskriver to enheter, avvist utdatert oppdatering og nettverksfeil. Bare bekreftede oppdateringer garanteres på tvers av enheter. Teknisk revisjons-/låse-/retryprotokoll er fortsatt et forslag. Ingen kode eller skytjeneste endret.
+
+**Egen refleksjon (ubesvart):** Hvorfor bør en gammel nettleserfane hente siste fremdrift før den lagrer videre?
+
+### 11.11.2026 – Ny innlogging etter serverrestart valgt
+
+**Dokumentert hendelse:** KI anbefalte midlertidig backend-styrt innloggingstilstand i serverminnet for førsteversjonen. Studenten svarte «kjør anbefalt løsning». Serverrestart eller oppdatering krever ny innlogging, mens lagrede dokumenter, læringsmateriale og synkronisert fremdrift beholdes i Supabase. Flere enheter kan være innlogget samtidig.
+
+**Resultat:** Valget er registrert i beslutningsloggen, AD-3, studentforklaringen, PRD og EXPERIENCE. PRD beskriver kontroll av avvist gammel økt og gjenåpning etter ny innlogging. Valget gjelder øktens levetid; detaljer for sikkerhet, gjenoppretting og tidsgrenser er fortsatt forslag. Ingen backend implementert eller skytjeneste opprettet.
+
+**Egen refleksjon (ubesvart):** Hva er forskjellen mellom at innloggingen forsvinner og at et lagret dokument slettes?
+
+### 11.11.2026 – Skjulte svar ved gjenåpning valgt
+
+**Dokumentert hendelse:** Studenten svarte «ja» til forslaget om at svarene skjules når et lagret dokument åpnes igjen, samtidig som riktig flashcard og quizspørsmål gjenopptas. Fanebytte under samme besøk beholder allerede viste svar.
+
+**Resultat:** AD-7, studentforklaringen, PRD, EXPERIENCE og beslutningsloggen er oppdatert. Akseptansesjekken krever at begge svar er skjult ved gjenåpning og at plasseringene beholdes. Dette er dokumentert oppførsel for senere implementering; ingen kode endret.
+
+**Egen refleksjon (ubesvart):** Hvordan kan skjulte svar støtte øving når du fortsetter på et lagret dokument?
+
+### 11.11.2026 – Automatisk lagring av fremdrift valgt
+
+**Dokumentert hendelse:** KI foreslo å lagre kort- og quizplassering automatisk når dokumentet allerede er lagret. Studenten svarte «jeg vil ha den ja». Dokument, innstillinger og nytt læringsmateriale krever fortsatt eksplisitt «Lagre»; fremdrift i ulagret materiale er bare i nettleserminnet.
+
+**Resultat:** Valget er registrert i arkitekturens beslutningslogg og AD-7, studentforklaringen, PRD og EXPERIENCE. Dette er en krav-/arkitekturbeslutning, ikke implementert skylagring. Synkroniseringsmekanisme og synlighet av svar ved gjenåpning er fortsatt åpne forslag.
+
+**Egen refleksjon (ubesvart):** Hvordan skiller du mellom å lagre læringsmaterialet og å huske hvor langt du har øvd?
 
 ## Mal for neste hendelse
 

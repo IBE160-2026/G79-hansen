@@ -1,22 +1,24 @@
-# Architecture handoff - AI Study Buddy
+# Architecture handoff — AI Study Buddy
 
-The PRD defines required behavior. The following implementation choices remain open; none prevents starting UX or architecture. Owner: student, supported by assistant.
+Updated 2026-11-11. The [PRD](prd.md), [DESIGN](../../ux-designs/ux-G79-hansen-2026-11-01/DESIGN.md) and [EXPERIENCE](../../ux-designs/ux-G79-hansen-2026-11-01/EXPERIENCE.md) define the reconciled product baseline. The [architecture spine](../../architecture/architecture-G79-hansen-2026-11-01/ARCHITECTURE-SPINE.md) fixes shared implementation contracts. These documents are ready for story planning, not proof of implemented features.
 
-| Choice | Required decision and revisit point |
-| --- | --- |
-| Stack and PDF library | Use the user-selected Python/FastAPI plus HTML/CSS/JavaScript in one project with hosted live mode and a locally runnable fixed-data demo, with a PDF library that preserves physical page positions. Decide before affected stories are implemented. |
-| Provider/model and access | Choose one provider/model, obtain API access, set a test budget and check provider data handling before live integration. Codex sign-in is not evidence of an application API key. |
-| AI request strategy | Decide prompt/output structure, one or multiple calls for the four sections, validation, request timeouts and retry behavior. Preserve the PRD's single Generate action and source-grounding requirements. |
-| Resource controls | Set upload-byte and request/output limits, character-count convention and text-decoding behavior. Respect the agreed 40-page/30,000-character limits; record any adjustments justified by tests. |
-| Session lifecycle | Define expiry, disconnect/restart behavior and cleanup with owner-scoped saved documents/results and no shared private-content caches. Use selected Supabase Auth, Postgres and private Storage; define account/session configuration, owner-based database/storage policies, deletion consistency and progress-write rules before affected implementation. Implement the exact New session reset and prevent stale outputs after source changes. |
-| Credentials and demo fixtures | Keep secrets server-side and out of Git; provide an example configuration without credentials. Keep fixed demo data distinct from live source material. |
+## Fixed contracts
 
-Delivery follow-up: the student confirms the exact deadline (currently approximately 15 December 2026) and checks the actual assessment guidance before final scheduling/submission. This is not an architecture blocker. Target core completion around 1 December.
+- Python/FastAPI serves ordinary HTML/CSS/JavaScript and same-origin APIs. Keep the approved prototype composition; use a clearly labelled synthetic demo without external keys first.
+- Supabase Auth owns email/password signup/login/recovery. Postgres and private Storage isolate each owner's records/files; FastAPI also checks ownership. Normal operations use user-scoped tokens, never a service-role bypass.
+- One-process backend login state lives in memory; restart requires login again without losing saved documents or acknowledged progress. Opaque secure cookies, same-origin/CSRF checks, local-scope logout and no-store private responses are governed by AD-3. Initial expiry is 30 minutes idle / 12 hours absolute. Recovery links require the initiating browser and a password-update-only session; normal login follows recovery.
+- Explicit Save stores source/settings/generated material; upload/generation alone never persists it. New session clears only active work. Signed generation receipts are checked against a bounded session/workspace registry, invalidated by source/settings/reset/new-generation actions, and used only to admit an explicit Save. After admission, an immutable owner-scoped staged operation can resume under a fresh login within 7 days, without requiring the expired receipt; cleanup/replay cannot stage new content. Revisioned idempotent save/delete operations preserve consistent snapshots and file/database lifecycle.
+- Saved flashcard/quiz positions update automatically and independently. Reopening restores positions with answers hidden. Tab changes within the current visit retain revealed answers. Outdated writes cannot overwrite newer progress; Hent siste fremdrift reloads current progress before more writes. AD-7 fixes revision, locking, mutation IDs and bounded retry. Show pending/failed sync; cross-device continuity guarantees acknowledged updates only.
+- One Generate action produces all four sections from one canonical source. Stable physical page/paragraph references, 40-page/30,000-character limits, no truncation/OCR, source insufficiency and honest failure/retry remain required.
 
-The optional automatically marked multiple-choice quiz remains deferred until core acceptance passes and inclusion is explicitly recorded. The 2026-11-10 user scope decision adds login and owner-only saved documents/results, library, reopening and deletion. This supersedes previous no-persistence assumptions. User selected explicit Save; no auto-save on upload/generation. Cross-visit card/quiz position resumption is required. Decide account/library UX, progress-write timing and reopened reveal-state handling before affected implementation. Do not auto-save an unsaved document merely to track progress.
+## Milestone gates
 
-## Adopted service selection - 2026-11-10
+| Owner | Decision/check | Required before |
+| --- | --- | --- |
+| Builder + student | pypdf candidate experiment: distinct first/third pages, blank middle, image-only input, bounded extraction; validate the 10 MiB initial upload ceiling and worker limits. | PDF integration; does not block fixed demo. |
+| Student + builder | Model/provider/API access, request limits, data handling and cost ceiling; then three-document factual/reference/concept checks. | Live AI integration. |
+| Student + builder | Hosting provider/region/quotas/cost, Supabase project/email/redirect configuration, backup and deletion retention. Render remains a candidate. | Provisioning/deployment or real private data. |
+| Builder | Tested dependency lockfile, migrations/RLS, negative two-user/API/file tests, restart, failure/lifecycle and browser/accessibility checks. | Each affected feature's acceptance; demo alone proves none of these. |
+| Student | Confirm actual deadline (currently approximately 15 December 2026), delivery/process evidence and schedule, preserving correction time. | Final delivery scheduling. |
 
-Supabase Auth owns identity; Postgres stores owner-linked document metadata, source text where appropriate, generated learning parts and progress; private Storage holds uploaded document files. Keep table and object access owner-scoped using database/storage policies and enforce authorization for FastAPI operations. Privileged secrets and private files never become frontend/static assets. Email/password with signup, login, recovery and logout is selected. Exact schema, SDK versions, token/cookie/session handling, email confirmation/recovery redirects, region, hosting, quotas/budget and migrations remain architecture configuration decisions. No cloud resources have been provisioned by this document update.
-
-Documentation verified: https://supabase.com/docs/guides/auth ; https://supabase.com/docs/guides/storage/buckets/fundamentals ; https://supabase.com/docs/guides/database/postgres/row-level-security .
+No paid service, public deployment, cloud resource or real private upload is authorized by this document. Optional multiple-choice marking remains deferred until core acceptance and an explicit inclusion decision. Secrets, private data, provider responses and tokens stay out of Git/logs/static assets.

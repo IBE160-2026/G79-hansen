@@ -1,0 +1,62 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 11-11-2026 18:15
+last_updated: 11-11-2026 18:39
+project: G79-hansen
+project_key: NOKEY
+tracking_system: file-system
+story_location: .docs/implementation-artifacts
+development_status:
+  epic-1: in-progress
+  1-1-run-the-four-part-study-demo: review
+  1-2-verify-physical-pdf-pages-before-integration: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-sign-up-and-sign-in-securely: backlog
+  2-2-recover-a-password-through-a-restricted-session: backlog
+  2-3-end-access-on-logout-expiry-and-restart: backlog
+  2-4-validate-and-extract-the-active-source: backlog
+  2-5-generate-all-learning-parts-from-the-source: backlog
+  2-6-evaluate-generated-content-against-known-sources: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-save-a-consistent-private-snapshot: backlog
+  3-2-open-your-private-document-library: backlog
+  3-3-synchronize-practice-progress-across-devices: backlog
+  3-4-delete-saved-material-completely: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-reach-the-app-securely-from-two-devices: backlog
+  4-2-verify-the-full-release-and-assessor-setup: backlog
+  epic-4-retrospective: optional

@@ -1,50 +1,32 @@
 # AI Study Buddy — development plan
 
-Build order and the early PDF experiment are user-approved. Local browser delivery, README startup and demo-first development are user-approved. Task boundaries, final technology and detailed checks below remain proposals. Final scope and quality goals are in [the brief](brief.md); its revised scope decisions apply here too. Text-based PDFs and Python/FastAPI with HTML/CSS/JavaScript are selected. The 2026-11-10 scope update adds login and persistent documents/results; provider/model, budget and storage/authentication implementation remain open.
+Updated 2026-11-11 after the user delegated architecture finalization, backlog, sprint planning and the first runnable demo. [Epics and stories](../../epics.md) now own task order and acceptance criteria; [sprint status](../../../implementation-artifacts/sprint-status.yaml) owns actual progress. The historical numbered task sequence is superseded by this integrated plan after the login/storage scope expansion.
 
-## Small tasks and checks
+## Delivery sequence
 
-Finish one task and record its result before continuing. Adapt concept, flashcard and quiz counts to the source; test short/incomplete material and require an explanation in any section that cannot be supported, rather than invented content. Build fixed responses into a labelled demo mode with supplied example material, usable without an API key. Demo mode does not generate answers for arbitrary uploads. Use separate real AI calls for content checks. Experiments are not completed product features.
+1. **Try the complete study flow locally:** Story 1.1 builds one FastAPI app serving the approved plain HTML/CSS/JavaScript workspace and a validated named-fixture demo API. No external credentials, real AI, auth or durable persistence. Story 1.2 tests PDF extraction before later own-source feature work.
+2. **Study your own material privately:** email/password signup/login/recovery/logout, active-source extraction and all four real generated outputs with references and explicit failure handling. A provider/model/API/budget/data-handling decision is required before live model integration.
+3. **Keep and resume your study material:** owner-only explicit Save, My documents, reopen and delete. Source/settings/results only persist on Save. Independent practice positions automatically synchronize for saved generations; reopening hides answers; stale views must fetch latest progress before writing again.
+4. **Use and assess the finished app reliably:** authorized hosting/configuration, real two-account/two-device checks, reproducible setup, complete content evaluation and browser/accessibility checks. Hosting/region/cost and operations decisions precede deployment.
 
-| Order | Small task | Observable check |
-| --- | --- | --- |
-| 1a | Text box, Generate button and summary display using a fixed response. | The submitted text follows the expected flow; empty input is rejected. |
-| 1b | Connect one model to generate a summary. | A short known text produces a supported summary. |
-| 1c | Busy state and failed-request message. | A simulated generation failure preserves material and every setting, shows an understandable error and Try again button, and retries with the same inputs. A successful retry shows all four sections with answers initially hidden once those features exist. |
-| 2 | Early standalone PDF experiment, before further feature work. | Extract a three-page PDF with distinct text on the first and third pages and a blank middle page. Preserve physical page positions; the last page remains page 3. Compare extracted text with the PDF. Try an image-only page and report absent usable text. Record findings and limitations, not an OCR solution. |
-| 3a | Text-file upload alongside pasted text, with one active input method. | A sample file yields expected text; switching methods uses only the active source and invalidates previous results. Empty active input is rejected even if inactive input exists. |
-| 3b | Optional course/subject, language and detail inputs. | Generation works with a blank subject; defaults are Norwegian/short. Allow English and detailed summary independently; all four sections and answers use the chosen language and the summary follows the detail setting. Relevant or conflicting course context must not introduce facts unsupported by the source. |
-| 3c | Number text paragraphs and attach summary references. | Each checked reference identifies the supporting paragraph. |
-| 4 | Key concepts, brief explanations and references. | Apply the agreed four-of-five concept check. |
-| 5 | Flashcards with answer reveal. | Reveal works and each answer is supported by its reference. |
-| 6 | Quiz questions and answer reveal. | A student can attempt a question before revealing the supported answer. No scoring or multiple-choice work. |
-| 6b | Combine all four learning outputs under one Generate action in clearly labelled sections. | One press produces all sections for the same document/settings; flashcard and quiz answers start hidden, including after regeneration. |
-| 7a | Integrate PDF extraction into the same text-processing flow. | Pasted text, text-file and PDF inputs each produce every required output; exactly one source is active at a time. |
-| 7b | Preserve PDF page references and handle unreadable input. | References preserve original physical PDF pages. Process readable pages while listing pages without readable text and stating results cover extracted text only. An entirely unreadable PDF triggers no generation and asks for a text-based PDF or pasted text. |
-| 8 | Final three-document quality check and requirements check. | Record factual support, reference accuracy and concept coverage; fix failures. Include text and PDF. Verify New session clears pasted text, uploaded file, subject, all results and answer-reveal state, and restores Norwegian/short; verify saved material survives restart, is owner-scoped, deletes correctly and never enters Git/logs. Verify demo startup without credentials and document the live setup. |
+Each story introduces only the entities it needs. No upfront complete database, vector search, separate frontend build or agent framework. Every epic delivers usable behavior using only earlier epics. Demo functionality never counts as complete live functionality.
 
-If the early PDF experiment fails, investigate its cause before leaving the task; do not silently omit PDF or add OCR. Document limitations clearly; support text-based PDFs without OCR or table/figure interpretation, as decided in the brief.
+## Early PDF experiment
 
-## Technical proposal — not yet approved
+After Story 1.1, use a synthetic PDF with readable pages 1 and 3, blank page 2 and image-only page 4. Preserve physical page positions, list unreadable pages and compare extracted text against the document. Exercise malformed/encrypted/oversized files, byte/time/memory limits and 40/41-page plus 30,000/30,001-character boundaries. Record the tested library/version and limitations before adoption. Do not add OCR/table/figure interpretation. A failed experiment requires investigation before PDF feature work proceeds.
 
-Use one Python/FastAPI project serving HTML/CSS/JavaScript, with hosted live mode and locally runnable fixed-data demo, one future model provider and one PDF library. Add owner-scoped persistence and login for saved material. No separate frontend build system, vector search or agent framework is required. Keep secrets server-side and out of Git.
+## Quality and scope
 
-Provider and PDF library remain open. Initial input limits are 40 physical PDF pages and 30,000 characters for pasted text, text-file content or total PDF-extracted text. PDFs must meet both limits; blank/image-only pages count toward the page limit. Reject oversized input before live AI calls, ask for a shorter excerpt and never truncate automatically. Check exact boundaries and record any limit changes justified by testing. A locally running app using a cloud model still sends text to that service. Define session cleanup and avoid caching/logging student content; implement authenticated sessions with logout/expiry; distinguish active-workspace reset from deletion of saved documents and keep saved material private. Check provider data handling separately before live use. No paid service or public deployment is approved.
+Before real generation, select five central concepts and supporting locations per document for three test documents. Include text and PDF. All sampled content must be source-supported, references correct, and at least four of five concepts covered per document; separately record unsupported content, wrong references and missing concepts. Source insufficiency must explain missing parts without invented material.
 
-## Work rhythm and evidence — proposals
+Generation failure retains every input/setting with explicit retry. One Generate action supplies all four parts. Tab changes, answer reveal, navigation and saved reopen never call AI. New session clears the active workspace, not saved documents. Limits remain 40 physical PDF pages and 30,000 Unicode code points, with rejection rather than truncation.
 
-Use one small task per work session and a small commit after checking it; no hourly estimate is promised. Use approximately 15 December 2026 as the provisional deadline, with core completion around 1 December to reserve two weeks for fixes and submission. Confirm the exact deadline before final scheduling. Reassess pace after the first working summary.
+Live identity/storage uses Supabase Auth/Postgres/private Storage through owner-scoped FastAPI access and RLS. One-process in-memory login state means server restart requires re-login, without deleting saved records. Operation/revision safeguards and cleanup tests are defined in the architecture and stories; private material/secrets never enter Git/logs/static assets.
 
-Keep a setup/use README, the brief and short PRD, and a compact development/test log covering results and relevant AI/BMAD decisions. Additional reports, reflection or testing are included if the assessment rubric requires them. Do not duplicate the same evidence across documents.
+## Scheduling and evidence
 
-## Delivery and optional extension
+Approximate deadline remains 15 December 2026 and the desired core-completion target around 1 December; neither is a confirmed delivery guarantee. Use backlog progress to reassess scope/pace and reserve time for correction. The first increment is runnable demo only; the full live scope is not promised complete in the same session.
 
-Before live integration, choose the provider/model and budget, set request limits, enforce the agreed document limits and record cloud data handling. Keep test material in a dedicated folder and saved demo responses separate from live output. README covers setup, demo/live modes, example secrets without real keys and PDF limitations. Check readable contrast, labelled inputs, keyboard use, output sections and reference visibility.
+Keep README setup/demo/live instructions, lockfile, implementation specs, sprint status and observed validation evidence. Record significant decisions and actual errors/checks in the session/reflection notes; do not invent test outcomes or learning experiences. Browser keyboard/narrow-window/200% zoom and screen-reader checks remain part of final application acceptance.
 
-Only after all core checks pass, consider EXT-1: multiple-choice quiz with automatic marking and source-supported explanations. Record inclusion in the PRD and verify answer handling, score calculation and source references. Preserve the final two-week correction buffer; defer the extension if it threatens required delivery. Longer-term repetition features remain outside this plan.
-
-## Required storage/login work - scope update 2026-11-10
-
-Before affected implementation, revise the UX/prototype for login, My documents and save/open/delete. Choose storage/authentication in architecture, add restart persistence tests and negative ownership tests with two accounts, including direct ID requests. Test logout, reset without deleting saved content, deletion including associated results and failed deletion. Include local account/demo setup in README so assessor startup remains reproducible without paid accounts. Saving trigger and cross-visit learning-progress policy remain open. These are core requirements; optional quiz marking must not displace them. Reassess dates/effort after this added work is broken into stories.
-
-Supabase is selected (2026-11-10) for Auth, Postgres and private Storage. Add multi-device same-owner reopen/progress checks and cross-user negative tests covering database, file storage and API operations. Keep cloud configuration/migrations reproducible and demo fixtures usable without external credentials. Define hosting, region, budgets/quotas and exact auth flow before their implementation.
+EXT-1 multiple-choice scoring remains optional after all core checks, and is not included in these epics. Export, spaced repetition, sharing, multi-document analysis and native mobile apps remain outside v1. No paid service or public deployment is authorized by the local implementation request.
