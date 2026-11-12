@@ -10,6 +10,7 @@ dependencies = [
 
 [dependency-groups]
 dev = ["httpx>=0.28,<0.29", "pytest>=9,<10"]
+pdf-experiment = ["pypdf==7.0.1"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

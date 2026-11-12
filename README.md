@@ -52,6 +52,44 @@ Testscriptet starter og stopper selv en lokal uvicorn-prosess på en ledig port.
 
 Nettlesertestene dekker alle fire deler, kildevisning, separate posisjoner og svar, tastatur/fokus, antall genereringskall, duplikatvern, reset med et forsinket svar som ignorerer kansellering, feil ved første innlasting, semantisk ugyldige svar og eksplisitt retry. Både innlasting og generering har et tidsavbrudd på 15 sekunder som testes med reell ventetid. De kontrollerer horisontal overløp ved 320/390/480 piksler og 200 % layoutzoom og legger skjermbilder i den ignorerte mappen `test-results/`. Dette er automatiserte nettlesersjekker; en full manuell skjermleser- og WCAG-vurdering er ikke gjennomført.
 
+## Lokalt PDF-eksperiment (Story 1.2)
+
+PDF-proben krever Windows med tilgjengelig Job Object-isolasjon. Installer den valgfrie,
+låste eksperimentgruppen og kjør fra repoets rot:
+
+```powershell
+uv sync --locked --group pdf-experiment
+uv run --group pdf-experiment pytest
+uv run --group pdf-experiment python scripts/pdf_probe.py --help
+```
+
+Lag en syntetisk PDF i den ignorerte testmappen og prøv CLI-en:
+
+```powershell
+New-Item -ItemType Directory -Force test-results | Out-Null
+uv run --group pdf-experiment python tests/pdf_fixtures.py test-results/synthetic.pdf
+uv run --group pdf-experiment python scripts/pdf_probe.py test-results/synthetic.pdf
+```
+
+JSON viser status, antall, opprinnelige sidenumre, dekningsvarsel og ressursmålinger.
+Kildetekst, filnavn og parserfeil vises aldri. Avvisning gir exit-kode 1. Ved import
+gir `scripts.pdf_probe.probe_pdf(path)` og `probe_stream(binary_stream)` også lesbare
+kildeenheter i minnet; disse skal ikke logges. Enheten `pdf-page-3` viser fysisk side 3,
+selv om side 2 er blank. Blanke sider og bildesider blir oppgitt som ulesbare.
+
+Grensene er 40 fysiske sider, 30 000 Unicode-kodepunkter etter normalisering av
+linjeskift, 10 MiB input, 10 sekunder arbeidertid og 512 MiB forpliktet arbeiderminne.
+Overskridelser avvises uten avkorting eller delvis aksept. Manglende minneisolasjon
+gir `isolation_unavailable`; Linux/macOS støttes foreløpig ikke. Eksperimenttestene
+er valgfrie og hoppes over hvis gruppen ikke er installert; `uv run pytest` fortsetter
+å kjøre demoens tester.
+
+Se [målerapport og begrensninger](.docs/implementation-artifacts/pdf-experiment.md).
+Bare syntetiske PDF-er er testet. Ingen OCR eller tolkning av bilder/tabeller inngår,
+og krypterte dokumenter avvises. Dette er lokal gjennomførbarhetstesting;
+applikasjonsintegrasjon tilhører Story 2.4. Målplattformen må verifiseres før hosting.
+Story 1.1 venter fortsatt på studentens gjennomgang.
+
 ## Medlemmer
 
 - Fredrik Fladmark Hansen

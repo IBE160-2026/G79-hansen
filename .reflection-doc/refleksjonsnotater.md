@@ -1,6 +1,6 @@
 # Arbeidsnotater til refleksjonsrapporten
 
-Opprettet: 01.11.2026. Sist oppdatert: 11.11.2026.
+Opprettet: 01.11.2026. Sist oppdatert: 12.11.2026.
 
 Dette er et løpende kildegrunnlag til [refleksjonsrapportmalen](reflection-report-template.md), ikke den ferdige rapporten. Notatene skiller mellom dokumenterte hendelser og spørsmål studenten må besvare med egne erfaringer. Tidligere arbeid er oppsummert i etterkant fra samtalen, prosjektfiler og Git-historikken; dette er ikke en fullstendig samtaleeksport.
 
@@ -254,6 +254,32 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 **Resultat:** Valget er registrert i arkitekturens beslutningslogg og AD-7, studentforklaringen, PRD og EXPERIENCE. Dette er en krav-/arkitekturbeslutning, ikke implementert skylagring. Synkroniseringsmekanisme og synlighet av svar ved gjenåpning er fortsatt åpne forslag.
 
 **Egen refleksjon (ubesvart):** Hvordan skiller du mellom å lagre læringsmaterialet og å huske hvor langt du har øvd?
+
+## 12.11.2026 – Neste oppgave konkretisert som PDF-eksperiment
+
+**Dokumentert hendelse:** Studenten ba «fortsette på prosjekt study buddy». Assistenten leste siste logg og sprintstatus og konkretiserte neste planlagte oppgave, Story 1.2. En kontekstagent samlet relevante Epic 1-krav. Demoens status er fortsatt `review`; studentens godkjenning er ikke antatt.
+
+**KI-forslag:** Et lokalt eksperiment med syntetiske PDF-er skal kontrollere opprinnelige sidenumre og grenser for sider, tegn, filstørrelse, tid og minne før PDF-opplasting integreres. 10 sekunder og 512 MiB er foreslåtte eksperimentgrenser, ikke målte resultater. pypdf-dokumentasjonen advarer om stor minnebruk; Python-modulen `resource` kan ikke brukes som en generell Windows-løsning. Kilder og akseptansekriterier finnes i [spesifikasjonen](../.docs/implementation-artifacts/spec-1-2-verify-physical-pdf-pages-before-integration.md).
+
+**Kontroll og avgrensning:** `git diff --check` bestod. Ingen PDF-pakker installert, funksjon implementert eller funksjonstester kjørt i denne planleggingsøkten. Spesifikasjonen er `draft` ved BMADs godkjenningspunkt.
+
+**Egen refleksjon (ubesvart):** Hvorfor må et PDF-eksperiment teste minnebruk i tillegg til filstørrelse og korrekte sidetall?
+
+## 12.11.2026 – PDF-eksperiment implementert og kontrollert
+
+**Studentens styring:** Studenten godkjente planen med «kjør». Det autoriserte lokal implementering og testing av Story 1.2, uten å godkjenne demoen på studentens vegne eller opprette skytjenester.
+
+**Dokumentert resultat:** Et lokalt Python-verktøy bruker pypdf 7.0.1 i en egen Windows-prosess. Originale fysiske sidetall beholdes, blanke/bildesider oppgis, og grensene på 40 sider, 30 000 Unicode-kodepunkter og 10 MiB kontrolleres uten avkorting. Prosessen har en faktisk Windows-minnegrense på 512 MiB forpliktet minne og en tidsgrense på 10 sekunder. Kommandolinjeutdata viser metadata, ikke kildetekst eller filnavn. Verktøyet er et eksperiment og er ikke koblet til appens opplasting.
+
+**KI-feil og retting:** Første kjøring viste at Windows' Python-miljø bruker en ekstra oppstartsprosess som kolliderte med grensen på én prosess. Oppstart via basisinterpreteren løste dette, mens biblioteket fortsatt lastes etter bekreftet isolasjon. Hovedagentens kontroll fant at én enkelt read-operasjon ikke håndterte strømmer som leverer data i små biter; lesingen ble rettet og testet mot omgåelse av bytegrensen.
+
+**Uavhengig kontroll:** Tre KI-gjennomlesere vurderte endringen. Oppfølgingen la til et dekningsvarsel også på sider med både tekst og bilde, riktig feilkode ved isolasjonsfeil, målbare JUnit-egenskaper og en ekte PDF med lesbar side 1 og parserfeil på side 2. Denne feilen skal avvise hele dokumentet. Flere KI-vurderinger erstatter ikke studentens vurdering.
+
+**Faktisk kontrollresultat:** Hovedagentens endelige kjøring ga 62 beståtte tester og én plattformspesifikk test hoppet over, med en eksisterende TestClient/httpx-advarsel. Testene omfatter den uendrede demoens API-kontrakter og PDF-eksperimentet. Låst installasjon, CLI-hjelp og diff-kontroll bestod. Komprimert stresstest ble stoppet innenfor ressursgrensene; dette er ikke bevis for korrekt uttrekk fra alle PDF-er.
+
+**Begrensninger og spor:** Bare syntetiske PDF-er på denne Windows-maskinen er kontrollert. Typografi/leserekkefølge mot gjengitte sider, representative tillatte dokumenter og faktisk serverplattform må prøves før integrasjon. Se [rapporten](../.docs/implementation-artifacts/pdf-experiment.md) og [spesifikasjonens triage](../.docs/implementation-artifacts/spec-1-2-verify-physical-pdf-pages-before-integration.md). Ingen appfiler, kontoer eller eksterne tjenester ble endret.
+
+**Egen refleksjon (ubesvart):** Hvorfor er en vellykket test med syntetiske filer utilstrekkelig til å hevde at alle forelesnings-PDF-er blir lest korrekt?
 
 ## Mal for neste hendelse
 
