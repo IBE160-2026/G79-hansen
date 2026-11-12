@@ -5,6 +5,7 @@ description = "A same-origin, fixed-example study demo"
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "fastapi>=0.162.4,<0.163",
+  "supabase==2.34.1",
   "uvicorn>=0.38,<0.50",
 ]
 

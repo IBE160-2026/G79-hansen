@@ -44,3 +44,11 @@ main, section, .row > *, #content { min-width: 0; overflow-wrap: anywhere; }
   .panel { padding: 16px; }
   .demo-label { margin-left: 0; }
 }
+/* Account controls reuse the demo's surfaces, spacing and focus treatment. */
+.account-main { max-width: 46rem; }
+.account-main .panel { margin-bottom: 1.25rem; }
+.account-main input { display: block; width: 100%; box-sizing: border-box; font: inherit; padding: .7rem; border: 1px solid #64748b; border-radius: .35rem; margin: .35rem 0 1rem; }
+.account-main input:focus-visible { outline: 3px solid #315f91; outline-offset: 3px; }
+.account-main a { color: #315f91; }
+.account-main p { overflow-wrap: anywhere; }
+.account-main form button { margin-top: .25rem; }

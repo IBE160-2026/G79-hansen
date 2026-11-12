@@ -281,6 +281,34 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Egen refleksjon (ubesvart):** Hvorfor er en vellykket test med syntetiske filer utilstrekkelig til å hevde at alle forelesnings-PDF-er blir lest korrekt?
 
+## 12.11.2026 – Innlogging planlagt og manglende Supabase-prosjekt avklart
+
+**Studentens styring:** Studenten ba «kjøre neste steg» etter PDF-eksperimentet. På spørsmål om eksisterende Supabase-testprosjekt svarte studenten «Nei, det må opprettes». Dette dokumenterer manglende oppsett; gratisplan/konkret region er foreløpig foreslått, ikke opprettet eller godkjent.
+
+**KI-bidrag:** Epic 2-kontekst, en [konkret innloggingsspesifikasjon](../.docs/implementation-artifacts/spec-2-1-sign-up-and-sign-in-securely.md) og [oppsettsveiledning](../.docs/implementation-artifacts/auth-setup.md) er utarbeidet. En egen kontekstagent samlet kravene, og en teknisk agent undersøkte stabil Supabase Python-SDK, isolert PKCE-lagring og sikker validering av identitet. Forslaget er et separat `studybuddy-test` på Free i konkret Frankfurt-region `eu-central-1`, med aktiverte e-postbekreftelser og begrensede testmottakere.
+
+**Viktig kontrollfunn:** Offisiell dokumentasjon oppgir at standard SMTP bare sender til autoriserte teamadresser og for tiden er begrenset til to e-poster per time. Dette påvirker live-testing og er dokumentert, uten å foreslå at e-postbekreftelse deaktiveres. Stabil Python-SDK 2.34.1 ble valgt som teknisk utgangspunkt for senere installasjon, fremfor alfakode. Kildene er lenket i oppsettsveiledningen.
+
+**Tilgang og avgrensning:** Forsøkt nettlesertilgang returnerte «The browser access host is unavailable»; kontroll av tilgjengelige flater viste heller ingen tilgjengelig native-pipe. Supabase-integrasjonen ble funnet i katalogen og foreslått, men var ikke installert/tilkoblet ved siste kontroll. Ingen konto, prosjekt, nøkkel, melding eller skytjeneste ble opprettet. Ingen appkode eller avhengigheter er endret, og nye innloggingstester er ikke kjørt. `git diff --check` bestod; spesifikasjonen står `draft` med oppsettsvalg til godkjenning.
+
+**Egen refleksjon (ubesvart):** Hvorfor kan lokale tester med en simulert innloggingstjeneste ikke bevise at e-postbekreftelse og innlogging fungerer hos den faktiske leverandøren?
+
+## 12.11.2026 – Innlogging implementert; kontrollpunkt før dagens avslutning
+
+**Studentens styring:** Studenten svarte «godkjenner» til innloggingsplanen og Free/Frankfurt-oppsettet. Studenten opprettet deretter organisasjon/prosjekt manuelt, oppga prosjektadresse og publiserbar nøkkel, og sa at femtimerskvoten nesten var brukt opp og at dagen snart måtte avsluttes. Godkjenningen beholdes ved neste økt.
+
+**Dokumentert implementering:** Supabase Python-SDK 2.34.1 er låst. Backend har validering av identitet, avgrensede minnebaserte økter, separate PKCE-forsøk, CSRF/Origin-vern, no-store og skjerming av kontrollverdier i logger. En norsk `/account`-side har konto/innlogging og feil-/bekreftelsestilstander. Demoen er beholdt uten krav om Supabase-konfigurasjon.
+
+**Kontrollfunn og rettelser:** Hovedagenten fant at en ugyldig JSON-type i en legacy-nøkkel kunne gi feil fremfor avvist oppsett, at kodede callback-stier kunne omgå loggskjerming, og at null/ugyldige serversvar kunne gi fastlåst eller utrygg feilmelding. Dette ble rettet og testet. Nettlesertestene fant også behov for å rydde bort `#fragment` ved adresseendring uten sidelasting. En SDK-test brukte først feil form på signup-svaret; testdata ble korrigert mot det låste SDK-et.
+
+**Faktisk verifikasjon:** Hovedagentens fulle kjøring ga **130 beståtte tester og én forventet plattformtest hoppet over**, med én eksisterende TestClient/httpx-advarsel, 47,18 sekunder. Implementeringsagenten kjørte 12 faktiske nettleserscenarier for konto og alle 11 demoscenarier; hovedagenten inspiserte skjermbilder for desktop og 200 % layoutzoom. SDK-testene bruker faktisk SDK med kontrollert HTTP-transport, ikke ekte kontoer.
+
+**Supabase og lokale verdier:** Prosjektadressen og den publiserbare nøkkelen er bare lagt i ignorert `.env`; ingen databasesecret/service-role/passord er nødvendig eller lagt i repoet. En leseforespørsel til prosjektets offentlige Auth-innstillinger returnerte HTTP 200, e-post aktiv, e-postbekreftelse påkrevd og registrering tillatt. Det ble ikke opprettet konto eller sendt e-post i denne kontrollen.
+
+**Avgrensning ved avslutning:** Studentens ønske om å runde av prioriteres. Story 2.1 står fortsatt `in-progress`: faktisk redirect-/maloppsett og registrering/e-postbekreftelse/innlogging i separate nettlesere samt den uavhengige kodegjennomgangen gjenstår. Ingen fullført sikkerhetsakseptanse er hevdet. Ingen videre funksjoner, betalte tjenester, publisering eller push ble startet. [Oppsett og neste kontroll](../.docs/implementation-artifacts/auth-setup.md) og [spesifikasjonen](../.docs/implementation-artifacts/spec-2-1-sign-up-and-sign-in-securely.md) er oppdatert.
+
+**Egen refleksjon (ubesvart):** Hvordan skiller du mellom at en tjeneste svarer, at lokale tester består, og at hele den ekte innloggingsflyten er kontrollert?
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

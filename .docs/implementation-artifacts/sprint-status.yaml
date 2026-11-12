@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 12-11-2026 19:05
+last_updated: 12-11-2026 19:48
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -40,8 +40,8 @@ development_status:
   1-2-verify-physical-pdf-pages-before-integration: review
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-sign-up-and-sign-in-securely: backlog
+  epic-2: in-progress
+  2-1-sign-up-and-sign-in-securely: in-progress
   2-2-recover-a-password-through-a-restricted-session: backlog
   2-3-end-access-on-logout-expiry-and-restart: backlog
   2-4-validate-and-extract-the-active-source: backlog
