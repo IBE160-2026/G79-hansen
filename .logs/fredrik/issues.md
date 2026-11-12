@@ -8,6 +8,7 @@
 - [x] 2026-11-11 [Fremdrift](997-2026-11-01-arkitektur.md) - Teknisk revisjons-/låse-/retryprotokoll avklart i ferdigstilt arkitektur; faktisk live-implementering følger backloggen (løst som planleggingspunkt 2026-11-11).
 - [x] 2026-11-11 [Arkitektur](997-2026-11-01-arkitektur.md) - Gjennomgang og samkjøring av PRD/UX ferdigstilt før stories (løst 2026-11-11).
 - [x] 2026-11-11 [Innlogging](997-2026-11-01-arkitektur.md) - Sikkerhets-/gjenopprettingsmekanismer og tidsgrenser avklart i arkitekturen; faktisk live-implementering følger backloggen (løst som planleggingspunkt 2026-11-11).
-- [ ] 2026-11-11 [Demo og neste oppgave](996-2026-11-11-18-41-02-studybuddy-demo.md) - Studenten gjennomgår Story 1.1; neste byggeoppgave er Story 1.2 PDF-eksperiment med fysiske sider og ressursgrenser.
+- [ ] 2026-11-11 [Demo og neste oppgave](996-2026-11-11-18-41-02-studybuddy-demo.md) - Studenten gjennomgår Story 1.1-demoen. Story 1.2 er konkretisert i eget planleggingspunkt 2026-11-12.
+- [ ] 2026-11-12 [PDF-eksperiment](995-2026-11-12-18-37-30-pdf-eksperiment.md) - Godkjenn eller juster Story 1.2-spesifikasjonen før implementering, tester og målt eksperimentrapport.
 - [ ] 2026-11-11 [Live-arbeid](996-2026-11-11-18-41-02-studybuddy-demo.md) - Implementer resten av backloggen; avklar modell/API/budsjett og hosting/e-post/region/backup før sine milepæler. Full manuell tilgjengelighetskontroll og faktiske live sikkerhets-/lagringstester kreves før appakseptanse.
 - [ ] 2026-11-11 [Leveringsdato](996-2026-11-11-18-41-02-studybuddy-demo.md) - Bekreft faktisk innleveringsdato før endelig leveranseplan; nåværende datoer er foreløpige.
