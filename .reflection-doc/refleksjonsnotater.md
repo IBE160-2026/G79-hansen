@@ -317,6 +317,8 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Begrensning og neste brukertrinn:** Windows-verktøyet fikk ikke kontakt med native-pipen (`os error 2`), og ingen Supabase-administrasjon er tilkoblet. Studenten ble bedt om å lagre Site URL og callback-mønster i dashboardet. Denne endringen og ekte kontoflyt er foreløpig ubekreftet; Story 2.1 forblir under arbeid. Offisiell dokumentasjon for [returadresser](https://supabase.com/docs/guides/auth/redirect-urls) og [standard e-posttjeneste](https://supabase.com/docs/guides/auth/auth-smtp) ble kontrollert på nytt. Ingen erfaring eller godkjenning tilskrives studenten uten svar.
 
+**Oppfølging samme dag:** Studenten svarte først «lagret» om returadressene og deretter «funka» på testen for registrering/e-postbekreftelse. Serveren viste én registrering med status 200 og én callback med 303. De undersøkte tilgangsoppføringene inneholdt ingen auth-querystrenger; bare tellinger ble skrevet ut ved kontrollen. Dette er et positivt første live-resultat, ikke full kontroll av isolasjon, avviste forsøk eller vanlig passordinnlogging. Studenten ble bedt om å teste innlogging i privat nettleservindu; resultatet er foreløpig ikke mottatt.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

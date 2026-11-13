@@ -3,7 +3,8 @@
 The user reported on 2026-11-12 that the project has been created manually after the
 organization. Local configuration and actual project settings still need verification.
 The application implementation is locally testable. **Provider reachability and
-required email confirmation are verified; actual signup/confirmation/login and
+required email confirmation are verified. The student reports successful first
+signup/email confirmation; separate password login, negative/isolation checks and
 independent code review remain pending.** The project's plan and region were not
 independently checked. Offline adapters live only in
 `tests/`; the application has no mock-auth mode.
@@ -165,17 +166,22 @@ This bootstrap did not send an email or create an account.
 
 Windows Computer Use could not connect its native pipe (`os error 2`), and no
 Supabase management tool is connected. The student was asked to save the Site URL
-and callback pattern in URL Configuration. That change has not yet been confirmed.
+and callback pattern in URL Configuration. The student subsequently confirmed
+that these were saved ("lagret") and reported that the guided first signup and
+email confirmation worked ("funka"). The server recorded one signup 200 and one
+callback 303; inspected access entries contained no auth query strings. This is
+partial live evidence, not proof of every acceptance/security case. A private-window
+password-login check was requested next and its result is pending.
 The redirect-pattern and default SMTP documentation were rechecked: only team
 addresses are supported by default, currently at two messages per hour. Actual
-signup/confirmation/login and independent review remain pending. The 130 passing
+remaining account checks and independent review are pending. The 130 passing
 offline tests are evidence from 2026-11-12, not a new run today.
 
 | Check | Observed evidence |
 | --- | --- |
 | Free Study Buddy organization / studybuddy-test / specific eu-central-1 | User reports project created; provider settings reachable. Name/plan/region not independently verified |
-| Confirmation enabled; local allowlist and template preserve state | Provider settings confirm email confirmation required. Allowlist/template/state flow pending |
-| A signs up, receives authorized test email and confirms in initiating browser | Pending |
+| Confirmation enabled; local allowlist and template preserve state | Provider confirms required confirmation; user reports saved URL Configuration and successful guided confirmation. Template not separately inspected |
+| A signs up, receives authorized test email and confirms in initiating browser | User reports success ("funka") on 2026-11-13 after guided test; server signup 200 and callback 303 observed |
 | get_user validates provider identity; only opaque cookies and safe email reach browser | Pending live (offline checks pass separately) |
 | B in independent browser cannot consume A's link; replay fails | Pending live |
 | A and B log in with independent accounts; invalid/unconfirmed credentials fail | Pending live |

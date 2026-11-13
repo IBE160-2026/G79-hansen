@@ -82,6 +82,12 @@ automation is unavailable (native pipe, os error 2), so the student was asked to
 save URL Configuration. No actual account flow or independent review has run;
 keep the story in-progress and do not advance to step-04 before live acceptance.
 
+2026-11-13 follow-up: the student confirmed URL Configuration saved and reported
+the guided first signup/email-confirmation flow worked. Server access evidence:
+one signup 200 and callback 303, without auth query strings in inspected entries.
+Separate private-window password login was requested; its result and remaining
+live security cases are pending. This does not complete the live acceptance tasks.
+
 ## Review Triage Log
 
 ## Verification
