@@ -31,3 +31,26 @@ Neste økt: les denne loggen og oppsettsveiledningen, behold implementerte filer
 ### Åpne punkter
 - Fullfør URL Configuration/redirect-allowlist og e-postmal, kontroller Free/konkret region og gjennomfør faktisk signup/e-postbekreftelse/innlogging i separate nettleserøkter. Standard SMTP er begrenset til autoriserte teamadresser og oppgitt to e-poster/time; annen levering krever eget oppsettsvalg.
 - Kjør den uavhengige BMAD-kodegjennomgangen og rett eventuelle funn før Story 2.1 regnes ferdig. Lokale tester består, men erstatter ikke denne kontrollen eller live-akseptanse.
+
+## 2026-11-13 kl. 20:20 — Fredrik
+
+### Oppgave
+Studenten spurte hva som var neste steg, og ba «kjør» etter forklaring av faktisk Supabase-registrering, e-postbekreftelse, innlogging og etterfølgende kodegjennomgang. Fortsett eksisterende godkjent Story 2.1.
+
+### Plan
+- Les forrige logg, issues, [spesifikasjonen](../../.docs/implementation-artifacts/spec-2-1-sign-up-and-sign-in-securely.md) og [oppsettet](../../.docs/implementation-artifacts/auth-setup.md); behold godkjenning og baseline.
+- Kontroller tilgjengelig dashboard-tilgang og offisielle returadresse-/e-postkrav, start én lokalt konfigurert backend og kontroller tilgjengelighet uten å sende e-post.
+- Fullfør ekte kontotesting etter at studenten har lagret de nødvendige dashboard-innstillingene; deretter uavhengig gjennomgang. Ikke hevde live-akseptanse fra offline tester.
+
+### Resultat
+Arbeidskopien var ren ved oppstart. BMAD gjenopptatt på implementeringstrinnet; eksisterende implementering ble bevart. Ingen Supabase-administrasjonsverktøy er tilkoblet. Windows Computer Use ble initialisert etter skillens dokumentasjon, men `list_apps` feilet fordi native-pipen ikke finnes (`os error 2`). Studenten ble derfor bedt via et ventende spørsmål om å sette Site URL og det avgrensede callback-mønsteret i Authentication → URL Configuration. Ingen bekreftelse på lagring er mottatt ved dette kontrollpunktet.
+
+Leseforespørselen mot leverandørens Auth-innstillinger returnerte igjen 200: e-post aktiv, bekreftelse påkrevd, registrering tillatt. Supabases offisielle dokumentasjon for returadresser og SMTP ble kontrollert på nytt; standard SMTP krever teamadresse og oppgir nå to e-poster per time. Ingen konto ble opprettet eller e-post sendt.
+
+Serveren ble startet med eksplisitt lokal ignorert `.env`, én worker og uten reload på `http://127.0.0.1:8000`. Første oppstart ble blokkert av uv-cachetilgang i sandkassen; godkjent eskalert oppstart virket. Prosess 38432, verktøysesjon 69651 ved oppstart. `/account` svarte 200; `/api/v1/auth/status` viste tilgjengelig innlogging og ingen innlogget bruker, med `Cache-Control: no-store` og `Referrer-Policy: no-referrer`. Ingen kontrollverdier ble skrevet ut. Servertilstand må kontrolleres ved neste fortsettelse før eventuell ny oppstart; serveromstart krever nytt PKCE-forsøk.
+
+Oppsettsstatus, spesifikasjonens løpende notater og faktabasert refleksjonsgrunnlag er lagret i `3638b18f86ab08baf0da6fd873970c6b021b8eee`. `git diff --check` bestod. Ingen kodeendring eller ny full testkjøring: 130 beståtte tester er fremdeles resultatet fra 12. november. Ingen gjennomgang startet før akseptansekriteriene er oppfylt, ingen ny funksjon og ingen push.
+
+### Åpne punkter
+- Studenten må bekrefte lagret URL Configuration; kontroller e-postmal og utfør faktisk registrering/bekreftelse/innlogging med autoriserte testere i separate nettleserøkter. Free/konkret region er fortsatt ikke separat kontrollert.
+- Uavhengig BMAD-kodegjennomgang og eventuelle rettelser gjenstår etter live-akseptanse. Story 2.1 er fortsatt in-progress.
