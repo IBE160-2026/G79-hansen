@@ -319,6 +319,8 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Oppfølging samme dag:** Studenten svarte først «lagret» om returadressene og deretter «funka» på testen for registrering/e-postbekreftelse. Serveren viste én registrering med status 200 og én callback med 303. De undersøkte tilgangsoppføringene inneholdt ingen auth-querystrenger; bare tellinger ble skrevet ut ved kontrollen. Dette er et positivt første live-resultat, ikke full kontroll av isolasjon, avviste forsøk eller vanlig passordinnlogging. Studenten ble bedt om å teste innlogging i privat nettleservindu; resultatet er foreløpig ikke mottatt.
 
+**Videre kontroll samme dag:** Studenten rapporterte «Skjema først, deretter innlogget» i privatvindu. Serveren viste login 200. Ved deretter bevisst feil passord rapporterte studenten den forventede trygge avvisningsmeldingen, og serveren viste login 401. Testene omfatter foreløpig én konto, ikke isolasjon mellom forskjellige brukere. Ingen testpassord eller rå kontrollverdier ble samlet inn.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

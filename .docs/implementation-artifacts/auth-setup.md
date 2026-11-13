@@ -172,8 +172,10 @@ email confirmation worked ("funka"). The server recorded one signup 200 and one
 callback 303; inspected access entries contained no auth query strings. This is
 partial live evidence, not proof of every acceptance/security case. A private-window
 password-login check subsequently passed by student report: login form first,
-then signed in. A login 200 was observed in server access entries. A wrong-password
-check and availability of a second authorized tester are awaiting student replies.
+then signed in. A login 200 was observed in server access entries. The subsequent
+wrong-password check returned the expected safe rejection message by student
+report; server login 401 observed. Availability of a second authorized tester is
+still awaiting a student reply.
 The redirect-pattern and default SMTP documentation were rechecked: only team
 addresses are supported by default, currently at two messages per hour. Actual
 remaining account checks and independent review are pending. The 130 passing
@@ -186,7 +188,7 @@ offline tests are evidence from 2026-11-12, not a new run today.
 | A signs up, receives authorized test email and confirms in initiating browser | User reports success ("funka") on 2026-11-13 after guided test; server signup 200 and callback 303 observed |
 | get_user validates provider identity; only opaque cookies and safe email reach browser | Pending live (offline checks pass separately) |
 | B in independent browser cannot consume A's link; replay fails | Pending live |
-| A and B log in with independent accounts; invalid/unconfirmed credentials fail | Pending live |
+| A and B log in with independent accounts; invalid/unconfirmed credentials fail | A password login succeeds; wrong-password login rejected (user report and server 401, 2026-11-13). Second account and unconfirmed credentials pending |
 | Fresh and overlapping attempts; expired link/restart require new registration | Pending live |
 | Browser storage/output/server logs do not expose credentials | Pending live |
 | Unconfigured demo still completes fixed study flow | Verified by offline regressions; rerun in intended runtime |
