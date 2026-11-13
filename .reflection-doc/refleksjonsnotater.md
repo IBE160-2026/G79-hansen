@@ -339,6 +339,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Manuell bekreftelse etter rettelsene:** Studenten svarte «Ja, jeg er logget inn» på den nye passordinnloggingen med eksisterende konto. Den nye serveren viste login 200; undersøkte tilgangsoppføringer hadde ingen auth-querystrenger. Dette bekrefter én ekte innlogging gjennom den korrigerte nettverksadapteren. Registrering/bekreftelse ble ikke gjentatt, og det er fortsatt ikke en test av to forskjellige brukere.
 
+## 14.11.2026 – Minst mulig manuelt arbeid i to-konto-testen
+
+**Studentens ønske:** Studenten ville fortsette testen dersom det krevde lite egeninnsats. Dette er en preferanse for automatisering, ikke bevis på en ekstra opprettet bruker eller tilkoblet administrasjon.
+
+**Tilgangskontroll:** Ingen Supabase-administrasjonsverktøy er tilgjengelige. Katalogsøk viste at integrasjonen finnes, men ikke er installert/tilkoblet. Studenten ble bedt om å koble den til; ingen privilegerte nøkler eller passord ble etterspurt i chat. Docker-klienten finnes, men den lokale motoren svarer ikke; det ble ikke installert/startet en egen Supabase-stack. En slik lokal test ville uansett ikke bekrefte isolasjon på det godkjente skyløsningstestprosjektet.
+
+**Faglig avgrensning:** Offisielle kilder for Auth Admin, administrativ brukeroppretting og SMTP ble kontrollert. En eventuell administrativt opprettet testbruker vil bare kunne gi evidens for de flytene som faktisk kjøres; den skal ikke omtales som verifisert e-postregistrering eller ubrukt lenkebinding. Ingen konto, invitasjon, e-post, innstillingsendring eller ny funksjonstest ble gjennomført i denne tilgangsavklaringen. Tidligere beståtte tester beholdes som historisk evidens.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

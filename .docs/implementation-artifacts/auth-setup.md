@@ -4,8 +4,9 @@ The user reported on 2026-11-12 that the project has been created manually after
 organization. Local configuration and actual project settings still need verification.
 The application implementation is locally testable. **Provider reachability and
 required email confirmation are verified. The student reports successful first
-signup/email confirmation and separate private-window password login. Remaining negative/isolation checks and
-independent code review remain pending.** The project's plan and region were not
+signup/email confirmation and separate private-window password login. The interim
+independent review and its corrections are verified; remaining hosted
+negative/isolation checks and final build acceptance are pending.** The project's plan and region were not
 independently checked. Offline adapters live only in
 `tests/`; the application has no mock-auth mode.
 
@@ -273,3 +274,27 @@ ordinary password login with the existing account. The student confirmed
 login 200 without auth query strings in inspected entries. This is a fresh hosted
 password-login check through the corrected adapter, not a second-account test or
 a repeated signup/confirmation check.
+
+### Low-effort hosted testing preflight — 2026-11-14
+
+The student authorized continuing the two-account test with as little manual work
+as possible. No Supabase management tools are connected. Plugin discovery reports
+the Supabase integration is available but not installed; its earlier suggestion
+was not a confirmed connection. The student was asked to connect it before any
+automated account-management action is attempted. Its exact account-management
+capabilities must be checked after connection, not inferred from its description.
+The app's publishable key remains the only configured app credential; privileged
+credentials are not requested in chat or added to app configuration.
+
+The installed Docker client cannot reach its local engine, so a separate local
+Supabase stack was not started or installed. Such a stack would not itself prove
+two-account isolation on the approved hosted test project. No account, invitation,
+email, auth-setting change or new test result was produced by this preflight.
+
+The official [Auth Admin reference](https://supabase.com/docs/reference/python/admin-api),
+[admin user creation reference](https://supabase.com/docs/reference/python/auth-admin-createuser)
+and [SMTP restrictions](https://supabase.com/docs/guides/auth/auth-smtp) were checked.
+Administrative creation does not send a confirmation email; if used later, record
+it as administrative provisioning, never evidence that signup/email confirmation
+was tested for that user. Do not substitute an admin-confirmed user for the
+remaining unused-confirmation-link binding test.
