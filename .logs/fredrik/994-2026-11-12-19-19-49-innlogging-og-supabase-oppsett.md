@@ -108,6 +108,8 @@ Docker-klienten finnes (29.9.3, desktop-linux), men den lokale motorens pipe man
 
 Oppsettsveiledningens innledning er rettet til faktisk reviewstatus, og tilgangsavklaring/refleksjonsgrunnlag er lagret i `3d5e884f6bce26912d164cdcc25d3cdaa0e0a97e`. Diff-kontroll bestod. Ingen appkode eller nye funksjonstestresultater; foregående 155/1-skip og 16 browser-scenarier er fortsatt historisk verifikasjon. Ingen push. Appens tidligere testserver er ikke stoppet/omstartet av denne avklaringen.
 
+Studenten ba deretter «kqn du gjøre det ?» om å få installert/tilkoblet integrasjonen. På dette eksplisitte ønsket ble Supabase gjort tilgjengelig for installasjon/tilkobling på nytt via plugin-verktøyet. Resultatet bekrefter bare at installasjon/tilkobling kan startes, ikke at den er utført. Ingen Supabase-verktøy er tilgjengelige ved siste sjekk. Innlogging og godkjenning av kontotilgang må studenten selv utføre; ingen autentiseringsdialog ble automatisert og ingen nøkler/passord ble bedt om.
+
 ### Åpne punkter
-- Avvent bekreftet Supabase-tilkobling, oppdag de faktiske administrasjonsverktøyene og velg minst mulig manuelt arbeid for autorisert to-konto-test. Ikke be om hemmelige nøkler i chat eller endre appens nøkkelkrav.
+- Avvent bekreftet Supabase-installasjon/tilkobling etter eksplisitt brukerforespørsel, oppdag de faktiske administrasjonsverktøyene og velg minst mulig manuelt arbeid for autorisert to-konto-test. Ikke be om hemmelige nøkler i chat eller endre appens nøkkelkrav.
 - Reell to-konto-isolasjon og øvrige gjenværende hosted-akseptansetester/formell build-kontroll er fortsatt åpne; de tidligere foreløpige reviewrettelsene er ferdige.
