@@ -55,6 +55,8 @@ Etter «lagret» ble fortsatt drift bekreftet: kontoside 200, innlogging tilgjen
 
 Studenten testet deretter separat privatvindu og svarte «Skjema først, deretter innlogget». Serveren viste én login 200. Resultatet er lagret i `f0b79a636e4f9be932dd3cb73e3dcdf172a48513`. Dette bekrefter første vellykkede passordinnlogging og at privatvinduet ikke arvet den opprinnelige økten; det beviser ikke isolasjon mellom to forskjellige kontoer. Ingen passord/e-postadresser/tokenverdier er samlet inn. Neste spørsmål ber om én bevisst feil passordinnlogging i ny privatøkt og om en annen allerede autorisert teambruker er tilgjengelig; begge svar venter.
 
+Studenten ba om klikkbar lenke og avklaring av testen; veiledningen presiserte riktig e-postadresse og bevisst feil passord én gang i ny privatøkt. Studenten rapporterte den forventede meldingen «Kunne ikke logge inn. Kontroller e-post, passord og bekreftelsen på e-post.» Serveren viste login 401 og ingen auth-querystrenger i den undersøkte loggbiten. Dette er en bestått negativ live-test. Oppsettsrapport og refleksjonsgrunnlag er oppdatert i `606d2e40cc69cb3b4475a7fdd8230b681021a6af`. Ingen kodeendring, omstart, push eller ny full offline-testkjøring.
+
 ### Åpne punkter
-- Første faktiske registrering/e-postbekreftelse og separat passordinnlogging er rapportert vellykket. Avvent feil-passord-test og avklaring av en annen autorisert teambruker; øvrige negative/isolasjonstester, malinspeksjon og kontroll av Free/konkret region gjenstår.
+- Første faktiske registrering/e-postbekreftelse, separat passordinnlogging og avvisning av feil passord er kontrollert. Avvent avklaring av en annen autorisert teambruker; øvrige negative/isolasjonstester, malinspeksjon og kontroll av Free/konkret region gjenstår.
 - Uavhengig BMAD-kodegjennomgang og eventuelle rettelser gjenstår etter live-akseptanse. Story 2.1 er fortsatt in-progress.
