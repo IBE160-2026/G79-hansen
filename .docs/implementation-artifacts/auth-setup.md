@@ -4,7 +4,7 @@ The user reported on 2026-11-12 that the project has been created manually after
 organization. Local configuration and actual project settings still need verification.
 The application implementation is locally testable. **Provider reachability and
 required email confirmation are verified. The student reports successful first
-signup/email confirmation; separate password login, negative/isolation checks and
+signup/email confirmation and separate private-window password login. Remaining negative/isolation checks and
 independent code review remain pending.** The project's plan and region were not
 independently checked. Offline adapters live only in
 `tests/`; the application has no mock-auth mode.
@@ -171,7 +171,9 @@ that these were saved ("lagret") and reported that the guided first signup and
 email confirmation worked ("funka"). The server recorded one signup 200 and one
 callback 303; inspected access entries contained no auth query strings. This is
 partial live evidence, not proof of every acceptance/security case. A private-window
-password-login check was requested next and its result is pending.
+password-login check subsequently passed by student report: login form first,
+then signed in. A login 200 was observed in server access entries. A wrong-password
+check and availability of a second authorized tester are awaiting student replies.
 The redirect-pattern and default SMTP documentation were rechecked: only team
 addresses are supported by default, currently at two messages per hour. Actual
 remaining account checks and independent review are pending. The 130 passing

@@ -88,6 +88,10 @@ one signup 200 and callback 303, without auth query strings in inspected entries
 Separate private-window password login was requested; its result and remaining
 live security cases are pending. This does not complete the live acceptance tasks.
 
+The private-window check subsequently passed by student report (login form first,
+then signed in); server login 200 observed. Wrong-password rejection and a second
+authorized tester are being checked next. No full acceptance/review claim.
+
 ## Review Triage Log
 
 ## Verification
