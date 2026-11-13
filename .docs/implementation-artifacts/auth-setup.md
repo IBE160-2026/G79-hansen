@@ -175,7 +175,21 @@ password-login check subsequently passed by student report: login form first,
 then signed in. A login 200 was observed in server access entries. The subsequent
 wrong-password check returned the expected safe rejection message by student
 report; server login 401 observed. Availability of a second authorized tester is
-still awaiting a student reply.
+now resolved: only tester A's account is available. Do not create/invite another
+user or weaken confirmation/email restrictions implicitly. Cross-account live
+isolation remains untested. A manual replay check using the already-consumed
+confirmation link in the unauthenticated private window is awaiting a reply.
+
+Ten additional HTTP boundary checks against the running configured server passed
+on 2026-11-13: independent browser cookies/CSRF bootstrap, HttpOnly/host-only/Lax
+cookie flags, privacy headers, no provider tokens in unauthenticated bootstrap,
+missing Origin rejection, other-browser CSRF rejection, other-Origin rejection,
+invalid body rejection, clean denial of an unknown callback, and denial/clearing
+of an unknown session. The ignored local helper is
+`test-results/auth-live-boundary-check.py`; it prints only boolean checks and
+counts. It uses synthetic invalid input, calls no signup/provider operation and
+sends no email. These checks do not establish authenticated user-to-user isolation,
+refresh/restart behavior or the real provider's unused-link binding behavior.
 The redirect-pattern and default SMTP documentation were rechecked: only team
 addresses are supported by default, currently at two messages per hour. Actual
 remaining account checks and independent review are pending. The 130 passing

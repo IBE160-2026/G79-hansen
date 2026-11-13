@@ -321,6 +321,8 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Videre kontroll samme dag:** Studenten rapporterte «Skjema først, deretter innlogget» i privatvindu. Serveren viste login 200. Ved deretter bevisst feil passord rapporterte studenten den forventede trygge avvisningsmeldingen, og serveren viste login 401. Testene omfatter foreløpig én konto, ikke isolasjon mellom forskjellige brukere. Ingen testpassord eller rå kontrollverdier ble samlet inn.
 
+**Tilgjengelige testere og videre avgrensning:** Studenten bekreftet at bare én konto er tilgjengelig. Test med to forskjellige ekte brukere er derfor ikke utført, og ingen ny bruker/invitasjon eller e-postleverandør ble opprettet. Ti HTTP-kontroller mot den kjørende appen bestod: isolert uautentisert cookie/CSRF-bootstrap, cookieflagg, personvernheadere, fravær av providertokens i bootstrap, avvisning av manglende/fremmed Origin, fremmed nettlesers CSRF, ugyldig skjema, ukjent callback og ukjent økt. Dette er ikke bevis for isolasjon av to autentiserte brukere. Studenten fikk en egen test for gjenbruk av den allerede brukte e-postlenken i privatvindu; resultat venter.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
