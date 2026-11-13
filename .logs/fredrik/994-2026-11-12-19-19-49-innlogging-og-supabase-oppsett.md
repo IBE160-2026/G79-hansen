@@ -43,7 +43,7 @@ Studenten spurte hva som var neste steg, og ba «kjør» etter forklaring av fak
 - Fullfør ekte kontotesting etter at studenten har lagret de nødvendige dashboard-innstillingene; deretter uavhengig gjennomgang. Ikke hevde live-akseptanse fra offline tester.
 
 ### Resultat
-Arbeidskopien var ren ved oppstart. BMAD gjenopptatt på implementeringstrinnet; eksisterende implementering ble bevart. Ingen Supabase-administrasjonsverktøy er tilkoblet. Windows Computer Use ble initialisert etter skillens dokumentasjon, men `list_apps` feilet fordi native-pipen ikke finnes (`os error 2`). Studenten ble derfor bedt via et ventende spørsmål om å sette Site URL og det avgrensede callback-mønsteret i Authentication → URL Configuration. Ingen bekreftelse på lagring er mottatt ved dette kontrollpunktet.
+Arbeidskopien var ren ved oppstart. BMAD gjenopptatt på implementeringstrinnet; eksisterende implementering ble bevart. Ingen Supabase-administrasjonsverktøy er tilkoblet. Windows Computer Use ble initialisert etter skillens dokumentasjon, men `list_apps` feilet fordi native-pipen ikke finnes (`os error 2`). Studenten ble derfor bedt om å sette Site URL og det avgrensede callback-mønsteret i Authentication → URL Configuration. Studenten bekreftet deretter «lagret». Dette er brukerbekreftet oppsett; faktisk videresending er ennå ikke observert.
 
 Leseforespørselen mot leverandørens Auth-innstillinger returnerte igjen 200: e-post aktiv, bekreftelse påkrevd, registrering tillatt. Supabases offisielle dokumentasjon for returadresser og SMTP ble kontrollert på nytt; standard SMTP krever teamadresse og oppgir nå to e-poster per time. Ingen konto ble opprettet eller e-post sendt.
 
@@ -51,6 +51,8 @@ Serveren ble startet med eksplisitt lokal ignorert `.env`, én worker og uten re
 
 Oppsettsstatus, spesifikasjonens løpende notater og faktabasert refleksjonsgrunnlag er lagret i `3638b18f86ab08baf0da6fd873970c6b021b8eee`. `git diff --check` bestod. Ingen kodeendring eller ny full testkjøring: 130 beståtte tester er fremdeles resultatet fra 12. november. Ingen gjennomgang startet før akseptansekriteriene er oppfylt, ingen ny funksjon og ingen push.
 
+Etter «lagret» ble fortsatt drift bekreftet: kontoside 200, innlogging tilgjengelig og ingen innlogget bruker i kontrollklienten. Ingen omstart. Studenten fikk neste manuelle test: registrer med egen autorisert Supabase-teamadresse og et nytt testpassord, åpne e-postlenken i samme nettleser/profil innen 10 minutter, og rapporter bare trygg resultatmelding. Passord og rå lenker skal ikke i chat. Testresultat venter på studentsvar.
+
 ### Åpne punkter
-- Studenten må bekrefte lagret URL Configuration; kontroller e-postmal og utfør faktisk registrering/bekreftelse/innlogging med autoriserte testere i separate nettleserøkter. Free/konkret region er fortsatt ikke separat kontrollert.
+- URL Configuration er bekreftet lagret av studenten. Avvent resultat av første faktiske registrering/bekreftelse, kontroller e-postmal ved behov og utfør øvrig innlogging/isolasjon med autoriserte testere i separate nettleserøkter. Free/konkret region er fortsatt ikke separat kontrollert.
 - Uavhengig BMAD-kodegjennomgang og eventuelle rettelser gjenstår etter live-akseptanse. Story 2.1 er fortsatt in-progress.
