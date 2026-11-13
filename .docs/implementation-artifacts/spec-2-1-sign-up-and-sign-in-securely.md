@@ -75,6 +75,13 @@ The student asked to wrap up today because their five-hour usage allowance was n
 
 ## Spec Change Log
 
+2026-11-13 continuation: approved scope and baseline preserved. Provider settings
+again confirmed required email confirmation. The one-worker live-configured local
+server starts; account/status bootstrap and privacy headers were checked. Desktop
+automation is unavailable (native pipe, os error 2), so the student was asked to
+save URL Configuration. No actual account flow or independent review has run;
+keep the story in-progress and do not advance to step-04 before live acceptance.
+
 ## Review Triage Log
 
 ## Verification

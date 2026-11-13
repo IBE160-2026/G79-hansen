@@ -309,6 +309,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Egen refleksjon (ubesvart):** Hvordan skiller du mellom at en tjeneste svarer, at lokale tester består, og at hele den ekte innloggingsflyten er kontrollert?
 
+## 13.11.2026 – Ekte innlogging gjort klar for manuell kontroll
+
+**Studentens styring:** Studenten ba «kjør» etter at neste steg var forklart som Supabase-oppsett, faktisk registrering/bekreftelse/innlogging og uavhengig kodegjennomgang. Tidligere godkjenning ble beholdt.
+
+**Observert kontroll:** Leverandørens offentlige Auth-innstillinger svarte igjen 200 med e-postbekreftelse påkrevd. Appen startet lokalt med ignorert `.env`, én prosess og uten reload. Kontosiden svarte 200; status viste tilgjengelig innlogging og ingen innlogget bruker. `no-store` og `no-referrer` var satt. Ingen konto ble opprettet eller e-post sendt i kontrollen. De 130 beståtte testene er fra 12. november, ikke en ny kjøring.
+
+**Begrensning og neste brukertrinn:** Windows-verktøyet fikk ikke kontakt med native-pipen (`os error 2`), og ingen Supabase-administrasjon er tilkoblet. Studenten ble bedt om å lagre Site URL og callback-mønster i dashboardet. Denne endringen og ekte kontoflyt er foreløpig ubekreftet; Story 2.1 forblir under arbeid. Offisiell dokumentasjon for [returadresser](https://supabase.com/docs/guides/auth/redirect-urls) og [standard e-posttjeneste](https://supabase.com/docs/guides/auth/auth-smtp) ble kontrollert på nytt. Ingen erfaring eller godkjenning tilskrives studenten uten svar.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

@@ -154,6 +154,23 @@ day due to the usage allowance, so the story remains in-progress at this checkpo
 Record only evidence actually observed; omit email addresses, keys, codes, states,
 tokens, passwords and raw callback URLs. Use tester aliases A/B.
 
+### Resumed 2026-11-13
+
+The read-only provider settings check again returned HTTP 200: email enabled,
+confirmation required and signup allowed. The existing implementation was started
+locally with the explicit ignored `.env`, one worker and no reload. `/account`
+returned 200; `/api/v1/auth/status` reported authentication available and no active
+session, with `Cache-Control: no-store` and `Referrer-Policy: no-referrer`.
+This bootstrap did not send an email or create an account.
+
+Windows Computer Use could not connect its native pipe (`os error 2`), and no
+Supabase management tool is connected. The student was asked to save the Site URL
+and callback pattern in URL Configuration. That change has not yet been confirmed.
+The redirect-pattern and default SMTP documentation were rechecked: only team
+addresses are supported by default, currently at two messages per hour. Actual
+signup/confirmation/login and independent review remain pending. The 130 passing
+offline tests are evidence from 2026-11-12, not a new run today.
+
 | Check | Observed evidence |
 | --- | --- |
 | Free Study Buddy organization / studybuddy-test / specific eu-central-1 | User reports project created; provider settings reachable. Name/plan/region not independently verified |
