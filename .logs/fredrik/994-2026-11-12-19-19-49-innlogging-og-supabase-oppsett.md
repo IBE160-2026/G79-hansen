@@ -90,3 +90,24 @@ Kode, tester, reviewrapport, matriseaudit, README, oppsetts-/spesifikasjonsnotat
 ### Åpne punkter
 - Første faktiske registrering/e-postbekreftelse, separat passordinnlogging, avvisning av feil passord og innlogging etter omstart er rapportert vellykket. Gjenbruk av bekreftelseslenken ga ifølge studenten bare innloggingssiden; eksplisitt feilmelding og eksakt avvisningsmekanisme er ikke bekreftet. Bare én autorisert konto er tilgjengelig. Øvrige negative/isolasjonstester, malinspeksjon og kontroll av Free/konkret region gjenstår. Ti uautentiserte HTTP-grensekontroller består, men erstatter ikke test av to forskjellige autentiserte brukere.
 - Fullfør gjenværende reell akseptanse og formell build-kontroll/status når testforutsetningene er tilgjengelige. Foreløpig firelagsgjennomgang og P1–P12-rettelser er ferdige; de erstatter ikke manglende tester med to forskjellige kontoer. Story 2.1 er fortsatt in-progress.
+
+## 2026-11-14 kl. 00:04 — Fredrik
+
+### Oppgave
+Studenten godkjente videre arbeid med to-konto-testen, med forbehold om minst mulig egeninnsats: «vi kan gjøre det, så lenge jeg ikke trenger å gjøre så mye». Undersøk om tilgjengelig tilgang kan automatisere dette før studenten får flere dashboard-oppgaver.
+
+### Plan
+- Les logg/oppsett og kontroller tilgjengelige integrasjoner før manuell omvei.
+- Undersøk minimal administrasjonstilgang og skill administrativ testprovisjonering fra faktisk registrering/e-postbekreftelse.
+- Be bare om den manglende tilkoblingen; behold godkjent prosjekt og allerede verifisert app.
+
+### Resultat
+Arbeidskopien var ren. Ingen Supabase-administrasjonsverktøy er tilgjengelige. Plugin-management-søk viste at Supabase-integrasjonen finnes, men fortsatt har installed:false. Tidligere forslag var derfor ikke en bekreftet installasjon/tilkobling. Det ble ikke sendt et nytt forslagskort, siden samme integrasjon var foreslått nylig; studenten ble bedt via et ventende spørsmål om å koble den tidligere foreslåtte integrasjonen til, med studybuddy-test som prosjektscope dersom dette kan velges. Ingen tilkoblingsbekreftelse er mottatt ved dette kontrollpunktet, og vi lover ikke en bestemt administrasjonsfunksjon før de faktiske tilkoblede verktøyene er kontrollert.
+
+Docker-klienten finnes (29.9.3, desktop-linux), men den lokale motorens pipe mangler. Ingen ny lokal Supabase-stack, Docker-tjeneste eller avhengighet ble installert/startet. Offisiell Auth Admin-/create-user-/SMTP-dokumentasjon ble kontrollert. Administrativ oppretting sender ikke bekreftelsesmail og skal aldri omtales som test av brukerens registrering eller ubrukt e-postlenkebinding. Ingen nye testkontoer, invitasjoner, e-poster, privilegerte appnøkler eller endrede Auth-innstillinger i denne avklaringen.
+
+Oppsettsveiledningens innledning er rettet til faktisk reviewstatus, og tilgangsavklaring/refleksjonsgrunnlag er lagret i `3d5e884f6bce26912d164cdcc25d3cdaa0e0a97e`. Diff-kontroll bestod. Ingen appkode eller nye funksjonstestresultater; foregående 155/1-skip og 16 browser-scenarier er fortsatt historisk verifikasjon. Ingen push. Appens tidligere testserver er ikke stoppet/omstartet av denne avklaringen.
+
+### Åpne punkter
+- Avvent bekreftet Supabase-tilkobling, oppdag de faktiske administrasjonsverktøyene og velg minst mulig manuelt arbeid for autorisert to-konto-test. Ikke be om hemmelige nøkler i chat eller endre appens nøkkelkrav.
+- Reell to-konto-isolasjon og øvrige gjenværende hosted-akseptansetester/formell build-kontroll er fortsatt åpne; de tidligere foreløpige reviewrettelsene er ferdige.

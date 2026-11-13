@@ -1,5 +1,7 @@
 # ?pne punkter
 
+- [ ] 2026-11-14 [Automatisert to-konto-test](994-2026-11-12-19-19-49-innlogging-og-supabase-oppsett.md) - Studenten ønsker minst mulig egeninnsats. Supabase-integrasjonen finnes, men er ikke installert/tilkoblet ved siste søk; tilkoblingsspørsmål venter på svar. Kontroller faktisk verktøystøtte etter tilkobling før testkonto-provisjonering eller løfter om full automasjon. Ingen ny konto/e-post/oppsettendring utført; ekte isolasjon er fortsatt utestet.
+
 - [x] 2026-11-01 [PRD-push og UX-oppstart](999-2026-11-01-10-39-24-prd-push-og-ux-oppstart.md) - UX-kontroll og eksempeltilstander godkjent; UX ferdigstilt (loest 2026-11-01).
 - [x] 2026-11-01 [PRD-push og UX-oppstart](999-2026-11-01-10-39-24-prd-push-og-ux-oppstart.md) - Delte BMAD-filer versjonert i bf6544a (loest 2026-11-01).
 
