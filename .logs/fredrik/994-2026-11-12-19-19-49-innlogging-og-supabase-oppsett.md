@@ -91,10 +91,10 @@ Kode, tester, reviewrapport, matriseaudit, README, oppsetts-/spesifikasjonsnotat
 - Første faktiske registrering/e-postbekreftelse, separat passordinnlogging, avvisning av feil passord og innlogging etter omstart er rapportert vellykket. Gjenbruk av bekreftelseslenken ga ifølge studenten bare innloggingssiden; eksplisitt feilmelding og eksakt avvisningsmekanisme er ikke bekreftet. Bare én autorisert konto er tilgjengelig. Øvrige negative/isolasjonstester, malinspeksjon og kontroll av Free/konkret region gjenstår. Ti uautentiserte HTTP-grensekontroller består, men erstatter ikke test av to forskjellige autentiserte brukere.
 - Fullfør gjenværende reell akseptanse og formell build-kontroll/status når testforutsetningene er tilgjengelige. Foreløpig firelagsgjennomgang og P1–P12-rettelser er ferdige; de erstatter ikke manglende tester med to forskjellige kontoer. Story 2.1 er fortsatt in-progress.
 
-## 2026-11-14 kl. 00:04 — Fredrik
+## 2026-11-14 kl. 00:10 — Fredrik
 
 ### Oppgave
-Studenten godkjente videre arbeid med to-konto-testen, med forbehold om minst mulig egeninnsats: «vi kan gjøre det, så lenge jeg ikke trenger å gjøre så mye». Undersøk om tilgjengelig tilgang kan automatisere dette før studenten får flere dashboard-oppgaver.
+Studenten godkjente videre arbeid med to-konto-testen, med forbehold om minst mulig egeninnsats: «vi kan gjøre det, så lenge jeg ikke trenger å gjøre så mye». Undersøk om tilgjengelig tilgang kan automatisere dette før studenten får flere dashboard-oppgaver. Studenten avsluttet deretter med «jeg må avslutte nå»; lagre status og stopp testserveren.
 
 ### Plan
 - Les logg/oppsett og kontroller tilgjengelige integrasjoner før manuell omvei.
@@ -109,6 +109,12 @@ Docker-klienten finnes (29.9.3, desktop-linux), men den lokale motorens pipe man
 Oppsettsveiledningens innledning er rettet til faktisk reviewstatus, og tilgangsavklaring/refleksjonsgrunnlag er lagret i `3d5e884f6bce26912d164cdcc25d3cdaa0e0a97e`. Diff-kontroll bestod. Ingen appkode eller nye funksjonstestresultater; foregående 155/1-skip og 16 browser-scenarier er fortsatt historisk verifikasjon. Ingen push. Appens tidligere testserver er ikke stoppet/omstartet av denne avklaringen.
 
 Studenten ba deretter «kqn du gjøre det ?» om å få installert/tilkoblet integrasjonen. På dette eksplisitte ønsket ble Supabase gjort tilgjengelig for installasjon/tilkobling på nytt via plugin-verktøyet. Resultatet bekrefter bare at installasjon/tilkobling kan startes, ikke at den er utført. Ingen Supabase-verktøy er tilgjengelige ved siste sjekk. Innlogging og godkjenning av kontotilgang må studenten selv utføre; ingen autentiseringsdialog ble automatisert og ingen nøkler/passord ble bedt om.
+
+Studenten spurte om Supabase-integrasjonen var en app på PC-en. Assistenten presiserte at det gjaldt integrasjonen her i ChatGPT/Codex, ikke et eget Supabase-PC-program. Ingen installasjon/tilkobling ble bekreftet før studenten måtte avslutte. Dette skal avklares enkelt neste økt, uten å anta tilgang eller be om hemmelige nøkler.
+
+Ved avslutningen ble testserveren stoppet via verktøysesjon 60984. Kontroll viste at PID 3292 ikke kjører og at `/health` på port 8000 ikke svarer. Ingen Supabase-konto, prosjekt eller testkonto ble slettet; nye lokale økter krever serveroppstart og vanlig innlogging. Arbeidskopien var ren før denne loggoppdateringen. Ingen flere koderettelser, konto-/e-posthandlinger, testkjøringer eller push etter de tidligere dokumenterte resultatene.
+
+Neste økt: les siste seksjon her og `auth-setup.md`. Behold kode `c36ffd2a64589847cab30b3798b19182a25c580c`, de dokumenterte 155/én skip og 16 browser-resultatene og Story 2.1 som in-progress. Kontroller om Supabase-integrasjonen faktisk er installert/tilkoblet før noen videre admin-handling; brukerens preferanse er minst mulig manuelt arbeid. Bare én ekte autorisert konto er bekreftet. Start appen igjen ved behov med den allerede godkjente én-worker-kommandoen og ignorert `.env`.
 
 ### Åpne punkter
 - Avvent bekreftet Supabase-installasjon/tilkobling etter eksplisitt brukerforespørsel, oppdag de faktiske administrasjonsverktøyene og velg minst mulig manuelt arbeid for autorisert to-konto-test. Ikke be om hemmelige nøkler i chat eller endre appens nøkkelkrav.
