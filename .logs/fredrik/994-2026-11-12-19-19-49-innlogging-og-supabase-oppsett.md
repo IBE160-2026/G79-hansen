@@ -32,10 +32,10 @@ Neste økt: les denne loggen og oppsettsveiledningen, behold implementerte filer
 - Fullfør URL Configuration/redirect-allowlist og e-postmal, kontroller Free/konkret region og gjennomfør faktisk signup/e-postbekreftelse/innlogging i separate nettleserøkter. Standard SMTP er begrenset til autoriserte teamadresser og oppgitt to e-poster/time; annen levering krever eget oppsettsvalg.
 - Kjør den uavhengige BMAD-kodegjennomgangen og rett eventuelle funn før Story 2.1 regnes ferdig. Lokale tester består, men erstatter ikke denne kontrollen eller live-akseptanse.
 
-## 2026-11-13 kl. 20:20 — Fredrik
+## 2026-11-13 kl. 23:23 — Fredrik
 
 ### Oppgave
-Studenten spurte hva som var neste steg, og ba «kjør» etter forklaring av faktisk Supabase-registrering, e-postbekreftelse, innlogging og etterfølgende kodegjennomgang. Fortsett eksisterende godkjent Story 2.1.
+Studenten spurte hva som var neste steg, og ba «kjør» etter forklaring av faktisk Supabase-registrering, e-postbekreftelse, innlogging og etterfølgende kodegjennomgang. Fortsett eksisterende godkjent Story 2.1. Etter testene ba studenten «tror vi avslutter for idag»; lagre kontrollpunkt og stopp testserveren.
 
 ### Plan
 - Les forrige logg, issues, [spesifikasjonen](../../.docs/implementation-artifacts/spec-2-1-sign-up-and-sign-in-securely.md) og [oppsettet](../../.docs/implementation-artifacts/auth-setup.md); behold godkjenning og baseline.
@@ -62,6 +62,12 @@ Studenten bekreftet «bare den ja» om tilgjengelig testkonto. Ingen ny bruker/i
 Ti HTTP-kontroller mot den eksisterende kjørende appen bestod via ignorert lokal `test-results/auth-live-boundary-check.py`: separate uautentiserte cookie-/CSRF-verdier, cookieflagg, no-store/no-referrer, ingen providertokens i bootstrap, avvisning av manglende Origin, annen klients CSRF, annet Origin, ugyldig body, ukjent callback og ukjent økt (inkludert sletting av cookie). Bare boolske resultater og tellinger ble skrevet ut. Ingen signup/provideroperasjon eller e-postsending i disse kontrollene. uv-cachetilgang krevde eskalert kjøring etter sandkassefeil. Oppsett og refleksjonsgrunnlag oppdatert i `4fc36f0851e8e2f67b10a8b1dfbfe2208c447545`; diff-kontroll bestod. Appkode, frosset spesifikasjon og eksisterende serverprosess er uendret.
 
 Ved oppfølging av lenkegjenbrukstesten svarte studenten først at fremgangsmåten var glemt. Veiledningen ble forenklet til å kopiere den brukte bekreftelseslenken fra e-posten til privatvinduet. Studenten rapporterte deretter «kommer bare til innloggingssiden». Registrer dette som brukerobservert retur til innloggingsside, uten rapportert ny autentisering. En eksplisitt ugyldig-/utløpt-melding ble ikke bekreftet. Ikke utled hvilken av leverandørens replay-, utløps- eller browser-binding-kontroller som avviste forsøket fra denne observasjonen. Ingen ekstra e-post eller kodeendring ble nødvendig.
+
+Ved ønsket dagsavslutning ble testserveren stoppet via verktøysesjon 69651. Etter stoppsignalet svarte ikke `/health`, og kontroll med `Get-Process` bekreftet at prosess 38432 ikke kjører. Verktøyet rapporterte exit 1, uten full shutdown-tekst, så stopp ble bekreftet med faktisk prosess-/HTTP-kontroll. Et valgfritt CIM-oppslag ble avvist i sandkassen; det var ikke nødvendig for kontrollen. Testkontoen i Supabase ble ikke slettet, og ingen provider-logout eller ny e-post ble sendt. Neste lokale oppstart krever ny innlogging, siden økter/forsøk ligger i minnet.
+
+Endelig oppsettsrapport, løpende spesifikasjonsnotater og faktabasert refleksjonsgrunnlag er lagret i `f2904ff2ef3acfd5d20df68a0d1c1c64be5f28e5`. `.env` og den lokale kontrollhjelperen er fortsatt ignorert. Diff-kontroll bestod; ingen kodeendring, full offline-testkjøring, publisering eller push i dag. 130 beståtte/én hoppet-over-test og nettlesersuitene stammer fortsatt fra 12. november; dagens nye automatiserte evidens er ti HTTP-grensekontroller. Story 2.1 står in-progress, ikke godkjent på studentens vegne.
+
+Neste økt: les denne loggen og oppdatert `auth-setup.md`, kontroller at port 8000 er ledig, start samme én-worker-kommando med ignorert `.env`, og logg inn med den eksisterende testkontoen. Behold godkjent plan og testresultater. Avklar resterende reelle sikkerhetstester og tilgang til en annen autorisert tester uten å opprette konto/invitasjon automatisk, og fullfør deretter den uavhengige kodegjennomgangen. Ikke omtal dagens grunnflyt som fullført sikkerhetsakseptanse.
 
 ### Åpne punkter
 - Første faktiske registrering/e-postbekreftelse, separat passordinnlogging og avvisning av feil passord er kontrollert. Gjenbruk av bekreftelseslenken ga ifølge studenten bare innloggingssiden; eksplisitt feilmelding og eksakt avvisningsmekanisme er ikke bekreftet. Bare én autorisert konto er tilgjengelig. Øvrige negative/isolasjonstester, malinspeksjon og kontroll av Free/konkret region gjenstår. Ti uautentiserte HTTP-grensekontroller består, men erstatter ikke test av to forskjellige autentiserte brukere.
