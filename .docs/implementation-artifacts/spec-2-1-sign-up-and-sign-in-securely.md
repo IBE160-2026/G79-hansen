@@ -92,6 +92,16 @@ The private-window check subsequently passed by student report (login form first
 then signed in); server login 200 observed. Wrong-password rejection and a second
 authorized tester are being checked next. No full acceptance/review claim.
 
+End-of-day 2026-11-13: wrong-password rejection passed (safe message and server
+401). Only one authorized test account is available. Reusing the confirmation
+link in the unauthenticated private window returned the login page by student
+report; no new login was reported, but the exact rejection/error display was not
+verified. Ten HTTP boundary checks against the configured local server passed.
+The student asked to end for today; the test server was stopped. Preserve existing
+scope, approval and baseline. Next session restart one worker, complete remaining
+live acceptance and then independent review. No code changes or fresh full-suite
+results today; status remains in-progress.
+
 ## Review Triage Log
 
 ## Verification

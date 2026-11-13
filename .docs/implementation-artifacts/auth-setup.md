@@ -177,8 +177,10 @@ wrong-password check returned the expected safe rejection message by student
 report; server login 401 observed. Availability of a second authorized tester is
 now resolved: only tester A's account is available. Do not create/invite another
 user or weaken confirmation/email restrictions implicitly. Cross-account live
-isolation remains untested. A manual replay check using the already-consumed
-confirmation link in the unauthenticated private window is awaiting a reply.
+isolation remains untested. For manual replay of the consumed confirmation link
+in the unauthenticated private window, the student reported only the login page.
+No new authentication was reported. The precise rejection mechanism and an
+explicit expired/invalid message were not verified from that observation.
 
 Ten additional HTTP boundary checks against the running configured server passed
 on 2026-11-13: independent browser cookies/CSRF bootstrap, HttpOnly/host-only/Lax
@@ -201,7 +203,7 @@ offline tests are evidence from 2026-11-12, not a new run today.
 | Confirmation enabled; local allowlist and template preserve state | Provider confirms required confirmation; user reports saved URL Configuration and successful guided confirmation. Template not separately inspected |
 | A signs up, receives authorized test email and confirms in initiating browser | User reports success ("funka") on 2026-11-13 after guided test; server signup 200 and callback 303 observed |
 | get_user validates provider identity; only opaque cookies and safe email reach browser | Pending live (offline checks pass separately) |
-| B in independent browser cannot consume A's link; replay fails | Pending live |
+| B in independent browser cannot consume A's link; replay fails | Used link in unauthenticated private window returned login page by student report. Explicit error/rejection mechanism and unused-link binding remain unverified |
 | A and B log in with independent accounts; invalid/unconfirmed credentials fail | A password login succeeds; wrong-password login rejected (user report and server 401, 2026-11-13). Second account and unconfirmed credentials pending |
 | Fresh and overlapping attempts; expired link/restart require new registration | Pending live |
 | Browser storage/output/server logs do not expose credentials | Pending live |
@@ -211,3 +213,14 @@ The provider can invalidate a superseded email confirmation even when the app
 keeps both PKCE attempts separate; record actual hosted behavior. Do not report
 Story 2.1 fully accepted until the real positive/negative two-browser checks above
 have been executed with authorized testers.
+
+### End-of-day checkpoint 2026-11-13
+
+The student requested to end the session. The local test server was stopped;
+the health endpoint no longer responded after the stop signal. Start one worker
+with the command above next session; existing memory sessions/pending attempts
+cannot be reused. The test account remains in Supabase and can log in normally.
+No application code changed today. Ten local-server boundary checks passed;
+the full offline suite was not rerun. Story 2.1 remains in-progress. Remaining
+provider/security acceptance and independent review must be recorded honestly;
+do not create a second tester or claim the missing evidence implicitly.

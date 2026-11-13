@@ -323,6 +323,8 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Tilgjengelige testere og videre avgrensning:** Studenten bekreftet at bare én konto er tilgjengelig. Test med to forskjellige ekte brukere er derfor ikke utført, og ingen ny bruker/invitasjon eller e-postleverandør ble opprettet. Ti HTTP-kontroller mot den kjørende appen bestod: isolert uautentisert cookie/CSRF-bootstrap, cookieflagg, personvernheadere, fravær av providertokens i bootstrap, avvisning av manglende/fremmed Origin, fremmed nettlesers CSRF, ugyldig skjema, ukjent callback og ukjent økt. Dette er ikke bevis for isolasjon av to autentiserte brukere. Studenten fikk en egen test for gjenbruk av den allerede brukte e-postlenken i privatvindu; resultat venter.
 
+**Dagens avslutning:** Ved gjenbruk av bekreftelseslenken rapporterte studenten «kommer bare til innloggingssiden». Ingen ny innlogging ble rapportert; eksplisitt feilmelding og hvilken mekanisme som avviste forsøket er ikke verifisert. Studenten ba deretter om å avslutte for dagen. Lokal testserver ble stoppet, status og åpne tester lagret, og Story 2.1 forblir under arbeid. Testkontoen i Supabase beholdes; minneøktene i lokal backend skal ikke forventes å overleve. Ingen ny full offline-testkjøring eller appkodeendring i dag.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
