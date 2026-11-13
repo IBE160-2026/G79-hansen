@@ -52,7 +52,7 @@
           request_rejected: 'Forespørselen ble avvist. Last siden på nytt og prøv igjen.',
           auth_capacity: 'For mange pågående forsøk. Vent litt og prøv igjen.',
         };
-        throw new AccountError(messages[data.code] || unavailable);
+        throw new AccountError(Object.hasOwn(messages, data.code) ? messages[data.code] : unavailable);
       }
       return data;
     } finally {
@@ -68,13 +68,15 @@
     signedIn.hidden = false;
     status.textContent = 'Du er logget inn.';
   }
-  async function bootstrap() {
+  async function bootstrap({background = false} = {}) {
     active?.abort();
     const id = ++sequence;
-    clearPasswords();
+    const preserveDraft = background && !forms.hidden;
+    const focused = preserveDraft ? document.activeElement : null;
+    if (!preserveDraft) clearPasswords();
     clearDisplay();
     csrf = null;
-    forms.hidden = true;
+    if (!preserveDraft) forms.hidden = true;
     retry.hidden = true;
     error.hidden = true;
     status.textContent = 'Kontrollerer innlogging …';
@@ -83,6 +85,7 @@
       const data = await request('status', {}, id);
       if (!data) return;
       if (data.available !== true) {
+        forms.hidden = true;
         status.textContent = unavailable;
         retry.hidden = false;
         return;
@@ -94,15 +97,21 @@
         forms.hidden = false;
         status.textContent = 'Du er ikke logget inn.';
       }
-      if (confirmation === 'invalid') fail(confirmationError);
-      else if (confirmation === 'success' && !data.authenticated) fail(confirmationError);
+      const pendingConfirmation = confirmation;
+      confirmation = null;
+      if (pendingConfirmation === 'invalid') fail(confirmationError);
+      else if (pendingConfirmation === 'success' && !data.authenticated) fail(confirmationError);
     } catch (failure) {
       if (id !== sequence) return;
+      forms.hidden = true;
       status.textContent = '';
       fail(failure.name === 'AbortError' ? 'Forespørselen tok for lang tid. Prøv igjen.' : (failure instanceof AccountError ? failure.message : unavailable));
       retry.hidden = false;
     } finally {
-      if (id === sequence) setBusy(false);
+      if (id === sequence) {
+        setBusy(false);
+        if (preserveDraft && !forms.hidden && error.hidden && focused?.isConnected) focused.focus();
+      }
     }
   }
   for (const action of ['login', 'signup']) {
@@ -120,7 +129,10 @@
       try {
         const data = await request(action, {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrf}, body}, id);
         if (!data) return;
-        if (action === 'login') showIdentity(data);
+        if (action === 'login') {
+          confirmation = null;
+          showIdentity(data);
+        }
         else {
           if (data.status !== 'check_email') throw new AccountError(unavailable);
           status.textContent = 'Hvis kontoen kan opprettes, får du en e-post. Åpne bekreftelsen i samme nettleser innen 10 minutter.';
@@ -135,7 +147,7 @@
       }
     });
   }
-  retry.addEventListener('click', bootstrap);
+  retry.addEventListener('click', () => bootstrap());
   window.addEventListener('pagehide', () => {
     ++sequence;
     active?.abort();
@@ -149,6 +161,6 @@
     history.replaceState(null, '', '/account');
     bootstrap();
   });
-  window.addEventListener('focus', () => { if (!busy) bootstrap(); });
+  window.addEventListener('focus', () => { if (!busy) bootstrap({background: true}); });
   bootstrap();
 })();

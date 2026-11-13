@@ -70,6 +70,38 @@ async function main() {
       assert.match(tree, /textbox "E-post"/);
     });
 
+    await check('window focus revalidation preserves unsubmitted passwords and field focus', async () => {
+      await page.bringToFront();
+      await ready(page);
+      await page.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+      await fill(page, 'login', 'draft@example.test', 'UNSUBMITTED_DRAFT');
+      await page.locator('#login-password').focus();
+      await other.bringToFront();
+      const revalidated = page.waitForResponse(response => response.url().endsWith('/api/v1/auth/status'));
+      await page.bringToFront();
+      // Headless Chromium does not consistently emit native window focus.
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await revalidated;
+      await page.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+      assert.equal(await page.locator('#login-email').inputValue(), 'draft@example.test');
+      assert.equal(await page.locator('#login-password').inputValue(), 'UNSUBMITTED_DRAFT');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'login-password');
+      await page.reload();
+      await ready(page);
+      assert.equal(await page.locator('#login-password').inputValue(), '');
+    });
+
+    await check('unavailable background validation offers retry without inert visible forms', async () => {
+      await fill(page, 'login', 'draft@example.test', 'UNSUBMITTED_DRAFT');
+      await page.route('**/api/v1/auth/status', route => route.fulfill({json: {available: false, authenticated: false}}), {times: 1});
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await page.locator('#account-retry').waitFor({state: 'visible'});
+      assert.equal(await page.locator('#account-forms').isVisible(), false);
+      await page.locator('#account-retry').click();
+      await ready(page);
+      assert.equal(await page.locator('#login-password').inputValue(), '');
+    });
+
     await check('real browser context rejects missing/wrong Origin and CSRF before signup', async () => {
       const status = await (await first.request.get(`${baseURL}/api/v1/auth/status`)).json();
       for (const protection of [{}, {Origin: 'https://attacker.test', 'X-CSRF-Token': status.csrfToken}, {Origin: baseURL, 'X-CSRF-Token': 'wrong'}]) {
@@ -131,6 +163,24 @@ async function main() {
       await page.locator('#account-signed-in').waitFor({state: 'visible'});
       assert.equal(await page.locator('#account-email').innerText(), 'first@example.test');
       assert.notEqual((await first.cookies()).find(c => c.name === 'sb_session').value, (await second.cookies()).find(c => c.name === 'sb_session').value);
+    });
+
+    await check('confirmation error is consumed once and cannot return after login and focus', async () => {
+      const isolated = await browser.newContext();
+      try {
+        const current = await isolated.newPage();
+        await current.goto(`${baseURL}/account?confirmation=invalid`);
+        await current.locator('#account-error').waitFor({state: 'visible'});
+        await fill(current, 'login', 'confirmed@example.test');
+        await submit(current, 'login');
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+        const response = current.waitForResponse(reply => reply.url().endsWith('/api/v1/auth/status'));
+        await current.evaluate(() => window.dispatchEvent(new Event('focus')));
+        await response;
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+        assert.equal(await current.locator('#account-error').isVisible(), false);
+        assert.equal(await current.locator('#account-email').innerText(), 'confirmed@example.test');
+      } finally { await isolated.close(); }
     });
 
     await check('opaque HttpOnly cookies and no tokens/passwords in browser storage, DOM, URL or output', async () => {
@@ -198,6 +248,17 @@ async function main() {
       await submit(page, 'login');
       await page.locator('#account-error').waitFor({state: 'visible'});
       assert.doesNotMatch(await page.locator('#account-error').innerText(), /BROWSER_PRIVATE/);
+    });
+
+    await check('inherited, null and unknown response codes use only the fixed unavailable message', async () => {
+      for (const code of ['constructor', 'toString', null, 'BROWSER_PRIVATE_UNKNOWN']) {
+        await page.route('**/api/v1/auth/login', route => route.fulfill({status: 503, json: {code, message: 'BROWSER_PRIVATE_BODY'}}), {times: 1});
+        await fill(page, 'login', 'first@example.test');
+        await submit(page, 'login');
+        await page.locator('#account-error').waitFor({state: 'visible'});
+        assert.equal(await page.locator('#account-error').innerText(), 'Innlogging er ikke tilgjengelig nå. Studiedemoen kan fortsatt brukes.');
+        assert.equal(await page.locator('#login-password').inputValue(), '');
+      }
     });
 
     await check('duplicate submissions are suppressed and page changes defeat uncancellable late replies', async () => {

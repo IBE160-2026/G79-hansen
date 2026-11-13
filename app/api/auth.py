@@ -1,5 +1,6 @@
 """Same-origin, cookie/CSRF protected authentication endpoints."""
 
+import asyncio
 import re
 from uuid import uuid4
 from urllib.parse import urlencode
@@ -14,6 +15,7 @@ from app.adapters.auth import AuthFailure
 router = APIRouter(prefix="/api/v1/auth")
 BROWSER_COOKIE = "sb_browser"
 SESSION_COOKIE = "sb_session"
+CREDENTIAL_BODY_SECONDS = 5.0
 MESSAGES = {
     "auth_unavailable": "Innlogging er ikke tilgjengelig nå. Prøv igjen senere.",
     "invalid_credentials": "Kunne ikke logge inn. Kontroller e-post, passord og bekreftelsen på e-post.",
@@ -73,10 +75,14 @@ def clear_session(response, settings):
 async def credentials(request):
     # Bound actual streamed bytes, including chunked requests, before parsing or SDK work.
     raw = bytearray()
-    async for chunk in request.stream():
-        raw.extend(chunk)
-        if len(raw) > 8192:
-            raise AuthFailure("invalid_request")
+    try:
+        async with asyncio.timeout(CREDENTIAL_BODY_SECONDS):
+            async for chunk in request.stream():
+                if len(chunk) > 8192 - len(raw):
+                    raise AuthFailure("invalid_request")
+                raw.extend(chunk)
+    except TimeoutError:
+        raise AuthFailure("invalid_request") from None
     if request.headers.get("content-type", "").split(";")[0].strip() != "application/json":
         raise AuthFailure("invalid_request")
     try:
@@ -94,19 +100,17 @@ async def status(request: Request):
         return error("request_rejected")
     try:
         browser_id, browser = registry.browser(request.cookies.get(BROWSER_COOKIE))
-        identity = await run_in_threadpool(registry.authenticated, request.cookies.get(SESSION_COOKIE), browser_id, adapter)
+        identity = await registry.authenticated_async(request.cookies.get(SESSION_COOKIE), browser_id, adapter)
         display = {"available": True, "authenticated": identity is not None, "csrfToken": browser.csrf}
         if identity:
             display["email"] = identity.email
         response = JSONResponse(display)
         cookie(response, BROWSER_COOKIE, browser_id, settings)
-        if not identity and request.cookies.get(SESSION_COOKIE):
-            clear_session(response, settings)
+        # Status never mutates sb_session. Even a completed denial response can
+        # arrive after a newer login response and otherwise erase its cookie.
         return response
     except AuthFailure as exc:
-        response = error(exc.code)
-        clear_session(response, settings)
-        return response
+        return error(exc.code)
 
 
 async def submit(request, action):
@@ -124,6 +128,7 @@ async def submit(request, action):
             redirect = settings.app_origin + "/api/v1/auth/callback?" + urlencode({"state": state})
             await run_in_threadpool(adapter.signup, submitted.email, submitted.password, pending, redirect)
             return JSONResponse({"status": "check_email", "message": "Hvis kontoen kan opprettes, får du en e-post. Åpne bekreftelsen i nettleseren der du startet registreringen."})
+        registry.retain_browser(browser_id)
         identity = await run_in_threadpool(adapter.login, submitted.email, submitted.password)
         session_id = registry.rotate(request.cookies.get(SESSION_COOKIE), browser_id, identity)
         response = JSONResponse({"authenticated": True, "email": identity.email})

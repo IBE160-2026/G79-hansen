@@ -325,6 +325,20 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Dagens avslutning:** Ved gjenbruk av bekreftelseslenken rapporterte studenten «kommer bare til innloggingssiden». Ingen ny innlogging ble rapportert; eksplisitt feilmelding og hvilken mekanisme som avviste forsøket er ikke verifisert. Studenten ba deretter om å avslutte for dagen. Lokal testserver ble stoppet, status og åpne tester lagret, og Story 2.1 forblir under arbeid. Testkontoen i Supabase beholdes; minneøktene i lokal backend skal ikke forventes å overleve. Ingen ny full offline-testkjøring eller appkodeendring i dag.
 
+## 13.11.2026 – Gjenopptatt arbeid og foreløpig kodegjennomgang
+
+**Studentens styring:** Etter dagsavslutningen ba studenten «vi fortsetter litt». Appen ble startet igjen, og studenten rapporterte «fikk logget inn». Dette bekrefter rapportert innlogging etter oppstart, men den gamle cookie-tilstanden før innlogging ble ikke separat dokumentert. Den tidligere godkjenningen ble beholdt.
+
+**Uavhengige KI-kontroller:** Fire gjennomlesere vurderte kode, kanttilfeller, testgap og akseptanse. Alle funn fikk en egen vurdering før gruppering i tolv rettelser. En separat foreløpig gjennomgang ble gjennomført mens ekte akseptansetester står åpne, uten å hevde at Story 2.1 eller buildens formelle kontrolltrinn er fullført. Anonym kapasitetsbelastning på et fremtidig offentlig endepunkt ble vurdert som utenfor denne loopback-rettingen; dette innebærer ingen godkjenning av offentlig drift. Se [rapporten](../.docs/implementation-artifacts/auth-code-review-2026-11-13.md).
+
+**Reproduserte feil og rettelser:** En ikke-ASCII-CSRF-verdi ga 500 uten no-store; samme probe gir nå 403 med no-store. En sen statusrespons kunne slette en nyere innlogging. Status endrer derfor ikke lenger økt-cookien; backend fjerner ugyldig autoritet og UI avviser, mens en ufarlig gammel tilfeldig verdi kan bli igjen. Andre rettelser gjelder nettverks-/innlesingsbudsjett, samtidig validering, levetid for nettleserbinding, skjema ved vindusbytte og trygge feilmeldinger.
+
+**Feil funnet i KI-rettingen:** Oppfølgingskontrollen fant at avbrudd før køet arbeid fikk en tråd kunne etterlate en uavklart Future, og at testen for treg body bestod av feil grunn fordi passord manglet. Det ble rettet med selvstendig valideringsarbeid og komplett, forsinket testinput som må avbrytes. Hovedagenten fant også behov for å lukke den nye TLS-strømmen hvis håndtrykket returnerer etter budsjettet. Nye tester og oppfølgingsgjennomlesning kontrollerte dette. Tidsbudsjettet er kooperativt; det kan ikke tvangsavbryte systemets DNS/native operasjoner, og det hevdes ikke en hard veggklokkegrense.
+
+**Faktisk sluttkontroll:** Hovedagentens samlede kjøring ga **155 beståtte tester, én forventet PDF-plattformtest hoppet over og én eksisterende advarsel**, 25,38 sekunder. Alle **93 innloggingstilfeller** bestod; **16 nettleserscenarier** og ti kontroller mot oppdatert konfigurert lokal server bestod. En ekstra gjennomleser kjørte avbruddsregresjonen med én bestått test. Låst installasjon/diff-kontroll bestod, og den godkjente frosne spesifikasjonen er uendret. Ingen ny konto/e-post/betalt tjeneste ble opprettet av testene. En ny manuell passordinnlogging etter selve rettelsene er bedt om, men ikke bekreftet ved dette kontrollpunktet. Test av to forskjellige autoriserte kontoer og øvrig hosted-akseptanse gjenstår.
+
+**Manuell bekreftelse etter rettelsene:** Studenten svarte «Ja, jeg er logget inn» på den nye passordinnloggingen med eksisterende konto. Den nye serveren viste login 200; undersøkte tilgangsoppføringer hadde ingen auth-querystrenger. Dette bekrefter én ekte innlogging gjennom den korrigerte nettverksadapteren. Registrering/bekreftelse ble ikke gjentatt, og det er fortsatt ikke en test av to forskjellige brukere.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

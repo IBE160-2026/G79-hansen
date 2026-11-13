@@ -33,7 +33,7 @@ Demoen trenger ingen konfigurasjon og gjør ingen Supabase-kall. `/account` tilb
 
 ## Konto og Supabase (Story 2.1)
 
-Følg [oppsett og akseptanse for autentisering](.docs/implementation-artifacts/auth-setup.md): organisasjonen **Study Buddy** på **Free**, prosjektet **studybuddy-test** i spesifikk **Frankfurt (`eu-central-1`)**, med e-postbekreftelse og bare autoriserte teamtestere. Studenten har oppgitt at prosjektet er opprettet. Forbindelsen og aktiv e-postbekreftelse er kontrollert; redirect-oppsett, faktisk registrering/innlogging og uavhengig kodegjennomgang gjenstår.
+Følg [oppsett og akseptanse for autentisering](.docs/implementation-artifacts/auth-setup.md): organisasjonen **Study Buddy** på **Free**, prosjektet **studybuddy-test** i spesifikk **Frankfurt (`eu-central-1`)**, med e-postbekreftelse og bare autoriserte teamtestere. Studenten har oppgitt at prosjektet er opprettet. Forbindelsen og aktiv e-postbekreftelse er kontrollert. Studenten rapporterer vellykket registrering/bekreftelse, separat privat innlogging, avvist feil passord og innlogging etter serverrestart. Gjenværende live sikkerhetskontroller og isolasjon mellom to autoriserte kontoer er fortsatt åpne; den mellomliggende kodegjennomgangen erstatter ikke denne akseptansen.
 
 Serveren leser `AUTH_ENABLED=true`, `APP_ORIGIN`, `SUPABASE_URL` og `SUPABASE_PUBLISHABLE_KEY` fra prosessmiljøet. `.env.example` er kun dokumentasjon og lastes ikke automatisk. Bruk bare publishable/anon-nøkkel, aldri service_role/secret-nøkkel. Lokal HTTP krever også `AUTH_ALLOW_LOOPBACK_HTTP=true` og loopback-adresse. Andre oppsett krever HTTPS. Manglende/ugyldig konfigurasjon stenger autentiseringen uten å påvirke demoen.
 

@@ -9,6 +9,7 @@ baseline_commit: 74fa5f971e187bbb3de924a8f438aff2cba5e782
 review_loop_iteration: 0
 context:
   - .docs/implementation-artifacts/epic-2-context.md
+  - .docs/implementation-artifacts/auth-code-review-2026-11-13.md
 ---
 
 <frozen-after-approval reason="approved by the student on 2026-11-12">
@@ -103,6 +104,43 @@ live acceptance and then independent review. No code changes or fresh full-suite
 results today; status remains in-progress.
 
 ## Review Triage Log
+
+### Review Findings
+
+The student resumed after the end-of-day checkpoint and reported that password
+login after the server restart worked. Continue the already authorized corrections
+through a separate interim code review while preserving the live acceptance gate;
+this is not a declaration that build step-03 acceptance or formal step-04 is done.
+All individual findings, evidence, verdicts and patch instructions are in the
+[interim review](auth-code-review-2026-11-13.md), loaded through frontmatter context.
+
+- [x] [Review][Patch] P1 safe malformed CSRF/binding rejection.
+- [x] [Review][Patch] P2 finite complete-provider-operation budget.
+- [x] [Review][Patch] P3 coalesced overlapping session validation.
+- [x] [Review][Patch] P4 align new session and pending-attempt binding lifetime.
+- [x] [Review][Patch] P5 preserve unsubmitted forms during focus revalidation.
+- [x] [Review][Patch] P6 consume confirmation outcomes once.
+- [x] [Review][Patch] P7 own-key-only safe browser error lookup.
+- [x] [Review][Patch] P8 elapsed credential-body reading bound.
+- [x] [Review][Patch] P9 check byte bound before accumulator append.
+- [x] [Review][Patch] P10 prevent late old status from deleting a newer login cookie.
+- [x] [Review][Patch] P11 exact SDK redirect/state transport assertions.
+- [x] [Review][Patch] P12 negative real-SDK existing-session validation coverage.
+
+Existing hosted acceptance remains open, independently of these code corrections.
+P1–P12 were implemented with 93 passing auth tests and 16 passing real-browser
+auth scenarios. Locked dependency sync and diff checks passed. Status responses
+retire invalid registry authority without mutating `sb_session`, including already
+created late denials, so they cannot erase a newer login cookie. The 10-second
+SDK budget is cooperative across requests/chunks/low-level network calls; native
+blocking/DNS overshoot is documented rather than represented as hard cancellation.
+Shared validation has an independent owner task that survives cancellation before
+worker admission. Detailed patch evidence and unchanged live gates are in the
+linked interim review. These offline corrections do not complete hosted acceptance
+or formal build step-04.
+Rejected B2: low for this loopback-only change; intentional registry overflow is
+not changed into a new admission/IP/proxy policy. Preserve the full explanation
+and all reviewer verdicts in the linked review report.
 
 ## Verification
 

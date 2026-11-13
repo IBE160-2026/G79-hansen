@@ -7,6 +7,7 @@ import time
 from uuid import UUID
 
 import httpx
+import httpcore
 from supabase import ClientOptions, create_client
 from supabase_auth.errors import AuthApiError
 
@@ -50,16 +51,144 @@ class AttemptStorage:
             self.pending.verifier = None
 
 
+class OperationBudget:
+    """One elapsed deadline across every request and streamed response in an SDK call."""
+    def __init__(self, seconds, clock):
+        self.clock, self.deadline = clock, clock() + seconds
+
+    def remaining(self):
+        remaining = self.deadline - self.clock()
+        if remaining <= 0:
+            raise AuthFailure()
+        return remaining
+
+
+class BudgetStream(httpx.SyncByteStream):
+    def __init__(self, stream, budget):
+        self.stream, self.budget = stream, budget
+
+    def __iter__(self):
+        try:
+            iterator = iter(self.stream)
+            while True:
+                self.budget.remaining()
+                try:
+                    chunk = next(iterator)
+                except StopIteration:
+                    break
+                self.budget.remaining()
+                yield chunk
+        except BaseException:
+            self.close()
+            raise
+
+    def close(self):
+        self.stream.close()
+
+
+class BudgetTransport(httpx.BaseTransport):
+    def __init__(self, transport, budget):
+        self.transport, self.budget = transport, budget
+
+    def handle_request(self, request):
+        remaining = self.budget.remaining()
+        request.extensions["timeout"] = {
+            phase: min(limit, remaining)
+            for phase, limit in request.extensions["timeout"].items()
+        }
+        response = self.transport.handle_request(request)
+        try:
+            self.budget.remaining()
+        except BaseException:
+            response.close()
+            raise
+        response.stream = BudgetStream(response.stream, self.budget)
+        return response
+
+    def close(self):
+        self.transport.close()
+
+
+class BudgetNetworkStream(httpcore.NetworkStream):
+    """Recheck the deadline below HTTP framing, including partial-header reads."""
+    def __init__(self, stream, budget):
+        self.stream, self.budget = stream, budget
+
+    def _call(self, action, *args, timeout=None, **kwargs):
+        try:
+            remaining = self.budget.remaining()
+            result = action(*args, timeout=min(timeout, remaining) if timeout is not None else remaining, **kwargs)
+            self.budget.remaining()
+            return result
+        except BaseException:
+            self.close()
+            raise
+
+    def read(self, max_bytes, timeout=None):
+        return self._call(self.stream.read, max_bytes, timeout=timeout)
+
+    def write(self, buffer, timeout=None):
+        self._call(self.stream.write, buffer, timeout=timeout)
+
+    def start_tls(self, ssl_context, server_hostname=None, timeout=None):
+        stream = None
+        try:
+            remaining = self.budget.remaining()
+            stream = self.stream.start_tls(ssl_context, server_hostname=server_hostname,
+                                          timeout=min(timeout, remaining) if timeout is not None else remaining)
+            self.budget.remaining()
+            return BudgetNetworkStream(stream, self.budget)
+        except BaseException:
+            if stream is not None:
+                stream.close()
+            self.close()
+            raise
+
+    def get_extra_info(self, info):
+        return self.stream.get_extra_info(info)
+
+    def close(self):
+        self.stream.close()
+
+
+class BudgetNetworkBackend(httpcore.SyncBackend):
+    def __init__(self, budget):
+        self.budget = budget
+
+    def connect_tcp(self, host, port, timeout=None, local_address=None, socket_options=None):
+        remaining = self.budget.remaining()
+        stream = super().connect_tcp(host, port, timeout=min(timeout, remaining) if timeout is not None else remaining,
+                                     local_address=local_address, socket_options=socket_options)
+        wrapped = BudgetNetworkStream(stream, self.budget)
+        try:
+            self.budget.remaining()
+        except BaseException:
+            wrapped.close()
+            raise
+        return wrapped
+
+
 class SupabaseAuth:
-    def __init__(self, settings: Settings, *, transport=None, clock=time.time):
+    def __init__(self, settings: Settings, *, transport=None, clock=time.time,
+                 budget_clock=time.monotonic, operation_seconds=10):
         self.settings, self.transport, self.clock = settings, transport, clock
+        self.budget_clock, self.operation_seconds = budget_clock, operation_seconds
 
     @contextmanager
     def client(self, storage=None):
         # An SDK and HTTP client per operation: never share mutable auth state.
+        budget = OperationBudget(self.operation_seconds, self.budget_clock)
+        limits = httpx.Limits(max_connections=2, max_keepalive_connections=0)
+        transport = self.transport
+        if transport is None:
+            transport = httpx.HTTPTransport(retries=0, limits=limits, trust_env=False)
+            # HTTPX has no public backend-injection option. This narrow integration
+            # is pinned by uv.lock and exercised through the real HTTP framing tests.
+            transport._pool._network_backend = BudgetNetworkBackend(budget)
+        transport = BudgetTransport(transport, budget)
         with httpx.Client(timeout=httpx.Timeout(5.0, connect=3.0),
-                          limits=httpx.Limits(max_connections=2, max_keepalive_connections=0),
-                          follow_redirects=False, trust_env=False, transport=self.transport) as http:
+                          limits=limits,
+                          follow_redirects=False, trust_env=False, transport=transport) as http:
             try:
                 options = ClientOptions(auto_refresh_token=False, persist_session=False,
                                         flow_type="pkce", httpx_client=http)
@@ -67,6 +196,7 @@ class SupabaseAuth:
                     options.storage = storage
                 sdk = create_client(self.settings.supabase_url, self.settings.supabase_key, options)
                 yield sdk.auth
+                budget.remaining()
             except AuthFailure:
                 raise
             except AuthApiError as exc:

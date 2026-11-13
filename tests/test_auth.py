@@ -1,19 +1,22 @@
 """Offline contracts and security matrix. These do not prove live acceptance."""
 
 from concurrent.futures import ThreadPoolExecutor
+import asyncio
 from dataclasses import replace
 import base64
 import hashlib
 import json
 import logging
 import time
+from threading import Event
 from urllib.parse import urlsplit
 
 from fastapi.testclient import TestClient
 import httpx
+import httpcore
 import pytest
 
-from app.adapters.auth import AuthFailure, Identity, SupabaseAuth
+from app.adapters.auth import AuthFailure, BudgetNetworkStream, Identity, OperationBudget, SupabaseAuth
 from app.config import Settings
 from app.main import RedactAuthQuery, create_app
 from app.services.sessions import Pending, Registry
@@ -247,9 +250,12 @@ def test_browser_isolation_unknown_sessions_outage_and_restart():
     assert client.get("/api/v1/auth/status").json()["email"] == EMAIL
     assert second.get("/api/v1/auth/status").json()["email"] == "second@example.test"
     fake.fail = True
+    retired = client.cookies["sb_session"]
     response = client.get("/api/v1/auth/status")
     assert response.status_code == 503
-    assert "sb_session" not in client.cookies
+    assert client.cookies["sb_session"] == retired
+    assert retired not in registry.sessions
+    assert "set-cookie" not in response.headers
     fake.fail = False
     assert second.get("/api/v1/auth/status").json()["authenticated"]
     registry.sessions.clear()
@@ -375,10 +381,12 @@ def test_real_sdk_transport_pkce_exchange_login_validation_and_refresh_contracts
         return httpx.Response(200, json=provider_session())
     adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
     attempts = []
-    for _ in range(2):
+    expected_redirects = [ORIGIN + "/api/v1/auth/callback?state=" + str(index) * 43 for index in range(2)]
+    for redirect in expected_redirects:
         attempts.append(Pending("browser", EMAIL, time.time() + 600))
-        adapter.signup(EMAIL, PASSWORD, attempts[-1], ORIGIN + "/api/v1/auth/callback?state=test")
+        adapter.signup(EMAIL, PASSWORD, attempts[-1], redirect)
     assert attempts[0].verifier != attempts[1].verifier
+    assert redirects == expected_redirects
     identity = adapter.exchange("PRIVATE_CODE", attempts[0])
     assert adapter.login(EMAIL, PASSWORD).owner_id == OWNER
     assert adapter.validate(identity).owner_id == OWNER
@@ -427,4 +435,362 @@ def test_sdk_rejects_incomplete_mismatched_and_failed_provider_responses_without
     response = post(client, "login")
     assert response.status_code in (401, 503)
     assert "sb_session" not in client.cookies
+    assert "PRIVATE" not in response.text
+
+
+@pytest.mark.parametrize("field", ["csrf", "binding"])
+def test_raw_non_ascii_protection_input_denies_with_safe_headers(field):
+    client, fake, _ = setup()
+    protection = headers(client)
+    raw_headers = [(name.encode(), value.encode()) for name, value in protection.items()]
+    if field == "csrf":
+        raw_headers = [(name, b"\xff") if name.lower() == b"x-csrf-token" else (name, value)
+                       for name, value in raw_headers]
+    else:
+        raw_headers.append((b"cookie", b"sb_browser=\xff"))
+    response = client.post("/api/v1/auth/login", json=PAYLOAD, headers=raw_headers)
+    assert response.status_code == 403
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["referrer-policy"] == "no-referrer"
+    assert not fake.calls
+
+
+def test_callback_non_ascii_binding_is_rejected_before_exchange():
+    client, fake, _ = setup()
+    post(client)
+    response = client.get(fake.redirects[0] + "&code=PRIVATE_CODE",
+                          headers=[(b"cookie", b"sb_browser=\xff")], follow_redirects=False)
+    assert response.headers["location"] == "/account?confirmation=invalid"
+    assert "exchange" not in fake.calls
+
+
+def test_complete_sdk_budget_stops_trickled_body_and_closes_stream():
+    now, closed = [0.0], []
+    class Trickle(httpx.SyncByteStream):
+        def __iter__(self):
+            for _ in range(20):
+                now[0] += 0.3
+                yield b" "
+        def close(self):
+            closed.append(True)
+    adapter = SupabaseAuth(SETTINGS, budget_clock=lambda: now[0], operation_seconds=1,
+                           transport=httpx.MockTransport(lambda request: httpx.Response(200, stream=Trickle())))
+    with pytest.raises(AuthFailure, match="auth_unavailable"):
+        adapter.login(EMAIL, PASSWORD)
+    assert 1 <= now[0] <= 1.3
+    assert closed
+
+
+def test_real_http_framing_budget_stops_trickle_before_complete_response_headers(monkeypatch):
+    now, timeouts, closed = [0.0], [], []
+    class TrickleWire(httpcore.NetworkStream):
+        def read(self, max_bytes, timeout=None):
+            timeouts.append(timeout)
+            now[0] += 0.25
+            return b"H"  # No complete h11 header or body chunk is ever emitted.
+        def write(self, buffer, timeout=None):
+            pass
+        def start_tls(self, ssl_context, server_hostname=None, timeout=None):
+            return self
+        def close(self):
+            closed.append(True)
+    monkeypatch.setattr(httpcore.SyncBackend, "connect_tcp", lambda *args, **kwargs: TrickleWire())
+    adapter = SupabaseAuth(SETTINGS, budget_clock=lambda: now[0], operation_seconds=1)
+    with pytest.raises(AuthFailure, match="auth_unavailable"):
+        adapter.login(EMAIL, PASSWORD)
+    assert now[0] == 1
+    assert timeouts == [1, 0.75, 0.5, 0.25]
+    assert closed
+
+
+def test_tls_stream_created_after_deadline_is_closed_with_original_stream():
+    now, closed = [0.0], []
+    class TLSStream:
+        def close(self):
+            closed.append("tls")
+    class PlainStream:
+        def start_tls(self, *args, **kwargs):
+            now[0] += 2
+            return TLSStream()
+        def close(self):
+            closed.append("plain")
+    stream = BudgetNetworkStream(PlainStream(), OperationBudget(1, lambda: now[0]))
+    with pytest.raises(AuthFailure):
+        stream.start_tls(None)
+    assert closed == ["tls", "plain"]
+
+
+@pytest.mark.parametrize("advance", [0.7, 1.1])
+def test_complete_sdk_budget_is_shared_by_token_and_get_user(advance):
+    now, calls = [0.0], []
+    def transport(request):
+        calls.append(request.url.path)
+        if request.url.path.endswith("/token"):
+            now[0] += advance
+            return httpx.Response(200, json=provider_session())
+        remaining = 1 - advance
+        assert request.extensions["timeout"] == pytest.approx(dict.fromkeys(["connect", "read", "write", "pool"], remaining))
+        now[0] += 0.4
+        return httpx.Response(200, json=provider_user())
+    adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport),
+                           budget_clock=lambda: now[0], operation_seconds=1)
+    with pytest.raises(AuthFailure, match="auth_unavailable"):
+        adapter.login(EMAIL, PASSWORD)
+    assert len(calls) == (2 if advance < 1 else 1)
+
+
+@pytest.mark.parametrize("fail", [False, True])
+def test_overlapping_status_coalesces_validation_without_caching_later_requests(fail):
+    async def scenario():
+        app = create_app(SETTINGS, auth_adapter=FakeAuth())
+        fake = app.state.auth_adapter
+        entered, release = Event(), Event()
+        original = fake.validate
+        def validate(identity):
+            entered.set()
+            assert release.wait(3)
+            return original(identity)
+        fake.validate = validate
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            await client.post("/api/v1/auth/login", json=PAYLOAD,
+                              headers={"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]})
+            fake.fail = fail
+            first = asyncio.create_task(client.get("/api/v1/auth/status"))
+            assert await asyncio.to_thread(entered.wait, 2)
+            second = asyncio.create_task(client.get("/api/v1/auth/status"))
+            await asyncio.sleep(0.05)
+            release.set()
+            responses = await asyncio.gather(first, second)
+            assert fake.calls.count("validate") == 1
+            assert [r.status_code for r in responses] == [503 if fail else 200] * 2
+            if fail:
+                assert not app.state.auth_registry.sessions
+            else:
+                await client.get("/api/v1/auth/status")
+                assert fake.calls.count("validate") == 2
+    asyncio.run(scenario())
+
+
+def test_separate_sessions_validate_concurrently():
+    registry, fake = Registry(), FakeAuth()
+    bindings = [registry.browser(None)[0] for _ in range(2)]
+    sessions = [registry.rotate(None, binding, fake.identity()) for binding in bindings]
+    from threading import Barrier
+    both = Barrier(2)
+    def validate(identity):
+        both.wait(timeout=2)
+        return identity
+    fake.validate = validate
+    with ThreadPoolExecutor(2) as pool:
+        results = list(pool.map(lambda pair: registry.authenticated(*pair, fake), zip(sessions, bindings)))
+    assert all(result.owner_id == OWNER for result in results)
+
+
+@pytest.mark.parametrize("flow", ["login", "confirmation"])
+def test_near_expiry_binding_covers_new_session_and_pending_attempt(flow):
+    now = [1000.0]
+    registry, fake = Registry(clock=lambda: now[0], idle_seconds=500, absolute_seconds=100), FakeAuth()
+    browser, binding = registry.browser(None)
+    now[0] += 99
+    if flow == "confirmation":
+        state, pending = registry.start_attempt(browser, EMAIL)
+        pending.verifier = "v" * 43
+        assert binding.expires >= pending.expires
+        now[0] += 20
+        registry.consume(state, browser)
+    else:
+        registry.retain_browser(browser)
+        now[0] += 20
+    session = registry.rotate(None, browser, fake.identity())
+    assert binding.expires >= now[0] + 100
+    now[0] += 99
+    assert registry.authenticated(session, browser, fake)
+    now[0] += 1
+    assert registry.authenticated(session, browser, fake) is None
+
+
+def test_elapsed_body_budget_rejects_actually_delayed_stream_before_provider(monkeypatch):
+    from app.api import auth
+    monkeypatch.setattr(auth, "CREDENTIAL_BODY_SECONDS", 0.03)
+    async def scenario():
+        fake = FakeAuth()
+        app = create_app(SETTINGS, auth_adapter=fake)
+        cancelled = []
+        async def delayed():
+            body = json.dumps(PAYLOAD).encode()
+            yield body[:10]
+            try:
+                await asyncio.sleep(0.1)
+            except asyncio.CancelledError:
+                cancelled.append(True)
+                raise
+            yield body[10:]
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            response = await client.post("/api/v1/auth/login", content=delayed(),
+                headers={"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"], "Content-Type": "application/json"})
+            assert response.status_code == 422
+            assert response.json()["code"] == "invalid_request"
+            assert response.headers["cache-control"] == "no-store"
+            assert cancelled
+            assert not fake.calls
+    asyncio.run(scenario())
+
+
+def test_cancelled_validation_waiter_cannot_orphan_owner_before_worker_admission():
+    import anyio
+    async def scenario():
+        registry, fake = Registry(), FakeAuth()
+        browser = registry.browser(None)[0]
+        session = registry.rotate(None, browser, fake.identity())
+        limiter = anyio.to_thread.current_default_thread_limiter()
+        previous = limiter.total_tokens
+        entered, release = Event(), Event()
+        def occupy_worker():
+            entered.set()
+            assert release.wait(3)
+        limiter.total_tokens = 1
+        try:
+            occupied = asyncio.create_task(anyio.to_thread.run_sync(occupy_worker))
+            assert await asyncio.to_thread(entered.wait, 2)
+            cancelled = asyncio.create_task(registry.authenticated_async(session, browser, fake))
+            await asyncio.sleep(0.03)
+            assert registry.sessions[session].validation is not None
+            cancelled.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await cancelled
+            follower = asyncio.create_task(registry.authenticated_async(session, browser, fake))
+            release.set()
+            await occupied
+            identity = await asyncio.wait_for(follower, timeout=2)
+            assert identity.owner_id == OWNER
+            assert fake.calls.count("validate") == 1
+            assert registry.sessions[session].validation is None
+        finally:
+            release.set()
+            limiter.total_tokens = previous
+    asyncio.run(scenario())
+
+
+def test_credential_accumulator_checks_bound_before_appending(monkeypatch):
+    from app.api import auth
+    appended = []
+    class TrackedBuffer(bytearray):
+        def extend(self, chunk):
+            appended.append(len(chunk))
+            return super().extend(chunk)
+    monkeypatch.setattr(auth, "bytearray", TrackedBuffer, raising=False)
+    class Request:
+        headers = {"content-type": "application/json"}
+        async def stream(self):
+            yield b" " * 8192
+            yield b"x" * 100000
+    with pytest.raises(AuthFailure, match="invalid_request"):
+        asyncio.run(auth.credentials(Request()))
+    assert appended == [8192]
+    class ExactRequest:
+        headers = {"content-type": "application/json"}
+        async def stream(self):
+            body = json.dumps(PAYLOAD).encode()
+            yield body + b" " * (8192 - len(body))
+    assert asyncio.run(auth.credentials(ExactRequest())).email == EMAIL
+
+
+@pytest.mark.parametrize("fail", [False, True])
+def test_old_status_validation_cannot_erase_new_login_cookie_in_arrival_order(fail):
+    async def scenario():
+        fake = FakeAuth()
+        app = create_app(SETTINGS, auth_adapter=fake)
+        entered, release = Event(), Event()
+        def validate(identity):
+            entered.set()
+            assert release.wait(3)
+            if fail:
+                raise AuthFailure()
+            return identity
+        fake.validate = validate
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]}
+            await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
+            old_cookie = client.cookies["sb_session"]
+            old_status = asyncio.create_task(client.get("/api/v1/auth/status"))
+            assert await asyncio.to_thread(entered.wait, 2)
+            login = await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
+            new_cookie = client.cookies["sb_session"]
+            assert new_cookie != old_cookie and login.status_code == 200
+            release.set()
+            response = await old_status
+            assert not response.json().get("authenticated", False)
+            assert "sb_session=" not in response.headers.get("set-cookie", "")
+            assert client.cookies["sb_session"] == new_cookie
+            assert new_cookie in app.state.auth_registry.sessions
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("error", [False, True])
+def test_already_completed_denial_response_cannot_erase_a_later_login(error):
+    client, fake, registry = setup()
+    protection = headers(client)
+    client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
+    if error:
+        fake.fail = True
+    else:
+        registry.sessions.clear()
+    stale = client.get("/api/v1/auth/status")
+    fake.fail = False
+    client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
+    newest = client.cookies["sb_session"]
+    client.cookies.extract_cookies(stale)
+    assert client.cookies["sb_session"] == newest
+    assert "sb_session=" not in stale.headers.get("set-cookie", "")
+
+
+def test_http_signup_passes_each_exact_callback_state_to_real_sdk_transport():
+    redirects = []
+    def transport(request):
+        assert request.url.path.endswith("/signup")
+        redirects.append(request.url.params["redirect_to"])
+        return httpx.Response(200, json=provider_user(confirmed=False))
+    registry = Registry()
+    adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
+    client = TestClient(create_app(SETTINGS, auth_adapter=adapter, registry=registry), base_url=ORIGIN)
+    post(client)
+    post(client)
+    assert len(redirects) == 2
+    assert redirects == [ORIGIN + "/api/v1/auth/callback?state=" + state for state in registry.pending]
+    assert redirects[0] != redirects[1]
+
+
+@pytest.mark.parametrize("case", ["missing", "unconfirmed", "changed_owner", "changed_email"])
+def test_real_sdk_status_retires_invalid_existing_identity_without_cookie_mutation(case):
+    status_validation = [False]
+    def transport(request):
+        if request.url.path.endswith("/token"):
+            return httpx.Response(200, json=provider_session())
+        user = provider_user()
+        if status_validation[0]:
+            if case == "missing":
+                user = {}
+            elif case == "unconfirmed":
+                user["email_confirmed_at"] = None
+            elif case == "changed_owner":
+                user["id"] = OTHER
+            elif case == "changed_email":
+                user["email"] = "other@example.test"
+        return httpx.Response(200, json=user)
+    adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
+    registry = Registry()
+    client = TestClient(create_app(SETTINGS, auth_adapter=adapter, registry=registry), base_url=ORIGIN)
+    assert post(client, "login").status_code == 200
+    old_cookie = client.cookies["sb_session"]
+    status_validation[0] = True
+    response = client.get("/api/v1/auth/status")
+    assert response.status_code in (401, 503)
+    assert not response.json().get("authenticated", False)
+    assert old_cookie not in registry.sessions
+    assert client.cookies["sb_session"] == old_cookie
+    assert "sb_session=" not in response.headers.get("set-cookie", "")
+    assert response.headers["cache-control"] == "no-store"
     assert "PRIVATE" not in response.text

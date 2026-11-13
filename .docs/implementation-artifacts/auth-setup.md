@@ -79,14 +79,30 @@ are random host-only HttpOnly values with SameSite=Lax; they are Secure on HTTPS
 Closing the browser can also discard the browser binding. Each callback attempt
 expires after 10 minutes. There are at most 1,000 sessions, 1,000 attempts and
 1,000 browser bindings, with four simultaneous attempts per browser. Overflow is
-rejected. Provider operations use request-scoped SDK/HTTP clients, 3-second
-connect and 5-second transport phase timeouts, no redirects, retries or background
-refresh. Auth UI requests time out after 15 seconds.
+rejected. Successful authentication extends its browser binding to cover the new
+session's absolute lifetime; a pending attempt retains binding authority through
+its own deadline, without extending any session deadline. Provider operations use
+request-scoped SDK/HTTP clients, a shared 10-second elapsed budget, at most
+3-second connect and 5-second transport phase timeouts, no redirects, retries or
+background refresh. The remaining budget is checked between SDK requests,
+response chunks and underlying network reads/writes/TLS operations; network phase
+timeouts are capped by the remaining time. HTTP framing cannot reset the budget
+by trickling incomplete headers. This is a cooperative deadline, not cancellation
+of a running native operation: an in-progress blocking call (including the system
+DNS resolver) must return before its elapsed deadline is observed. There is no
+abandoned network thread presented as canceled work. The narrow HTTPX/httpcore
+backend integration is pinned by the lockfile and covered by transport tests.
+Auth UI requests time out after 15 seconds.
 
-Every authenticated status request validates its token using provider `get_user`.
-Within 30 seconds of token expiry it explicitly refreshes under the session lock,
+Each new authenticated status validation uses provider `get_user`; overlapping
+requests for the same session share only that in-flight validation. Followers wait
+without retaining worker threads, and cancellation of one HTTP waiter cannot
+orphan the shared owner. Within 30 seconds of token expiry it explicitly refreshes,
 then validates the returned user. Owner changes, invalid/incomplete responses and
-provider failure deny locally and clear the session cookie. Sessions expire after
+provider failure deny locally and retire the registry session. Status responses
+never set or delete the session cookie: a delayed old denial must not erase a
+newer successful login cookie. An obsolete opaque cookie grants no authority and
+is replaced by the next successful authentication. Sessions expire after
 30 minutes idle or 12 hours absolute; provider refresh never resets those limits.
 Recovery and complete logout controls belong to Stories 2.2/2.3. No private
 document data, document tables, AI processing, persistence or deployment is added.
@@ -108,14 +124,19 @@ errors have `Cache-Control: no-store` and `Referrer-Policy: no-referrer`.
 | POST `/api/v1/auth/login` | Same JSON and protections | Provider-validated `{authenticated:true,email}` and newly rotated opaque session cookie. |
 | GET `/api/v1/auth/callback?state=...&code=...` | Exact keys, browser binding and unexpired signup verifier; one atomic consumption | 303 to `/account?confirmation=success` or `/account?confirmation=invalid`. No credentials in destination. Account JS immediately removes even the safe outcome query and rejects/clears fragments. |
 
-POST bodies are bounded to 8 KiB, email to 254 characters and password to 8–1,024
+POST bodies are bounded to 8 KiB and a five-second elapsed reading deadline;
+cumulative length is checked before copying each received chunk. Email is bounded
+to 254 characters and password to 8–1,024
 characters; unknown fields are rejected. Error JSON is `{code,message,requestId}`
 with safe messages. Origin/CSRF failures precede parsing/provider calls (403),
 invalid body is 422, invalid credentials 401, bounded-registry overflow 429 and
 provider/configuration availability failures 503. A disabled status remains 200
 with `available:false`. The browser clears submitted passwords immediately,
 retains email on errors, focuses the alert, suppresses duplicate submissions and
-ignores responses made stale by navigation. No browser storage is used.
+ignores responses made stale by navigation. Background focus revalidation keeps
+unsubmitted drafts and field focus when the forms remain usable; unavailable or
+malformed bootstrap responses show an explicit retry. Navigation/retry retains
+password cleanup. Confirmation outcomes are consumed once. No browser storage is used.
 
 ## Reproducible offline verification
 
@@ -224,3 +245,31 @@ No application code changed today. Ten local-server boundary checks passed;
 the full offline suite was not rerun. Story 2.1 remains in-progress. Remaining
 provider/security acceptance and independent review must be recorded honestly;
 do not create a second tester or claim the missing evidence implicitly.
+
+### Interim corrections after the checkpoint
+
+The authorized interim review patches P1–P12 are implemented. The focused Python
+auth suite passed **93 tests** and the isolated real-browser auth suite passed
+**16 scenarios**; locked dependency sync and diff checks passed. Their new cases
+cover malformed protection values, shared SDK deadlines, overlapping validation
+and cancellation before worker admission, binding lifetimes, background drafts,
+one-time outcomes, safe error-code lookup, delayed/oversized bodies, stale status
+cookie races, exact SDK callback transport and negative existing-session identity.
+See [the review evidence](auth-code-review-2026-11-13.md) for details and the
+cooperative transport deadline limitation. The earlier boundary result described
+unknown-cookie clearing for the pre-patch implementation; current status behavior
+denies authority without changing `sb_session` to preserve newer login cookies.
+No new hosted account/email check was performed by this patch verification.
+Story 2.1 and its remaining live acceptance gates stay in-progress.
+
+Final parent verification after the corrections: **155 passed, 1 expected PDF
+platform skip**, one existing TestClient warning, 25.38 seconds; **16 browser-auth
+scenarios** passed. The final configured server passed ten unauthenticated boundary
+checks with the revised no-status-cookie-mutation expectation. The malformed-CSRF
+probe now returns 403 and no-store instead of 500. A fresh one-worker test server
+is running after the patch restart; the student has been asked to verify one
+ordinary password login with the existing account. The student confirmed
+"Ja, jeg er logget inn" after these corrections, and the new server recorded
+login 200 without auth query strings in inspected entries. This is a fresh hosted
+password-login check through the corrected adapter, not a second-account test or
+a repeated signup/confirmation check.
