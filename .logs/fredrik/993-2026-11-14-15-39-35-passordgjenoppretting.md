@@ -66,3 +66,10 @@ Neste manuelle observasjon er forespørsel fra studentens egen eksisterende auto
 
 ### E-post mottatt kl. 00:13
 Studenten rapporterte «fikk epost om resatt passord». KI avklarte om dette var en lenke eller en melding om allerede endret passord; studenten svarte «Den har en lenke for å velge nytt passord». Registrer dette som rapportert mottatt gjenopprettingslenke, ikke fullført passordbytte. Studenten bes åpne lenken i samme nettleser/profil med en gang og rapportere om begrenset nytt-passord-skjema vises. Callback, faktisk allowlist/mal-matching og passordmutasjon er fortsatt ikke bekreftet. Ingen ny e-post sendt av agenten, ingen passord/lenke bedt om i chat og ingen ny automatisk test. auth-setup.md og issues er oppdatert.
+
+### Vellykket passordbytte kl. 00:17
+Studenten rapporterte «resette passord fungerte» og presiserte «jeg prøvde å bytte passord, det fungerte». Agenten leste eksisterende serverutdata fra verktøysesjon 37132 og skrev bare ut trygge tellinger/boolske verdier: én recovery request 200, én callback 303, én password POST 200 og vanlig login 200 etter den siste oppdateringsoppføringen. Ingen rå queryverdier var synlige i observerte auth-oppføringer. Passordverdi/kontoidentitet ble ikke hentet; det hevdes ikke hvilket passord som ble brukt i login-kallet. Agenten sendte ingen e-post og utførte ikke passordmutasjonen.
+
+Den positive hosted-flyten er nå støttet av studentrapport og faktiske request-/callback-/update-/login-statuskoder. Ikke be studenten gjenta passordbyttet eller ny innlogging når denne evidensen allerede finnes. Malinnhold og negative hosted-tilfeller (ubrukt feil nettleser, replay, utløp, overlapp og annen brukers tilgang under reelt bytte) står fortsatt åpne. auth-setup, sprintkommentarer, issues og faktabasert refleksjonsgrunnlag er oppdatert. Ingen kode eller nye automatiske funksjonstester.
+
+Studenten spurte «hva er neste steg». Svaret forklarer neste planlagte oppgave, Story 2.3 Logg ut og avslutning ved utløp/omstart. Ingen ny spesifikasjon, implementering eller full hosted-akseptanse er antatt fra spørsmålet alene. Eksisterende godkjenninger og Free/Paris beholdes.
