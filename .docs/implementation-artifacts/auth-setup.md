@@ -622,3 +622,13 @@ Administrative example.com test users are not email-delivery testers. Do not ask
 for a password or raw confirmation/recovery link in chat. Genuine email delivery,
 callback completion and password mutation remain pending until observed/reported;
 the saved-setting report alone does not complete hosted acceptance.
+
+### Recovery email received — student report, 2026-11-15
+
+The student reported **“fikk epost om resatt passord”** and then clarified
+**“Den har en lenke for å velge nytt passord”**. This is student-reported receipt
+of a recovery link, not evidence that the password has changed. The next step is
+opening that link promptly in the initiating browser/profile and observing the
+restricted new-password form. Callback success, actual redirect/template matching
+and password mutation remain unverified. No password or raw link was requested
+in chat, and no further email was triggered by the agent.
