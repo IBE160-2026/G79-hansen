@@ -23,6 +23,19 @@
     <h2 id="signed-in-heading">Du er logget inn</h2>
     <p id="account-email"></p>
     <p class="source">Kontoen er bekreftet. Privat materiale og lagring kommer senere. Tilgangen slutter etter 30 minutter uten aktivitet, senest etter 12 timer, eller når serveren starter på nytt.</p>
+    <button id="account-show-forms" type="button" data-account-navigation>Logg inn eller gjenopprett passord</button>
+  </section>
+  <section id="account-recovery" class="panel" aria-labelledby="recovery-password-heading" hidden>
+    <h2 id="recovery-password-heading">Velg nytt passord</h2>
+    <p id="recovery-password-help" class="source">Denne lenken gir bare tilgang til å endre passord i 10 minutter. Bruk 8–1024 tegn. Etterpå må du logge inn på vanlig måte. Et innsendt forsøk kan ikke brukes om igjen.</p>
+    <form id="recovery-password-form" aria-describedby="recovery-password-help">
+      <label for="recovery-password">Nytt passord</label>
+      <input id="recovery-password" name="password" type="password" autocomplete="new-password" required>
+      <label for="recovery-password-confirm">Bekreft nytt passord</label>
+      <input id="recovery-password-confirm" name="password-confirm" type="password" autocomplete="new-password" required>
+      <button class="primary" type="submit">Endre passord</button>
+    </form>
+    <button id="recovery-login" type="button" data-account-navigation>Logg inn i stedet</button>
   </section>
   <div id="account-forms" hidden>
     <section class="panel" aria-labelledby="login-heading">
@@ -44,6 +57,15 @@
         <label for="signup-password">Passord</label>
         <input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="1024" required>
         <button class="primary" type="submit">Opprett konto</button>
+      </form>
+    </section>
+    <section class="panel" aria-labelledby="recovery-heading">
+      <h2 id="recovery-heading">Glemt passord</h2>
+      <p id="recovery-help" class="source">Be om en lenke på e-post. Åpne den i samme nettleser og nettleserprofil innen 10 minutter. Hold nettleserøkten åpen.</p>
+      <form id="recovery-form" aria-describedby="recovery-help">
+        <label for="recovery-email">E-post</label>
+        <input id="recovery-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+        <button type="submit">Send gjenopprettingslenke</button>
       </form>
     </section>
   </div>

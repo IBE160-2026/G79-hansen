@@ -383,6 +383,26 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Status:** E-postlenkens resterende negative tilfeller og malinspeksjon står åpne; Story 2.1 forblir under arbeid. [Akseptansestatus](../.docs/implementation-artifacts/auth-setup.md) skiller nye resultater fra historiske tester og videre arbeid. Ingen appkode eller globale Auth-innstillinger ble endret.
 
+## 14.11.2026 – Neste oppgave konkretisert: Glemt passord
+
+**Studentens styring:** «ok, da går vi videre». Den ekstra bekreftelses-e-posttesten står åpen. Studenten godkjente deretter «Ja, lagre og fortsett» for lagring av de fire ferdige dokumentoppdateringene fra testingen. De ble lagret lokalt i `32b1586bf6c1ebc3297205eefe538c1a3b176af9`.
+
+**KI-bidrag og kontroll:** BMAD build ble brukt til å undersøke neste backloggoppgave og skrive [en konkret draft for Story 2.2](../.docs/implementation-artifacts/spec-2-2-recover-a-password-through-a-restricted-session.md). Én read-only-agent undersøkte gjenbrukspunkter etter skillens instruks. SDK-koden viste et viktig recovery-særtilfelle: lagret PKCE-verifier har `/PASSWORD_RECOVERY`-markør, mens utvekslingen må sende selve verifieren. Planen krever transporttest for dette og eierkontroll før passordmutasjon.
+
+**Status og avgrensning:** Planen beskriver passordoppdateringsautoritet adskilt fra vanlig innlogging og gjenbruk av beskyttelsen mot at en sen respons overskriver en nyere login-cookie. Den er presentert til konkret godkjenning etter workflowens kontrollpunkt. Appkode er ikke endret, og ingen nye tester/e-poster/passordmutasjoner er utført. Dette er planlegging, ikke implementering eller godkjent akseptanse. Studentens egen refleksjon er ikke lagt til.
+
+## 14.11.2026 – Glemt passord implementert og kontrollert
+
+**Studentens godkjenning:** Etter forklaring av den konkrete planen svarte studenten «gjør det». Den frosne intensjonen i Story 2.2 ble låst; tidligere e-postakseptanse fra Story 2.1 forblir åpen. KI har ikke skrevet studentens egen refleksjon.
+
+**Implementert:** Generisk forespørsel om gjenopprettingslenke, separat PKCE-formål/verifier/binding, begrenset engangsautoritet, passordoppdatering og vanlig innlogging etterpå. Kun syntetiske leverandørsvar brukes i implementasjonstestene. Ingen ekte e-post eller passordmutasjon ble utført.
+
+**KI-feil og uavhengig kontroll:** Hovedagenten fant at SDKens update_user kunne fornye økten etter den første eierkontrollen. Identiteten kontrolleres nå også etter denne interne fornyelsen, før PUT. Tre uavhengige reviewlag leverte ti blindfunn, to verifikasjonsfunn og ingen ytterligere kanttilfellefunn. Alle funn fikk egen dom før gruppering. Syv små rettelser/testforbedringer ble gjennomført; to lave forslag ble avvist med begrunnelse, og tidligere eksisterende e-postkvote/throttling før offentlig drift ble utsatt eksplisitt. En syntetisk probe reproduserte at en forsinket recovery-callback kunne erstatte nyere innlogging; etter retting settes ingen gammel cookie og den nye innloggingen beholdes. UI fikk konsistente Unicode-grenser, riktige pre-admission-feil og synlig navigasjon til innlogging/recovery.
+
+**Faktisk sluttkontroll:** Hovedagentens siste fulle kjøring ga **213 bestått, én forventet PDF-plattformskip og én eksisterende Starlette-advarsel**, 26,89 sekunder. JUnit inneholder **151 auth-tester uten feil/skips**, inkludert tre callback-racer, to utløp-under-validering og gjentatt feil/retry uten kapasitetslekkasje. **23 ekte nettleserscenarier for konto** med testleverandør og **11 demoscenarier** bestod. Hovedagenten leste full diff og patchdiff og inspiserte oppdatert 200 %-skjermbilde uten avkuttet innhold. Den frosne spesifikasjonsblokken er uendret. Ingen nye tester hevdes fra den etterfølgende dokumentredigeringen.
+
+**Lokal drift og gjenstående akseptanse:** Normalappen ble startet på nytt med eksisterende ignorert `.env` og én worker; lesekontroller fant ny recovery-UI/status og personvernheadere. Omstarten krever ny vanlig innlogging. Implementeringsspesifikasjonen er done og sprintstoryen review. Ekstra hosted callback-allowlist, malinspeksjon, ekte gjenopprettingsmail og uttrykkelig autorisert passordendring gjenstår; dette er ikke full hosted-godkjenning. Free/Paris, ingen nye tabeller/betalte tjenester/utrulling og de eldre Story 2.1-portene er bevart. Se [oppsett og evidens](../.docs/implementation-artifacts/auth-setup.md).
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

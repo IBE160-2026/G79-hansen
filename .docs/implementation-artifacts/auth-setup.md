@@ -35,6 +35,12 @@ Frankfurt requirement for this project only. Offline adapters live only in
    state for each attempt. Do not allow arbitrary hosts or external return URLs.
    Supabase documents these pattern rules in its
    [redirect URL guide](https://supabase.com/docs/guides/auth/redirect-urls).
+   For password recovery, also add the separate pattern
+   `http://127.0.0.1:8000/api/v1/auth/recovery/callback\?state=*`.
+   Keep the reset-password email's standard `{{ .ConfirmationURL }}` link so
+   Supabase verifies it and returns an authorization code to the backend.
+   This additional allowlist entry and template inspection have **not** been
+   performed by the implementation tests; verify them before authorized live recovery.
 5. Keep the standard confirmation email link through `{{ .ConfirmationURL }}`.
    Do not replace it with an implicit-fragment flow or a token-hash route: this
    app expects Supabase to confirm the email and redirect with `state` and `code`
@@ -459,3 +465,142 @@ confirmed accounts cannot establish a new-account confirmation test. Availabilit
 of an unused authorized team address has been requested; no answer or email
 delivery is assumed. No account/email or hosted Auth setting was changed by the
 automated checks. Story 2.1 remains in-progress.
+
+## Story 2.2 recovery implementation — 2026-11-14
+
+Recovery is implemented for local verification. **No real recovery email or
+password mutation was authorized or executed during implementation.** Story 2.1's
+email-confirmation gates above remain open. Keep Study Buddy on Free and retain
+the approved Paris (`eu-west-3`) test project. No hosted settings, accounts,
+database tables, deployment or paid services were changed.
+
+The browser requests `POST /api/v1/auth/recovery/request` with email only. The
+generic check-email acknowledgement is identical for existing/missing accounts;
+provider outages receive a fixed safe failure. Each attempt has its own verifier,
+state, browser binding and purpose, expires after ten minutes, and shares the
+1,000-total/four-per-browser pending-attempt limits with signup. The SDK stores
+`verifier/PASSWORD_RECOVERY`; the adapter retains the actual verifier separately
+and submits that actual value to the token exchange. Wrong-purpose callbacks
+cannot consume signup attempts or create a normal login.
+
+The exact recovery callback is `GET /api/v1/auth/recovery/callback?state=…&code=…`.
+It consumes its attempt before exchange, validates confirmed provider owner/email,
+rotates the opaque `sb_session`, retires any replaced local authority and redirects
+to a clean account URL after the one-use outcome is read. Its server record is a
+restricted, browser-bound ten-minute grant in a registry disjoint from normal
+sessions. Normal validation denies it. Status reports
+`authenticated:false,recoveryAvailable:true` and omits identity. Normal and
+restricted sessions share a 1,000-entry bound.
+
+`POST /api/v1/auth/recovery/password` accepts password only. It requires the same
+Origin/CSRF/browser protection as login, atomically removes the restricted grant,
+then performs at most one provider password write. The request-scoped SDK uses
+one shared operation budget across set_session, validation, any SDK-internal
+get_session refresh and update. Both refresh paths are checked against the
+grant's validated owner/email before PUT; the returned user is also checked.
+Success requires ordinary login afterward. Every admitted failure requires a
+new link; a timeout can mean the password changed. Password/status replies never
+change `sb_session`, so a late reply cannot erase a newer login cookie.
+Unrelated users' local sessions are retained. Supabase may affect other sessions
+for the same account when a password changes; no unchanged-provider-behavior
+promise is made.
+
+Bodies retain the 8 KiB and five-second streaming limits. Cookie, no-store,
+referrer, redaction, restart, unknown-field and error privacy controls are reused.
+The UI adds labelled email/new-password/confirmation forms, matching validation,
+one-use link outcomes, duplicate/stale-reply guards and login/new-link guidance.
+The fixed demo continues without configuration or external requests.
+
+Relevant official references checked against the installed, locked SDK:
+[password reset](https://supabase.com/docs/reference/python/auth-resetpasswordforemail),
+[password update](https://supabase.com/docs/reference/python/auth-updateuser) and
+[redirect patterns](https://supabase.com/docs/guides/auth/redirect-urls).
+The Supabase changelog was inspected; no applicable Python reset/update breaking
+change required a dependency update.
+
+### Remaining hosted recovery acceptance
+
+- Obtain explicit authorization naming the tester account/address before sending
+  real recovery email or changing its password. Existing signup/login authorization
+  is not treated as authorization to mutate a password.
+- Verify the extra callback allowlist and reset-email template. Exercise genuine
+  email delivery, same-browser completion, an unused link in the wrong browser,
+  replay, expiry and overlapping requests. Preserve the existing confirmation gates.
+- With explicit mutation authorization, verify one successful password change,
+  normal login afterward, safe denial of reuse and unchanged access for a separate
+  user. Record provider behavior for other sessions of the changed account without
+  promising they survive. Record every executed hosted case separately.
+
+Offline/browser checks below use only synthetic provider fixtures. They do not
+establish hosted email delivery or private-document isolation. Full logout remains
+Story 2.3; a full manual screen-reader audit and HTTPS-browser cookie check are
+still pending.
+
+### Initial recovery verification before review corrections
+
+- `.venv/Scripts/python.exe -m pytest tests/test_auth.py -q -p no:cacheprovider`:
+  **145 passed**, one existing Starlette/httpx deprecation warning.
+- `uv run --group pdf-experiment pytest -q -p no:cacheprovider`:
+  **207 passed, 1 skipped**, the same existing deprecation warning.
+- `node tests/browser-auth.cjs`: **20 scenarios passed**, including the recovery
+  form's labelled controls, matching validation, background-focus draft retention,
+  keyboard operation, 320/390/480-pixel and 200% reflow. The ignored screenshot
+  `test-results/account-recovery-200-percent.png` was visually inspected: no clipping
+  or horizontal overflow was observed.
+- `node tests/browser-demo.cjs`: **11 scenarios passed**, 21 fixture generation
+  requests; the credential-free demo and its delayed-request protections remain valid.
+- `git diff --check`: passed; only standard LF/CRLF conversion notices were emitted.
+
+| Spec matrix row | Executed synthetic evidence |
+| --- | --- |
+| Request | Existing/missing-account generic acknowledgement; safe outage; email-only body and no login. |
+| Callback | Exact SDK redirect/state, PKCE challenge and actual verifier; validated identity; rotated restricted authority; clean browser URL. |
+| Invalid link | Wrong browser/purpose, missing state/code/verifier, expiry including during exchange, replay/restart, exact query and independent overlapping attempts. |
+| Update | Matching UI validation, password-only provider write, consumed grant, normal-session rejection, normal authentication denial and ordinary login afterward. |
+| Race/outage | Concurrent duplicate updates invoke one adapter write; SDK owner/email mismatches before mutation including both refresh paths; response mismatch/timeout/deadline failures; no grant reuse or late cookie overwrite. |
+| Protection | Origin/CSRF rejection, malformed/oversized/slow bodies before provider work, unavailable configuration, shared capacity, no-store, opaque cookies, safe errors and browser storage/URL/console cleanup. |
+
+All new provider responses and emails in these checks are synthetic. The full
+suite's unchanged skip is not counted as executed coverage. Hosted recovery,
+email delivery and real password mutation remain unexecuted.
+
+### Final verification after independent review corrections
+
+All three review layers completed before triage; every finding and disposition is
+recorded in the [recovery specification](spec-2-2-recover-a-password-through-a-restricted-session.md).
+Seven small patch groups addressed callback ordering, Unicode bounds, precise
+pre-admission errors, navigation, overlapping SDK attempts, expiry during final
+validation and failed-request capacity cleanup. Local email admission/throttling
+for public operation is pre-existing hardening recorded in
+[deferred work](deferred-work.md); current per-browser limits do not prevent quota
+exhaustion. No provider settings or paid services were changed.
+
+Final parent results supersede initial test counts above:
+
+- Full Python suite: **213 passed, one expected PDF platform skip**, one existing
+  Starlette/httpx warning, 26.89 seconds. Ignored result file:
+  `test-results/recovery-parent-verification-final.xml`.
+- XML audit: **151 auth cases**, all executed/passed, including three blocked
+  recovery-versus-login races, two expiry-during-final-validation cases and repeated
+  failed-request cleanup/retry.
+- Real browser with test-only provider: **23 account scenarios** and **11 demo
+  scenarios**, 21 fixture generation requests. Parent inspected the updated
+  recovery screenshot at 200% with the login navigation action.
+- The original synthetic callback-race probe changed from replacing a newer
+  login with restricted authority to rejecting the stale callback without setting
+  `sb_session`; the newer normal identity remained authenticated.
+- Diff checks passed. No application code changed after these final checks.
+
+Recovery password fields now accept 8–1,024 Unicode code points consistently with
+the server. Known pre-admission errors retain the recovery form with specific
+guidance; unknown/admitted failures remain conservative. Users can return from
+restricted mode to normal login without a password write, and signed-in users
+can reveal the existing account/recovery forms. A browser authority revision
+rejects recovery rotation when another authentication transition happened during
+provider exchange; sequential independent attempts still work.
+
+The configured local server was restarted with one worker (PID 35884, tool session
+37132). Bootstrap/account read-only checks confirm the new recovery surface and
+privacy headers; they send no email and do not mutate an account. The spec's code
+workflow is done and Story 2.2 is at review, while the hosted checks above remain
+open. Story 2.1's remaining email-confirmation acceptance is unchanged.

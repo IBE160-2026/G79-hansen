@@ -1,0 +1,3 @@
+- source_spec: `.docs/implementation-artifacts/spec-2-2-recover-a-password-through-a-restricted-session.md`
+  summary: Add bounded recipient/request email throttling before public operation, covering signup and recovery together.
+  evidence: Baseline signup already lets fresh browser bindings consume the shared hosted email quota; recovery shares this existing admission envelope. Supabase rate limits actual sends, while per-browser pending capacity does not prevent quota exhaustion. Review finding B7 is verified medium pre-existing hardening work; no paid SMTP or hosted setting change was introduced.

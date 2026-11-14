@@ -57,9 +57,29 @@ async function main() {
     await ready(page);
     await other.goto(`${baseURL}/account`);
     await ready(other);
+    async function recoveryPage(email) {
+      const context = await browser.newContext();
+      context.on('page', current => {
+        current.on('console', message => messages.push(message.text()));
+        current.on('pageerror', error => errors.push(error.message));
+      });
+      const current = await context.newPage();
+      await openRecovery(current, email);
+      return {context, current};
+    }
+    async function openRecovery(current, email) {
+      await current.goto(`${baseURL}/account`);
+      await ready(current);
+      await current.locator('#recovery-email').fill(email);
+      await current.locator('#recovery-form button').click();
+      await current.waitForFunction(() => document.querySelector('#account-status').textContent.includes('Hvis kontoen finnes'));
+      const links = await (await fetch(`${baseURL}/__test/links`)).json();
+      await current.goto(links.at(-1).url);
+      await current.locator('#account-recovery').waitFor({state: 'visible'});
+    }
 
     await check('Norwegian labels, autocomplete, status headers and accessible form controls', async () => {
-      assert.equal(await page.getByLabel('E-post', {exact: true}).count(), 2);
+      assert.equal(await page.getByLabel('E-post', {exact: true}).count(), 3);
       assert.equal(await page.locator('#login-password').getAttribute('autocomplete'), 'current-password');
       assert.equal(await page.locator('#signup-password').getAttribute('autocomplete'), 'new-password');
       const response = await first.request.get(`${baseURL}/api/v1/auth/status`);
@@ -213,6 +233,289 @@ async function main() {
       await page.locator('#account-error').waitFor({state: 'visible'});
       assert.equal(page.url(), `${baseURL}/account`);
       assert.match(await page.locator('#account-error').innerText(), /Start registreringen på nytt/);
+    });
+
+    await check('recovery stays browser-bound, restricts access, validates matching passwords and requires normal login', async () => {
+      await page.goto(`${baseURL}/account`);
+      await ready(page);
+      await other.goto(`${baseURL}/account`);
+      await ready(other);
+      await fill(other, 'login', 'second@example.test');
+      await submit(other, 'login');
+      await other.locator('#account-signed-in').waitFor({state: 'visible'});
+      for (let index = 0; index < 2; index++) {
+        await page.locator('#recovery-email').fill('first@example.test');
+        await page.locator('#recovery-form button').click();
+        await page.waitForFunction(() => document.querySelector('#account-status').textContent.includes('Hvis kontoen finnes'));
+      }
+      const links = (await (await fetch(`${baseURL}/__test/links`)).json()).filter(link => link.purpose === 'recovery');
+      assert.equal(links.length, 2);
+      assert.notEqual(links[0].url, links[1].url);
+      await other.goto(links[0].url);
+      await other.locator('#account-error').waitFor({state: 'visible'});
+      assert.match(await other.locator('#account-error').innerText(), /ny lenke.*samme nettleser/);
+      assert.equal(other.url(), `${baseURL}/account`);
+      assert.equal(await other.locator('#account-email').innerText(), 'second@example.test');
+      const normal = await (await second.request.get(`${baseURL}/api/v1/auth/status`)).json();
+      const denied = await second.request.post(`${baseURL}/api/v1/auth/recovery/password`, {headers: {Origin: baseURL, 'X-CSRF-Token': normal.csrfToken}, data: {password: 'BROWSER_NEW_PASSWORD'}});
+      assert.equal(denied.status(), 401);
+      await page.goto(links[0].url);
+      await page.locator('#account-recovery').waitFor({state: 'visible'});
+      assert.equal(page.url(), `${baseURL}/account`);
+      assert.equal(await page.locator('#account-forms').isVisible(), false);
+      assert.equal(await page.locator('#account-signed-in').isVisible(), false);
+      const restricted = await (await first.request.get(`${baseURL}/api/v1/auth/status`)).json();
+      assert.equal(restricted.authenticated, false);
+      assert.equal(restricted.recoveryAvailable, true);
+      assert.equal('email' in restricted, false);
+      assert.equal(await page.locator('#recovery-password-confirm').getAttribute('autocomplete'), 'new-password');
+      await page.locator('#recovery-password').focus();
+      await page.keyboard.press('Tab');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'recovery-password-confirm');
+      for (const width of [320, 390, 480, 1280]) {
+        await page.setViewportSize({width, height: 1000});
+        assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      }
+      await page.evaluate(() => { document.documentElement.style.zoom = '200%'; });
+      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      await fs.mkdir(path.join(root, 'test-results'), {recursive: true});
+      await page.screenshot({path: path.join(root, 'test-results/account-recovery-200-percent.png'), fullPage: true});
+      await page.evaluate(() => { document.documentElement.style.zoom = ''; });
+      const tree = await page.locator('main').ariaSnapshot();
+      assert.match(tree, /heading "Velg nytt passord"/);
+      await page.locator('#recovery-password').fill('BROWSER_NEW_PASSWORD');
+      const background = page.waitForResponse(response => response.url().endsWith('/api/v1/auth/status'));
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await background;
+      await page.waitForFunction(() => !document.querySelector('#recovery-password-form button').disabled);
+      assert.equal(await page.locator('#recovery-password').inputValue(), 'BROWSER_NEW_PASSWORD');
+      await page.locator('#recovery-password-confirm').fill('BROWSER_MISMATCH');
+      await page.locator('#recovery-password-form button').click();
+      assert.equal(await page.locator('#recovery-password-confirm').evaluate(input => input.validationMessage), 'Passordene må være like.');
+      assert.deepEqual(await (await fetch(`${baseURL}/__test/updates`)).json(), []);
+      await page.locator('#recovery-password-confirm').fill('BROWSER_NEW_PASSWORD');
+      await page.locator('#recovery-password-form button').click();
+      await page.waitForFunction(() => document.querySelector('#account-status').textContent.includes('Passordet er endret'));
+      assert.equal(await page.locator('#account-recovery').isVisible(), false);
+      assert.equal(await page.locator('#recovery-password').inputValue(), '');
+      assert.equal(await page.locator('#recovery-password-confirm').inputValue(), '');
+      await page.goto(links[0].url);
+      await page.locator('#account-error').waitFor({state: 'visible'});
+      await fill(page, 'login', 'first@example.test', 'BROWSER_NEW_PASSWORD');
+      await submit(page, 'login');
+      await page.locator('#account-signed-in').waitFor({state: 'visible'});
+      const refreshed = page.waitForResponse(response => response.url().endsWith('/api/v1/auth/status'));
+      await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+      await refreshed;
+      assert.equal(await page.locator('#account-error').isVisible(), false);
+      await other.reload();
+      await other.locator('#account-signed-in').waitFor({state: 'visible'});
+      assert.equal(await other.locator('#account-email').innerText(), 'second@example.test');
+      await fetch(`${baseURL}/__test/end-sessions`, {method: 'POST'});
+      await page.reload();
+      await ready(page);
+    });
+
+    await check('uncertain recovery update consumes the grant and explains new-link or login outcome', async () => {
+      await page.locator('#recovery-email').fill('uncertain@example.test');
+      await page.locator('#recovery-form button').click();
+      await page.waitForFunction(() => document.querySelector('#account-status').textContent.includes('Hvis kontoen finnes'));
+      const links = await (await fetch(`${baseURL}/__test/links`)).json();
+      await page.goto(links.at(-1).url);
+      await page.locator('#account-recovery').waitFor({state: 'visible'});
+      await page.locator('#recovery-password').fill('BROWSER_UNCERTAIN_PASSWORD');
+      await page.locator('#recovery-password-confirm').fill('BROWSER_UNCERTAIN_PASSWORD');
+      await page.locator('#recovery-password-form button').click();
+      await page.locator('#account-error').waitFor({state: 'visible'});
+      assert.match(await page.locator('#account-error').innerText(), /kan være endret.*ny lenke/);
+      assert.equal(await page.locator('#account-recovery').isVisible(), false);
+      assert.equal(await page.locator('#account-forms').isVisible(), true);
+      assert.equal(await page.locator('#recovery-password').inputValue(), '');
+      const state = await (await first.request.get(`${baseURL}/api/v1/auth/status`)).json();
+      assert.equal(state.recoveryAvailable, false);
+      await fill(page, 'login', 'uncertain@example.test', 'BROWSER_UNCERTAIN_PASSWORD');
+      await submit(page, 'login');
+      await page.locator('#account-signed-in').waitFor({state: 'visible'});
+      await fetch(`${baseURL}/__test/end-sessions`, {method: 'POST'});
+      await page.reload();
+      await ready(page);
+    });
+
+    await check('duplicate recovery submissions and stale password replies cannot restore hidden authority', async () => {
+      let requestCount = 0;
+      await page.route('**/api/v1/auth/recovery/request', async route => {
+        requestCount++;
+        await pause(80);
+        await route.continue();
+      });
+      await page.locator('#recovery-email').fill('duplicate@example.test');
+      await page.locator('#recovery-form').evaluate(form => { form.requestSubmit(); form.requestSubmit(); });
+      await page.waitForFunction(() => document.querySelector('#account-status').textContent.includes('Hvis kontoen finnes'));
+      assert.equal(requestCount, 1);
+      await page.unroute('**/api/v1/auth/recovery/request');
+      const links = await (await fetch(`${baseURL}/__test/links`)).json();
+      await page.goto(links.at(-1).url);
+      await page.locator('#account-recovery').waitFor({state: 'visible'});
+      await page.addScriptTag({content: `(() => {const real = window.fetch.bind(window);window.fetch = (url, options) => {const {signal, ...rest} = options;return real(url, rest);};})();`});
+      let release, enter;
+      const held = new Promise(resolve => { release = resolve; });
+      const entered = new Promise(resolve => { enter = resolve; });
+      let writes = 0;
+      await page.route('**/api/v1/auth/recovery/password', async route => {
+        writes++; enter(); await held;
+        await route.fulfill({json: {status: 'password_updated', authenticated: false, recoveryAvailable: false}});
+      });
+      await page.locator('#recovery-password').fill('BROWSER_DUPLICATE_PASSWORD');
+      await page.locator('#recovery-password-confirm').fill('BROWSER_DUPLICATE_PASSWORD');
+      await page.locator('#recovery-password-form button').click();
+      await entered;
+      await page.locator('#recovery-password-form').evaluate(form => { form.requestSubmit(); form.requestSubmit(); });
+      assert.equal(writes, 1);
+      await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide')));
+      release();
+      await pause(100);
+      assert.equal(await page.locator('#account-recovery').isVisible(), false);
+      assert.equal(await page.locator('#recovery-password').inputValue(), '');
+      assert.doesNotMatch(await page.locator('#account-status').innerText(), /Passordet er endret/);
+      await page.unroute('**/api/v1/auth/recovery/password');
+      await fetch(`${baseURL}/__test/end-sessions`, {method: 'POST'});
+      await page.reload();
+      await ready(page);
+    });
+
+    await check('recovery cleanup clears fragments, passwords, storage and console secrets', async () => {
+      await page.goto(`${baseURL}/account?recovery=invalid#access_token=BROWSER_PRIVATE_ACCESS`);
+      await page.locator('#account-error').waitFor({state: 'visible'});
+      assert.equal(page.url(), `${baseURL}/account`);
+      assert.match(await page.locator('#account-error').innerText(), /Gjenopprettingslenken/);
+      const stored = await page.evaluate(async () => ({local: {...localStorage}, session: {...sessionStorage}, cookies: document.cookie,
+        databases: (await indexedDB.databases()).length, caches: (await caches.keys()).length}));
+      assert.deepEqual(stored, {local: {}, session: {}, cookies: '', databases: 0, caches: 0});
+      assert.doesNotMatch(await page.content(), /BROWSER_(PRIVATE|NEW|UNCERTAIN|DUPLICATE|MISMATCH)/);
+      assert.doesNotMatch(messages.join('\n') + output, /BROWSER_(PRIVATE|NEW|UNCERTAIN|DUPLICATE|MISMATCH)/);
+      await page.reload();
+      await ready(page);
+    });
+
+    await check('recovery password bounds count Unicode code points at both supplementary-character boundaries', async () => {
+      const {context, current} = await recoveryPage('unicode@example.test');
+      try {
+        const writes = (await (await fetch(`${baseURL}/__test/updates`)).json()).length;
+        const submitted = [];
+        current.on('request', request => {
+          if (request.url().endsWith('/api/v1/auth/recovery/password')) submitted.push(request.postDataJSON().password);
+        });
+        for (const length of [4, 7, 1025]) {
+          const value = '😀'.repeat(length);
+          await current.locator('#recovery-password').fill(value);
+          await current.locator('#recovery-password-confirm').fill(value);
+          assert.equal(await current.locator('#recovery-password').inputValue(), value);
+          await current.locator('#recovery-password-form button').click();
+          assert.equal(await current.locator('#recovery-password').evaluate(input => input.validationMessage), 'Bruk 8–1024 tegn i passordet.');
+          assert.equal(submitted.length, 0);
+          assert.equal((await (await fetch(`${baseURL}/__test/updates`)).json()).length, writes);
+          assert.equal(await current.locator('#account-recovery').isVisible(), true);
+        }
+        for (const [index, length] of [8, 1024].entries()) {
+          if (index) await openRecovery(current, 'unicode@example.test');
+          const value = '😀'.repeat(length);
+          await current.locator('#recovery-password').fill(value);
+          await current.locator('#recovery-password-confirm').fill(value);
+          await current.locator('#recovery-password-form button').click();
+          await current.waitForFunction(() => document.querySelector('#account-status').textContent.includes('Passordet er endret'));
+          assert.equal(submitted[index], value);
+          assert.equal((await (await fetch(`${baseURL}/__test/updates`)).json()).length, writes + index + 1);
+        }
+      } finally { await context.close(); }
+    });
+
+    await check('pre-admission password errors keep recovery correctable while unknown and admitted errors stay conservative', async () => {
+      const {context, current} = await recoveryPage('correctable@example.test');
+      try {
+        const writes = (await (await fetch(`${baseURL}/__test/updates`)).json()).length;
+        for (const [code, status, guidance] of [
+          ['invalid_request', 422, /Kontroller passordet/],
+          ['request_rejected', 403, /kontrollere tilgangen på nytt/],
+          ['auth_unavailable', 503, /ikke tilgjengelig nå/],
+        ]) {
+          await current.route('**/api/v1/auth/recovery/password', route => route.fulfill({status, json: {code, message: 'BROWSER_PRIVATE_BODY'}}), {times: 1});
+          await current.locator('#recovery-password').fill('BROWSER_CORRECTABLE_PASSWORD');
+          await current.locator('#recovery-password-confirm').fill('BROWSER_CORRECTABLE_PASSWORD');
+          await current.locator('#recovery-password-form button').click();
+          await current.locator('#account-error').waitFor({state: 'visible'});
+          const text = await current.locator('#account-error').innerText();
+          assert.match(text, guidance);
+          assert.match(text, /Passordet er ikke endret/);
+          assert.doesNotMatch(text, /kan være endret|BROWSER_PRIVATE/);
+          assert.equal(await current.locator('#account-recovery').isVisible(), true);
+          assert.equal(await current.locator('#account-forms').isVisible(), false);
+          assert.equal(await current.locator('#recovery-password').inputValue(), '');
+          assert.equal((await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json()).recoveryAvailable, true);
+          assert.equal((await (await fetch(`${baseURL}/__test/updates`)).json()).length, writes);
+          if (code !== 'invalid_request') {
+            await current.locator('#account-retry').click();
+            await current.locator('#account-recovery').waitFor({state: 'visible'});
+            await current.waitForFunction(() => !document.querySelector('#recovery-password-form button').disabled);
+          }
+        }
+        for (const code of ['recovery_failed', 'unknown_failure']) {
+          await current.route('**/api/v1/auth/recovery/password', route => route.fulfill({status: 503, json: {code}}), {times: 1});
+          await current.locator('#recovery-password').fill('BROWSER_CORRECTABLE_PASSWORD');
+          await current.locator('#recovery-password-confirm').fill('BROWSER_CORRECTABLE_PASSWORD');
+          await current.locator('#recovery-password-form button').click();
+          await current.locator('#account-error').waitFor({state: 'visible'});
+          assert.match(await current.locator('#account-error').innerText(), /kan være endret/);
+          assert.equal(await current.locator('#account-recovery').isVisible(), false);
+          await current.reload();
+          await current.locator('#account-recovery').waitFor({state: 'visible'});
+        }
+        await current.locator('#recovery-password').fill('BROWSER_CORRECTABLE_PASSWORD');
+        await current.locator('#recovery-password-confirm').fill('BROWSER_CORRECTABLE_PASSWORD');
+        await current.locator('#recovery-password-form button').click();
+        await current.waitForFunction(() => document.querySelector('#account-status').textContent.includes('Passordet er endret'));
+        assert.equal((await (await fetch(`${baseURL}/__test/updates`)).json()).length, writes + 1);
+      } finally { await context.close(); }
+    });
+
+    await check('recovery can return to normal login and signed-in users can request recovery without a password write', async () => {
+      const {context, current} = await recoveryPage('navigation@example.test');
+      try {
+        const writes = (await (await fetch(`${baseURL}/__test/updates`)).json()).length;
+        const cookies = await context.cookies();
+        const grant = cookies.find(cookie => cookie.name === 'sb_session').value;
+        const binding = cookies.find(cookie => cookie.name === 'sb_browser').value;
+        await current.locator('#recovery-password').fill('BROWSER_NAVIGATION_DRAFT');
+        await current.locator('#recovery-login').click();
+        await ready(current);
+        assert.equal(await current.locator('#recovery-password').inputValue(), '');
+        assert.equal(await current.locator('#account-recovery').isVisible(), false);
+        assert.equal(await current.evaluate(() => document.activeElement.id), 'login-email');
+        const focusStatus = current.waitForResponse(response => response.url().endsWith('/api/v1/auth/status'));
+        await current.evaluate(() => window.dispatchEvent(new Event('focus')));
+        await focusStatus;
+        await current.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+        assert.equal(await current.locator('#account-forms').isVisible(), true);
+        await fill(current, 'login', 'navigation@example.test');
+        await submit(current, 'login');
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+        const state = await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json();
+        assert.equal(state.authenticated, true);
+        assert.equal(state.recoveryAvailable, false);
+        const old = await (await fetch(`${baseURL}/api/v1/auth/status`, {headers: {Cookie: `sb_browser=${binding}; sb_session=${grant}`}})).json();
+        assert.equal(old.authenticated, false);
+        assert.equal(old.recoveryAvailable, false);
+        await current.locator('#account-show-forms').click();
+        await ready(current);
+        assert.equal(await current.locator('#recovery-form button').isVisible(), true);
+        await current.locator('#recovery-email').fill('navigation@example.test');
+        await current.locator('#recovery-form button').click();
+        await current.waitForFunction(() => document.querySelector('#account-status').textContent.includes('Hvis kontoen finnes'));
+        const links = await (await fetch(`${baseURL}/__test/links`)).json();
+        await current.goto(links.at(-1).url);
+        await current.locator('#account-recovery').waitFor({state: 'visible'});
+        assert.equal((await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, false);
+        assert.equal((await (await fetch(`${baseURL}/__test/updates`)).json()).length, writes);
+      } finally { await context.close(); }
     });
 
     await check('missing config, provider outage and malformed success never fabricate authentication', async () => {

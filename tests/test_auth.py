@@ -47,6 +47,18 @@ class FakeAuth:
         pending.verifier = "v" * 43 + str(len(self.redirects))
         self.redirects.append(redirect)
 
+    def request_recovery(self, email, pending, redirect):
+        self.calls.append("request_recovery")
+        if self.fail:
+            raise AuthFailure()
+        pending.verifier = "r" * 43 + str(len(self.redirects))
+        self.redirects.append(redirect)
+
+    def update_password(self, identity, password, *, expires_at):
+        self.calls.append("update_password")
+        if self.fail:
+            raise AuthFailure()
+
     def login(self, email, password):
         self.calls.append("login")
         if self.fail:
@@ -105,7 +117,7 @@ def test_missing_invalid_or_disabled_configuration_fails_closed_without_provider
     assert not settings.available
     client, fake, _ = setup(settings)
     response = client.get("/api/v1/auth/status")
-    assert response.json() == {"available": False, "authenticated": False}
+    assert response.json() == {"available": False, "authenticated": False, "recoveryAvailable": False}
     assert response.headers["cache-control"] == "no-store"
     assert client.get("/api/v1/demo/fixture").status_code == 200
     assert client.post("/api/v1/demo/generate", json={"schemaVersion": "1.0", "fixtureId": "memory-basics-v1"}).status_code == 200
@@ -794,3 +806,448 @@ def test_real_sdk_status_retires_invalid_existing_identity_without_cookie_mutati
     assert "sb_session=" not in response.headers.get("set-cookie", "")
     assert response.headers["cache-control"] == "no-store"
     assert "PRIVATE" not in response.text
+
+
+def recovery_grant(client, fake):
+    assert post(client, "recovery/request", {"email": EMAIL}).json()["status"] == "check_email"
+    response = callback(client, fake.redirects[-1])
+    assert response.headers["location"] == "/account?recovery=success"
+    return client.cookies["sb_session"]
+
+
+def test_recovery_replaces_local_session_with_restricted_authority_and_requires_login():
+    client, fake, registry = setup()
+    assert post(client, "login").status_code == 200
+    original = client.cookies["sb_session"]
+    grant = recovery_grant(client, fake)
+    assert grant != original and original not in registry.sessions
+    assert not registry.sessions and grant in registry.recoveries
+    before = list(fake.calls)
+    display = client.get("/api/v1/auth/status").json()
+    assert display["authenticated"] is False and display["recoveryAvailable"] is True
+    assert "email" not in display and fake.calls == before
+    updated = post(client, "recovery/password", {"password": PASSWORD})
+    assert updated.json() == {"status": "password_updated", "authenticated": False, "recoveryAvailable": False}
+    assert "sb_session=" not in updated.headers.get("set-cookie", "")
+    assert not registry.recoveries and fake.calls.count("update_password") == 1
+    assert post(client, "recovery/password", {"password": PASSWORD}).status_code == 401
+    assert client.get("/api/v1/auth/status").json()["authenticated"] is False
+    assert post(client, "login").status_code == 200
+    assert client.cookies["sb_session"] != grant
+
+
+@pytest.mark.parametrize("case", ["wrong_browser", "missing_binding", "missing_state", "missing_code", "missing_verifier", "purpose", "expired", "replay", "restart", "duplicate_state", "implicit"])
+def test_recovery_callback_binding_purpose_expiry_and_exact_query(case):
+    now = [time.time()]
+    client, fake, registry = setup(registry=Registry(clock=lambda: now[0]))
+    post(client, "recovery/request", {"email": EMAIL})
+    redirect = fake.redirects[-1]
+    pending = next(iter(registry.pending.values()))
+    if case == "wrong_browser":
+        client.cookies.clear()
+        headers(client)
+    elif case == "missing_binding":
+        client.cookies.clear()
+    elif case == "missing_verifier":
+        pending.verifier = None
+    elif case == "purpose":
+        pending.purpose = "signup"
+    elif case == "expired":
+        now[0] += 600
+    elif case == "restart":
+        registry.pending.clear()
+    elif case == "replay":
+        callback(client, redirect)
+        fake.calls.clear()
+    elif case == "duplicate_state":
+        redirect += "&state=" + "z" * 43
+    elif case == "implicit":
+        redirect += "&access_token=PRIVATE_ACCESS"
+    if case == "missing_state":
+        redirect = ORIGIN + "/api/v1/auth/recovery/callback"
+    response = client.get(redirect, follow_redirects=False) if case == "missing_code" else callback(client, redirect)
+    assert response.headers["location"] == "/account?recovery=invalid"
+    assert "exchange" not in fake.calls
+    assert not registry.sessions
+    assert response.headers["cache-control"] == "no-store"
+
+
+def test_recovery_and_signup_share_attempt_limits_but_keep_distinct_verifiers():
+    client, fake, registry = setup()
+    for action in ["signup", "recovery/request"] * 2:
+        assert post(client, action, PAYLOAD if action == "signup" else {"email": EMAIL}).status_code == 200
+    assert len(registry.pending) == 4
+    assert len({pending.verifier for pending in registry.pending.values()}) == 4
+    assert post(client, "recovery/request", {"email": EMAIL}).status_code == 429
+    recovery = fake.redirects[1]
+    signup_path = recovery.replace("/recovery/callback", "/callback")
+    assert callback(client, signup_path).headers["location"] == "/account?confirmation=invalid"
+    assert callback(client, recovery).headers["location"] == "/account?recovery=success"
+    assert callback(client, fake.redirects[0]).headers["location"] == "/account?confirmation=success"
+    assert len(registry.sessions) == 1 and not registry.recoveries
+
+
+def test_recovery_grants_combined_capacity_expiry_rotation_and_other_users():
+    now = [1000.0]
+    registry, fake = Registry(clock=lambda: now[0], capacity=2), FakeAuth()
+    first, other = [registry.browser(None)[0] for _ in range(2)]
+    normal = registry.rotate(None, first, fake.identity())
+    other_session = registry.rotate(None, other, fake.identity("other@example.test"))
+    with pytest.raises(AuthFailure, match="auth_capacity"):
+        registry.rotate(None, first, fake.identity(), recovery=True)
+    grant = registry.rotate(normal, first, fake.identity(), recovery=True)
+    assert normal not in registry.sessions and other_session in registry.sessions
+    assert registry.authenticated(grant, first, fake) is None
+    assert not registry.recovery_available(grant, other)
+    with pytest.raises(AuthFailure, match="invalid_recovery"):
+        registry.claim_recovery(other_session, other)
+    assert registry.authenticated(other_session, other, fake)
+    now[0] += 600
+    assert not registry.recovery_available(grant, first)
+    assert other_session in registry.sessions
+    assert registry.rotate(None, first, fake.identity(), recovery=True)
+
+
+@pytest.mark.parametrize("action,payload", [("recovery/request", {"email": EMAIL}), ("recovery/password", {"password": PASSWORD})])
+@pytest.mark.parametrize("case", ["origin", "csrf", "extra_owner", "extra_metadata", "malformed", "oversize", "wrong_type"])
+def test_recovery_protections_and_strict_bounded_bodies_precede_provider(action, payload, case):
+    client, fake, _ = setup()
+    protection = headers(client)
+    content = json.dumps(payload)
+    protection["Content-Type"] = "application/json"
+    if case == "origin":
+        protection["Origin"] = "https://attacker.test"
+    elif case == "csrf":
+        protection["X-CSRF-Token"] = "wrong"
+    elif case == "extra_owner":
+        content = json.dumps({**payload, "ownerId": OTHER})
+    elif case == "extra_metadata":
+        content = json.dumps({**payload, "user_metadata": {"owner": OTHER}})
+    elif case == "malformed":
+        content = "{PRIVATE"
+    elif case == "oversize":
+        content += " " * 8192
+    elif case == "wrong_type":
+        content = json.dumps({key: 23 for key in payload})
+    response = client.post("/api/v1/auth/" + action, headers=protection, content=content)
+    assert response.status_code == (403 if case in ("origin", "csrf") else 422)
+    assert not fake.calls and "PRIVATE" not in response.text
+    assert response.headers["cache-control"] == "no-store"
+
+
+@pytest.mark.parametrize("fail", [False, True])
+def test_concurrent_password_updates_claim_once_and_late_reply_never_changes_new_login_cookie(fail):
+    async def scenario():
+        fake, registry = FakeAuth(), Registry()
+        entered, release = Event(), Event()
+        def update(identity, password, *, expires_at):
+            fake.calls.append("update_password")
+            entered.set()
+            assert release.wait(3)
+            if fail:
+                raise AuthFailure()
+        fake.update_password = update
+        app = create_app(SETTINGS, auth_adapter=fake, registry=registry)
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]}
+            await client.post("/api/v1/auth/recovery/request", json={"email": EMAIL}, headers=protection)
+            await client.get(fake.redirects[-1] + "&code=PRIVATE_CODE")
+            pending = asyncio.create_task(client.post("/api/v1/auth/recovery/password", json={"password": PASSWORD}, headers=protection))
+            assert await asyncio.to_thread(entered.wait, 2)
+            duplicate = await client.post("/api/v1/auth/recovery/password", json={"password": PASSWORD}, headers=protection)
+            assert duplicate.status_code == 401
+            login = await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
+            assert login.status_code == 200
+            newest = client.cookies["sb_session"]
+            release.set()
+            response = await pending
+            assert response.status_code == (503 if fail else 200)
+            if fail:
+                assert response.json()["code"] == "recovery_failed"
+                assert "kan være endret" in response.json()["message"]
+            assert "sb_session=" not in response.headers.get("set-cookie", "")
+            assert client.cookies["sb_session"] == newest
+            assert newest in registry.sessions and not registry.recoveries
+            assert fake.calls.count("update_password") == 1
+    asyncio.run(scenario())
+
+
+def recovery_token(expires):
+    def encoded(value):
+        return base64.urlsafe_b64encode(json.dumps(value).encode()).decode().rstrip("=")
+    return encoded({"alg": "HS256"}) + "." + encoded({"exp": expires, "sub": OWNER}) + ".c3ludGhldGlj"
+
+
+def test_http_recovery_exact_sdk_redirect_challenge_actual_verifier_and_password_only_write():
+    registry, recoveries, writes = Registry(), [], []
+    jwt = recovery_token(int(time.time()) + 3600)
+    def transport(request):
+        body = json.loads(request.content) if request.content else None
+        if request.url.path.endswith("/recover"):
+            pending = list(registry.pending.values())[-1]
+            assert pending.purpose == "recovery" and "/" not in pending.verifier
+            assert body["email"] == EMAIL
+            assert body["code_challenge"] == base64.urlsafe_b64encode(hashlib.sha256(pending.verifier.encode()).digest()).decode().rstrip("=")
+            assert body["code_challenge_method"] == "s256"
+            recoveries.append(request.url.params["redirect_to"])
+            return httpx.Response(200, json={})
+        if request.url.path.endswith("/token"):
+            assert request.url.params["grant_type"] == "pkce"
+            index = int(body["auth_code"].removeprefix("PRIVATE_CODE_"))
+            assert body == {"auth_code": "PRIVATE_CODE_" + str(index), "code_verifier": verifiers[index]}
+            session = provider_session()
+            session["access_token"] = jwt
+            return httpx.Response(200, json=session)
+        assert request.headers["authorization"] == "Bearer " + jwt
+        if request.method == "PUT":
+            writes.append(body)
+            assert body == {"password": PASSWORD}
+        return httpx.Response(200, json=provider_user())
+    adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
+    client = TestClient(create_app(SETTINGS, auth_adapter=adapter, registry=registry), base_url=ORIGIN)
+    for _ in range(2):
+        assert post(client, "recovery/request", {"email": EMAIL}).status_code == 200
+    assert recoveries == [ORIGIN + "/api/v1/auth/recovery/callback?state=" + state for state in registry.pending]
+    verifiers = [p.verifier for p in registry.pending.values()]
+    assert verifiers[0] != verifiers[1]
+    for index, redirect in enumerate(recoveries):
+        assert callback(client, redirect, "PRIVATE_CODE_" + str(index)).headers["location"] == "/account?recovery=success"
+        grant = client.cookies["sb_session"]
+        assert grant in registry.recoveries and not registry.sessions
+        display = client.get("/api/v1/auth/status").json()
+        assert display["authenticated"] is False and display["recoveryAvailable"] is True
+        assert len(registry.pending) == 1 - index
+        assert post(client, "recovery/password", {"password": PASSWORD}).status_code == 200
+        assert grant not in registry.recoveries and not registry.sessions
+    assert writes == [{"password": PASSWORD}] * 2
+
+
+@pytest.mark.parametrize("case", ["changed_owner", "changed_email", "unconfirmed", "expired_grant", "refreshed_owner", "refreshed_email", "post_write_owner", "write_timeout", "budget_before_write", "budget_after_write"])
+def test_sdk_recovery_validates_before_write_and_never_retries_uncertain_updates(case):
+    now, paths, writes = [0.0], [], []
+    jwt = recovery_token(int(time.time()) + (-10 if case.startswith("refreshed_") else 3600))
+    def transport(request):
+        paths.append((request.method, request.url.path))
+        if request.url.path.endswith("/token"):
+            assert request.url.params["grant_type"] == "refresh_token"
+            session = provider_session()
+            session["access_token"] = recovery_token(int(time.time()) + 3600)
+            if case == "refreshed_owner":
+                session["user"]["id"] = OTHER
+            elif case == "refreshed_email":
+                session["user"]["email"] = "other@example.test"
+            return httpx.Response(200, json=session)
+        user = provider_user()
+        if request.method == "PUT":
+            writes.append(json.loads(request.content))
+            if case == "write_timeout":
+                raise httpx.ReadTimeout("PRIVATE_PROVIDER_BODY")
+            if case == "post_write_owner":
+                user["id"] = OTHER
+            if case == "budget_after_write":
+                now[0] += 2
+        else:
+            if case == "changed_owner":
+                user["id"] = OTHER
+            elif case == "changed_email":
+                user["email"] = "other@example.test"
+            elif case == "unconfirmed":
+                user["email_confirmed_at"] = None
+            if case == "budget_before_write":
+                now[0] += 0.6
+        return httpx.Response(200, json=user)
+    adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport),
+                           budget_clock=lambda: now[0], operation_seconds=1)
+    identity = Identity(OWNER, EMAIL, jwt, "PRIVATE_REFRESH", time.time() + 3600)
+    with pytest.raises(AuthFailure):
+        adapter.update_password(identity, PASSWORD, expires_at=time.time() + (-1 if case == "expired_grant" else 600))
+    expected = 1 if case in ("post_write_owner", "write_timeout", "budget_after_write") else 0
+    assert len(writes) == expected
+
+
+def test_recovery_request_nonexistent_account_ack_and_provider_outage_are_safe():
+    for provider_status in (200, 404, 503):
+        def transport(request):
+            return httpx.Response(provider_status, headers={"X-Supabase-Api-Version": "2024-01-01"},
+                                  json={} if provider_status == 200 else {"code": "user_not_found" if provider_status == 404 else "unexpected_failure", "message": "PRIVATE_BODY"})
+        adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
+        client = TestClient(create_app(SETTINGS, auth_adapter=adapter), base_url=ORIGIN)
+        response = post(client, "recovery/request", {"email": EMAIL})
+        assert response.status_code == (503 if provider_status == 503 else 200)
+        assert "PRIVATE" not in response.text and "sb_session" not in client.cookies
+
+
+@pytest.mark.parametrize("action,payload", [("recovery/request", {"email": EMAIL}), ("recovery/password", {"password": PASSWORD})])
+def test_slow_recovery_body_rejects_before_provider_or_grant_consumption(monkeypatch, action, payload):
+    from app.api import auth
+    monkeypatch.setattr(auth, "CREDENTIAL_BODY_SECONDS", 0.02)
+    async def scenario():
+        fake, registry = FakeAuth(), Registry()
+        app = create_app(SETTINGS, auth_adapter=fake, registry=registry)
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            binding = client.cookies["sb_browser"]
+            grant = registry.rotate(None, binding, fake.identity(), recovery=True)
+            client.cookies.set("sb_session", grant, domain="127.0.0.1", path="/")
+            async def delayed():
+                body = json.dumps(payload).encode()
+                yield body[:10]
+                await asyncio.sleep(0.1)
+                yield body[10:]
+            response = await client.post("/api/v1/auth/" + action, content=delayed(), headers={
+                "Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"], "Content-Type": "application/json"})
+            assert response.status_code == 422 and response.headers["cache-control"] == "no-store"
+            assert not fake.calls and grant in registry.recoveries
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("case", ["email", "owner", "unconfirmed", "no_refresh"])
+def test_real_sdk_recovery_callback_rejects_invalid_identity_before_grant(case):
+    def transport(request):
+        if request.url.path.endswith("/recover"):
+            return httpx.Response(200, json={})
+        if request.url.path.endswith("/token"):
+            session = provider_session()
+            if case == "no_refresh":
+                session.pop("refresh_token")
+            return httpx.Response(200, json=session)
+        user = provider_user()
+        if case == "email":
+            user["email"] = "other@example.test"
+        elif case == "owner":
+            user["id"] = OTHER
+        elif case == "unconfirmed":
+            user["email_confirmed_at"] = None
+        return httpx.Response(200, json=user)
+    registry = Registry()
+    client = TestClient(create_app(SETTINGS, auth_adapter=SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport)), registry=registry), base_url=ORIGIN)
+    post(client, "recovery/request", {"email": EMAIL})
+    state = next(iter(registry.pending))
+    response = callback(client, ORIGIN + "/api/v1/auth/recovery/callback?state=" + state)
+    assert response.headers["location"] == "/account?recovery=invalid"
+    assert not registry.sessions and not registry.recoveries and not registry.pending
+
+
+def test_expiry_during_recovery_exchange_cannot_create_restricted_authority():
+    now = [time.time()]
+    client, fake, registry = setup(registry=Registry(clock=lambda: now[0]))
+    post(client, "recovery/request", {"email": EMAIL})
+    def delayed_exchange(code, pending):
+        now[0] = pending.expires
+        return fake.identity()
+    fake.exchange = delayed_exchange
+    assert callback(client, fake.redirects[0]).headers["location"] == "/account?recovery=invalid"
+    assert not registry.recoveries and not registry.pending
+
+
+@pytest.mark.parametrize("changed", ["owner", "email", "none"])
+def test_sdk_update_user_implicit_near_expiry_refresh_is_validated_before_put(changed):
+    jwt, calls = recovery_token(int(time.time()) + 5), []
+    def transport(request):
+        calls.append((request.method, request.url.path))
+        if request.url.path.endswith("/token"):
+            assert request.url.params["grant_type"] == "refresh_token"
+            session = provider_session()
+            session["access_token"] = recovery_token(int(time.time()) + 3600)
+            if changed == "owner":
+                session["user"]["id"] = OTHER
+            elif changed == "email":
+                session["user"]["email"] = "other@example.test"
+            return httpx.Response(200, json=session)
+        return httpx.Response(200, json=provider_user())
+    adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
+    identity = Identity(OWNER, EMAIL, jwt, "PRIVATE_REFRESH", time.time() + 5)
+    if changed == "none":
+        adapter.update_password(identity, PASSWORD, expires_at=time.time() + 600)
+    else:
+        with pytest.raises(AuthFailure):
+            adapter.update_password(identity, PASSWORD, expires_at=time.time() + 600)
+    assert sum(method == "PUT" for method, _ in calls) == (1 if changed == "none" else 0)
+    assert sum(path.endswith("/token") for _, path in calls) == 1
+
+
+@pytest.mark.parametrize("prior", ["anonymous", "normal", "recovery"])
+def test_blocked_recovery_exchange_cannot_replace_intervening_login_and_other_attempt_still_works(prior):
+    async def scenario():
+        fake, registry = FakeAuth(), Registry()
+        entered, release = Event(), Event()
+        app = create_app(SETTINGS, auth_adapter=fake, registry=registry)
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]}
+            if prior == "normal":
+                await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
+            elif prior == "recovery":
+                await client.post("/api/v1/auth/recovery/request", json={"email": EMAIL}, headers=protection)
+                await client.get(fake.redirects[-1] + "&code=PRIVATE_CODE")
+            for _ in range(2):
+                await client.post("/api/v1/auth/recovery/request", json={"email": EMAIL}, headers=protection)
+            blocked_link, independent_link = fake.redirects[-2:]
+            exchange = fake.exchange
+            def blocked_exchange(code, pending):
+                if code == "BLOCKED_PRIVATE_CODE":
+                    entered.set()
+                    assert release.wait(3)
+                return exchange(code, pending)
+            fake.exchange = blocked_exchange
+            blocked = asyncio.create_task(client.get(blocked_link + "&code=BLOCKED_PRIVATE_CODE"))
+            assert await asyncio.to_thread(entered.wait, 2)
+            response = await client.post("/api/v1/auth/login", json={"email": "other@example.test", "password": PASSWORD}, headers=protection)
+            assert response.status_code == 200
+            newest = client.cookies["sb_session"]
+            release.set()
+            response = await blocked
+            assert response.headers["location"] == "/account?recovery=invalid"
+            assert "sb_session=" not in response.headers.get("set-cookie", "")
+            assert client.cookies["sb_session"] == newest
+            assert newest in registry.sessions and not registry.recoveries
+            display = (await client.get("/api/v1/auth/status")).json()
+            assert display["authenticated"] is True and display["email"] == "other@example.test"
+            independent = await client.get(independent_link + "&code=PRIVATE_CODE")
+            assert independent.headers["location"] == "/account?recovery=success"
+            assert newest not in registry.sessions
+            grant = client.cookies["sb_session"]
+            assert grant in registry.recoveries and not registry.sessions
+            assert not registry.pending
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("crossing", ["refresh", "validation"])
+def test_grant_expiry_during_final_sdk_session_validation_prevents_put(crossing):
+    now = [time.time()]
+    expires, calls, refreshed = now[0] + 1, [], [False]
+    jwt = recovery_token(int(time.time()) + 5)
+    def transport(request):
+        calls.append((request.method, request.url.path))
+        if request.url.path.endswith("/token"):
+            refreshed[0] = True
+            if crossing == "refresh":
+                now[0] = expires
+            session = provider_session()
+            session["access_token"] = recovery_token(int(time.time()) + 3600)
+            return httpx.Response(200, json=session)
+        if refreshed[0] and crossing == "validation":
+            now[0] = expires
+        return httpx.Response(200, json=provider_user())
+    adapter = SupabaseAuth(SETTINGS, clock=lambda: now[0], transport=httpx.MockTransport(transport))
+    identity = Identity(OWNER, EMAIL, jwt, "PRIVATE_REFRESH", time.time() + 5)
+    with pytest.raises(AuthFailure, match="invalid_recovery"):
+        adapter.update_password(identity, PASSWORD, expires_at=expires)
+    assert refreshed[0] and now[0] == expires
+    assert not any(method == "PUT" for method, _ in calls)
+
+
+def test_failed_recovery_requests_release_pending_slots_and_provider_recovery_allows_retry():
+    client, fake, registry = setup()
+    fake.fail = True
+    for _ in range(5):
+        response = post(client, "recovery/request", {"email": EMAIL})
+        assert response.status_code == 503 and response.json()["code"] == "auth_unavailable"
+        assert not registry.pending
+    assert fake.calls.count("request_recovery") == 5
+    fake.fail = False
+    assert post(client, "recovery/request", {"email": EMAIL}).status_code == 200
+    assert len(registry.pending) == 1
+    assert callback(client, fake.redirects[-1]).headers["location"] == "/account?recovery=success"
+    assert not registry.pending and len(registry.recoveries) == 1

@@ -16,6 +16,7 @@ from app.adapters.auth import AuthFailure, Identity
 class Browser:
     csrf: str
     expires: float
+    authority_revision: int = 0
 
 
 @dataclass(repr=False)
@@ -25,6 +26,7 @@ class Pending:
     expires: float
     purpose: str = "signup"
     verifier: str | None = None
+    authority_revision: int | None = None
 
 
 @dataclass(repr=False)
@@ -34,6 +36,13 @@ class Session:
     created: float
     touched: float
     validation: Future | None = field(default=None, repr=False)
+
+
+@dataclass(repr=False)
+class RecoveryGrant:
+    identity: Identity
+    browser_id: str
+    expires: float
 
 
 def opaque_equal(expected, supplied):
@@ -47,7 +56,7 @@ class Registry:
                  idle_seconds=1800, absolute_seconds=43200):
         self.clock, self.capacity, self.pending_ttl = clock, capacity, pending_ttl
         self.idle_seconds, self.absolute_seconds = idle_seconds, absolute_seconds
-        self.browsers, self.pending, self.sessions = {}, {}, {}
+        self.browsers, self.pending, self.sessions, self.recoveries = {}, {}, {}, {}
         self.lock = RLock()
         self._validation_tasks = set()
 
@@ -60,7 +69,7 @@ class Registry:
         for key, value in list(self.sessions.items()):
             if self._expired(value, now):
                 del self.sessions[key]
-        for table in (self.browsers, self.pending):
+        for table in (self.browsers, self.pending, self.recoveries):
             for key, value in list(table.items()):
                 if now >= value.expires:
                     del table[key]
@@ -81,14 +90,16 @@ class Registry:
             browser = self.browsers.get(browser_id)
             return bool(browser and opaque_equal(browser.csrf, csrf))
 
-    def start_attempt(self, browser_id, email):
+    def start_attempt(self, browser_id, email, purpose="signup"):
         with self.lock:
             self._prune()
+            if purpose not in ("signup", "recovery"):
+                raise AuthFailure("invalid_request")
             if (browser_id not in self.browsers or len(self.pending) >= self.capacity or
                     sum(p.browser_id == browser_id for p in self.pending.values()) >= 4):
                 raise AuthFailure("auth_capacity")
             state = token_urlsafe(32)
-            pending = Pending(browser_id, email, self.clock() + self.pending_ttl)
+            pending = Pending(browser_id, email, self.clock() + self.pending_ttl, purpose)
             self.pending[state] = pending
             self.browsers[browser_id].expires = max(self.browsers[browser_id].expires, pending.expires)
             return state, pending
@@ -115,24 +126,48 @@ class Registry:
                 raise AuthFailure("invalid_confirmation")
             # Consume before any provider exchange. A concurrent callback cannot exchange twice.
             del self.pending[state]
+            pending.authority_revision = self.browsers[browser_id].authority_revision
             return pending
 
-    def rotate(self, old_id, browser_id, identity):
+    def rotate(self, old_id, browser_id, identity, *, recovery=False, expected_revision=None):
         with self.lock:
             self._prune()
             if browser_id not in self.browsers:
                 raise AuthFailure("invalid_credentials")
-            old = self.sessions.get(old_id)
+            browser = self.browsers[browser_id]
+            if expected_revision is not None and browser.authority_revision != expected_revision:
+                raise AuthFailure("invalid_recovery")
+            old = self.sessions.get(old_id) or self.recoveries.get(old_id)
             replacing = old is not None and old.browser_id == browser_id
-            if len(self.sessions) >= self.capacity and not replacing:
+            if len(self.sessions) + len(self.recoveries) >= self.capacity and not replacing:
                 raise AuthFailure("auth_capacity")
             if replacing:
-                del self.sessions[old_id]
+                self.sessions.pop(old_id, None)
+                self.recoveries.pop(old_id, None)
             session_id = token_urlsafe(32)
             now = self.clock()
-            self.sessions[session_id] = Session(identity, browser_id, now, now)
-            self.browsers[browser_id].expires = max(self.browsers[browser_id].expires, now + self.absolute_seconds)
+            if recovery:
+                self.recoveries[session_id] = RecoveryGrant(identity, browser_id, now + self.pending_ttl)
+            else:
+                self.sessions[session_id] = Session(identity, browser_id, now, now)
+            lifetime = self.pending_ttl if recovery else self.absolute_seconds
+            self.browsers[browser_id].expires = max(self.browsers[browser_id].expires, now + lifetime)
+            browser.authority_revision += 1
             return session_id
+
+    def recovery_available(self, session_id, browser_id):
+        with self.lock:
+            self._prune()
+            grant = self.recoveries.get(session_id)
+            return bool(grant and opaque_equal(grant.browser_id, browser_id) and browser_id in self.browsers)
+
+    def claim_recovery(self, session_id, browser_id):
+        with self.lock:
+            if not self.recovery_available(session_id, browser_id):
+                raise AuthFailure("invalid_recovery")
+            # Remove before provider work, including refresh/validation. Never restore it.
+            self.browsers[browser_id].authority_revision += 1
+            return self.recoveries.pop(session_id)
 
     def _begin_validation(self, session_id, browser_id):
         with self.lock:

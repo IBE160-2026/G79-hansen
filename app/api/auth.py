@@ -22,6 +22,8 @@ MESSAGES = {
     "invalid_request": "Kontroller e-post og passord og prøv igjen.",
     "request_rejected": "Forespørselen ble avvist. Last siden på nytt og prøv igjen.",
     "auth_capacity": "For mange pågående forsøk. Vent litt og prøv igjen.",
+    "invalid_recovery": "Gjenopprettingslenken er ugyldig eller utløpt. Be om en ny lenke og åpne den i samme nettleser.",
+    "recovery_failed": "Passordendringen kunne ikke bekreftes. Passordet kan være endret. Prøv å logge inn, eller be om en ny lenke.",
 }
 
 
@@ -39,10 +41,21 @@ class Credentials(BaseModel):
         return value
 
 
+class RecoveryEmail(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    email: str = Field(min_length=3, max_length=254)
+    valid_email = field_validator("email")(Credentials.valid_email.__func__)
+
+
+class RecoveryPassword(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    password: str = Field(min_length=8, max_length=1024, repr=False)
+
+
 def error(code, status=None):
     if status is None:
         status = {"invalid_credentials": 401, "request_rejected": 403,
-                  "invalid_request": 422, "auth_capacity": 429}.get(code, 503)
+                  "invalid_request": 422, "auth_capacity": 429, "invalid_recovery": 401}.get(code, 503)
     return JSONResponse({"code": code, "message": MESSAGES.get(code, MESSAGES["auth_unavailable"]),
                          "requestId": str(uuid4())}, status_code=status)
 
@@ -72,7 +85,7 @@ def clear_session(response, settings):
                            httponly=True, samesite="lax")
 
 
-async def credentials(request):
+async def credentials(request, schema=Credentials):
     # Bound actual streamed bytes, including chunked requests, before parsing or SDK work.
     raw = bytearray()
     try:
@@ -86,7 +99,7 @@ async def credentials(request):
     if request.headers.get("content-type", "").split(";")[0].strip() != "application/json":
         raise AuthFailure("invalid_request")
     try:
-        return Credentials.model_validate_json(raw)
+        return schema.model_validate_json(raw)
     except ValidationError:
         raise AuthFailure("invalid_request") from None
 
@@ -95,13 +108,14 @@ async def credentials(request):
 async def status(request: Request):
     settings, registry, adapter = context(request)
     if not settings.available:
-        return JSONResponse({"available": False, "authenticated": False})
+        return JSONResponse({"available": False, "authenticated": False, "recoveryAvailable": False})
     if not correct_host(request, settings):
         return error("request_rejected")
     try:
         browser_id, browser = registry.browser(request.cookies.get(BROWSER_COOKIE))
         identity = await registry.authenticated_async(request.cookies.get(SESSION_COOKIE), browser_id, adapter)
-        display = {"available": True, "authenticated": identity is not None, "csrfToken": browser.csrf}
+        display = {"available": True, "authenticated": identity is not None, "csrfToken": browser.csrf,
+                   "recoveryAvailable": registry.recovery_available(request.cookies.get(SESSION_COOKIE), browser_id)}
         if identity:
             display["email"] = identity.email
         response = JSONResponse(display)
@@ -152,8 +166,18 @@ async def login(request: Request):
 
 @router.get("/callback")
 async def callback(request: Request):
+    return await complete_callback(request, "signup")
+
+
+@router.get("/recovery/callback")
+async def recovery_callback(request: Request):
+    return await complete_callback(request, "recovery")
+
+
+async def complete_callback(request, purpose):
     settings, registry, adapter = context(request)
-    response = RedirectResponse("/account?confirmation=invalid", status_code=303)
+    outcome = "recovery" if purpose == "recovery" else "confirmation"
+    response = RedirectResponse(f"/account?{outcome}=invalid", status_code=303)
     if not settings.available or not correct_host(request, settings):
         return response
     params = request.query_params
@@ -163,13 +187,55 @@ async def callback(request: Request):
         return response
     try:
         browser_id = request.cookies.get(BROWSER_COOKIE)
-        pending = registry.consume(params["state"], browser_id)
+        pending = registry.consume(params["state"], browser_id, purpose)
         identity = await run_in_threadpool(adapter.exchange, params["code"], pending)
         if registry.clock() >= pending.expires:
             return response
-        session_id = registry.rotate(request.cookies.get(SESSION_COOKIE), browser_id, identity)
-        response = RedirectResponse("/account?confirmation=success", status_code=303)
+        session_id = registry.rotate(request.cookies.get(SESSION_COOKIE), browser_id, identity,
+                                     recovery=purpose == "recovery",
+                                     expected_revision=pending.authority_revision if purpose == "recovery" else None)
+        response = RedirectResponse(f"/account?{outcome}=success", status_code=303)
         cookie(response, SESSION_COOKIE, session_id, settings)
         return response
     except AuthFailure:
         return response
+
+
+@router.post("/recovery/request")
+async def recovery_request(request: Request):
+    settings, registry, adapter = context(request)
+    if not protected(request, settings, registry):
+        return error("request_rejected")
+    if not settings.available:
+        return error("auth_unavailable")
+    state = None
+    try:
+        submitted = await credentials(request, RecoveryEmail)
+        browser_id = request.cookies[BROWSER_COOKIE]
+        state, pending = registry.start_attempt(browser_id, submitted.email, "recovery")
+        redirect = settings.app_origin + "/api/v1/auth/recovery/callback?" + urlencode({"state": state})
+        await run_in_threadpool(adapter.request_recovery, submitted.email, pending, redirect)
+        return JSONResponse({"status": "check_email", "message": "Hvis kontoen finnes, får du en e-post. Åpne lenken i samme nettleser innen 10 minutter."})
+    except AuthFailure as exc:
+        if state:
+            registry.discard_attempt(state)
+        return error(exc.code if exc.code in ("invalid_request", "auth_capacity") else "auth_unavailable")
+
+
+@router.post("/recovery/password")
+async def recovery_password(request: Request):
+    settings, registry, adapter = context(request)
+    if not protected(request, settings, registry):
+        return error("request_rejected")
+    if not settings.available:
+        return error("auth_unavailable")
+    admitted = False
+    try:
+        submitted = await credentials(request, RecoveryPassword)
+        grant = registry.claim_recovery(request.cookies.get(SESSION_COOKIE), request.cookies[BROWSER_COOKIE])
+        admitted = True
+        await run_in_threadpool(adapter.update_password, grant.identity, submitted.password, expires_at=grant.expires)
+        # The spent cookie is harmless. Clearing it could erase a newer login cookie.
+        return JSONResponse({"status": "password_updated", "authenticated": False, "recoveryAvailable": False})
+    except AuthFailure as exc:
+        return error("recovery_failed" if admitted else exc.code)

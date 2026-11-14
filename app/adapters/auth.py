@@ -10,6 +10,7 @@ import httpx
 import httpcore
 from supabase import ClientOptions, create_client
 from supabase_auth.errors import AuthApiError
+from supabase_auth.types import AuthResponse
 
 from app.config import Settings
 
@@ -39,12 +40,21 @@ class AttemptStorage:
         self.pending = pending
 
     def get_item(self, key):
-        return self.pending.verifier if key.endswith("-code-verifier") else None
+        if not key.endswith("-code-verifier") or not self.pending.verifier:
+            return None
+        suffix = "/PASSWORD_RECOVERY" if self.pending.purpose == "recovery" else ""
+        return self.pending.verifier + suffix
 
     def set_item(self, key, value):
-        if not key.endswith("-code-verifier") or not isinstance(value, str) or not 43 <= len(value) <= 128:
+        if not key.endswith("-code-verifier") or not isinstance(value, str):
             raise AuthFailure()
-        self.pending.verifier = value
+        verifier, separator, purpose = value.partition("/")
+        expected = "PASSWORD_RECOVERY" if self.pending.purpose == "recovery" else ""
+        if (not 43 <= len(verifier) <= 128 or not verifier.isascii() or
+                purpose != expected or bool(separator) != bool(expected)):
+            raise AuthFailure()
+        # The SDK stores a purpose suffix; the token endpoint needs the actual verifier.
+        self.pending.verifier = verifier
 
     def remove_item(self, key):
         if key.endswith("-code-verifier"):
@@ -234,6 +244,8 @@ class SupabaseAuth:
             raise AuthFailure("invalid_credentials") from None
         if (not response.user or not session.user or
                 response.user.id != owner or session.user.id != owner or
+                not response.user.email or response.user.email.casefold() != user.email.casefold() or
+                not session.user.email or session.user.email.casefold() != user.email.casefold() or
                 (expected_owner is not None and owner != expected_owner) or
                 (expected_email is not None and user.email.casefold() != expected_email.casefold()) or
                 not isinstance(session.expires_at, (int, float)) or session.expires_at <= self.clock()):
@@ -249,6 +261,45 @@ class SupabaseAuth:
         with self.client() as auth:
             response = auth.exchange_code_for_session({"auth_code": code, "code_verifier": pending.verifier})
             return self._validated(auth, response, expected_email=pending.email)
+
+    def request_recovery(self, email, pending, redirect):
+        with self.client(AttemptStorage(pending)) as auth:
+            try:
+                auth.reset_password_for_email(email, {"redirect_to": redirect})
+            except AuthApiError as exc:
+                if exc.code in ("user_not_found", "email_not_found"):
+                    return  # The same acknowledgement as an existing account.
+                raise AuthFailure() from None
+            if not pending.verifier:
+                raise AuthFailure()
+
+    def update_password(self, identity, password, *, expires_at):
+        with self.client() as auth:
+            # set_session can refresh. Validate that resulting authority before writing.
+            response = auth.set_session(identity.access_token, identity.refresh_token)
+            current = self._validated(auth, response, expected_email=identity.email,
+                                      expected_owner=identity.owner_id)
+            get_session = auth.get_session
+            def mutation_session():
+                # update_user calls get_session, which can itself refresh a token
+                # inside the SDK's expiry margin. Validate that final authority too.
+                session = get_session()
+                if session is None:
+                    raise AuthFailure("invalid_recovery")
+                self._validated(auth, AuthResponse(session=session, user=session.user),
+                                expected_email=identity.email, expected_owner=identity.owner_id)
+                if self.clock() >= expires_at:
+                    raise AuthFailure("invalid_recovery")
+                return session
+            auth.get_session = mutation_session
+            try:
+                updated = auth.update_user({"password": password})
+            finally:
+                auth.get_session = get_session
+            user = updated.user if updated else None
+            if (not user or user.id != current.owner_id or not user.email_confirmed_at or
+                    not user.email or user.email.casefold() != current.email.casefold()):
+                raise AuthFailure()
 
     def validate(self, identity):
         with self.client() as auth:
