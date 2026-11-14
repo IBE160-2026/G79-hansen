@@ -632,3 +632,25 @@ opening that link promptly in the initiating browser/profile and observing the
 restricted new-password form. Callback success, actual redirect/template matching
 and password mutation remain unverified. No password or raw link was requested
 in chat, and no further email was triggered by the agent.
+
+### Hosted recovery positive path — 2026-11-15
+
+The student reported **“resette passord fungerte”** and clarified **“jeg prøvde å
+bytte passord, det fungerte”**. Record a successful password change by student
+report following the received recovery email. The agent did not perform the write
+or inspect the password.
+
+The running configured server's access output corroborates one recovery request
+200, one recovery callback 303 and one password-update POST 200. A normal login
+POST 200 occurs after that password-update entry. This establishes observed
+successful normal authentication afterward, without asserting which password
+value was entered or selecting an account identity. Observed auth entries contain
+no callback query values; raw logs/credentials were not printed to the conversation.
+
+The previously reported saved recovery redirect is now supported by successful
+functional callback/update behavior. Reset-template contents were not separately
+inspected. Unused-link wrong-browser behavior, replay/expiry/overlap, other-user
+isolation during a real change and other negative hosted cases remain unexecuted.
+Keep Story 2.2 at review and Story 2.1's remaining gates open; do not repeat the
+positive password-change test merely because these negative cases remain open.
+No new automated suite was run for this observation.

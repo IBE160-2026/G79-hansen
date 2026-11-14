@@ -403,6 +403,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Lokal drift og gjenstående akseptanse:** Normalappen ble startet på nytt med eksisterende ignorert `.env` og én worker; lesekontroller fant ny recovery-UI/status og personvernheadere. Omstarten krever ny vanlig innlogging. Implementeringsspesifikasjonen er done og sprintstoryen review. Ekstra hosted callback-allowlist, malinspeksjon, ekte gjenopprettingsmail og uttrykkelig autorisert passordendring gjenstår; dette er ikke full hosted-godkjenning. Free/Paris, ingen nye tabeller/betalte tjenester/utrulling og de eldre Story 2.1-portene er bevart. Se [oppsett og evidens](../.docs/implementation-artifacts/auth-setup.md).
 
+## 15.11.2026 – Ekte passordbytte rapportert vellykket
+
+**Studentens observasjon:** Etter rapportert lagring av recovery Redirect URL mottok studenten e-post med lenke for nytt passord. Studenten svarte deretter «resette passord fungerte» og presiserte «jeg prøvde å bytte passord, det fungerte». Dette er studentrapportert gjennomført ekte passordbytte; KI endret ikke passordet og ba ikke om å få det i chat.
+
+**Supplerende kontroll:** Den kjørende konfigurerte serverens tilgangslogg viste én recovery-request 200, én recovery-callback 303, én passordoppdatering 200 og vanlig login 200 etter oppdateringsoppføringen. Bare trygge tellinger/boolske resultater ble skrevet ut. Hvilket passord som ble brukt ved innlogging ble ikke inspisert. Funksjonell callback er dermed underbygget, mens malinnhold og negative hosted-tilfeller fortsatt ikke er separat kontrollert. Ingen ny automatisk testkjøring er hevdet.
+
+**Videre retning:** Studenten spurte «hva er neste steg». Neste planlagte utviklingsoppgave er Story 2.3, Logg ut og tydelig avslutning ved utløp/omstart. Det er en beskrivelse av backloggen, ikke godkjenning av en ny konkret implementeringsplan eller full akseptanse av alle gjenværende hosted-tester. Studentens egen refleksjon er ikke skrevet av KI.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
