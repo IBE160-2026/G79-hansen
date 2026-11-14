@@ -1,6 +1,8 @@
 # ?pne punkter
 
-- [ ] 2026-11-14 [Automatisert to-konto-test](994-2026-11-12-19-19-49-innlogging-og-supabase-oppsett.md) - Supabase er nå bekreftet installert (installed:true), men ingen Supabase-verktøy er tilgjengelige i den eksisterende samtalen. Ikke be om ny installasjon. Prøv ny samtale i samme prosjekt med @Supabase og kontroller faktisk tilkobling/prosjekttilgang før testkonto-provisjonering eller løfter om full automasjon. Studenten ønsker minst mulig egeninnsats. Ingen ny konto/e-post/oppsettendring utført; ekte isolasjon er fortsatt utestet.
+- [x] 2026-11-14 [Supabase-prosjekttilgang](994-2026-11-12-19-19-49-innlogging-og-supabase-oppsett.md) - Verktøy og faktisk tilgang er verifisert i ny samtale: Study Buddy, Free, studybuddy-test og ACTIVE_HEALTHY (løst 2026-11-14). Ikke be om ny installasjon/tilkobling.
+- [ ] 2026-11-14 [Automatisert to-konto-test](994-2026-11-12-19-19-49-innlogging-og-supabase-oppsett.md) - Én bekreftet bruker verifisert med aggregert databasekontroll. Integrasjonen mangler Auth Admin-oppretting; native-pipe og nettleserhost er utilgjengelige. Et kort manuelt dashboard-steg for testkontoer er forespurt; avvent svar og bruk minst mulig egeninnsats. Ingen konto/e-post er opprettet; ekte isolasjon er fortsatt utestet. Ikke skriv direkte i auth.users eller be om privilegerte nøkler i chat.
+- [ ] 2026-11-14 [Supabase-region](994-2026-11-12-19-19-49-innlogging-og-supabase-oppsett.md) - Faktisk prosjektregion er eu-west-3, mens godkjent oppsett sier Frankfurt eu-central-1. Avklar avviket før endelig akseptanse; ingen flytting/sletting/oppretting er autorisert av denne observasjonen.
 
 - [x] 2026-11-01 [PRD-push og UX-oppstart](999-2026-11-01-10-39-24-prd-push-og-ux-oppstart.md) - UX-kontroll og eksempeltilstander godkjent; UX ferdigstilt (loest 2026-11-01).
 - [x] 2026-11-01 [PRD-push og UX-oppstart](999-2026-11-01-10-39-24-prd-push-og-ux-oppstart.md) - Delte BMAD-filer versjonert i bf6544a (loest 2026-11-01).

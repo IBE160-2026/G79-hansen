@@ -121,3 +121,13 @@ Senere samme dag spurte studenten «er den installert da?». Ny katalogkontroll 
 ### Åpne punkter
 - Supabase er bekreftet installert. Få verktøyene tilgjengelige i en ny samtale/aktivering ved behov, kontroller faktisk tilkobling/prosjekttilgang og velg minst mulig manuelt arbeid for autorisert to-konto-test. Ikke be om hemmelige nøkler i chat eller endre appens nøkkelkrav.
 - Reell to-konto-isolasjon og øvrige gjenværende hosted-akseptansetester/formell build-kontroll er fortsatt åpne; de tidligere foreløpige reviewrettelsene er ferdige.
+
+Oppdatert 14.11.2026 kl. 14:00 – Fredrik: Studenten ba «Fortsett Study Buddy der vi slapp.» Den nye samtalen har fungerende Supabase-verktøy. Lesekontroller bekreftet Study Buddy, Free, studybuddy-test og ACTIVE_HEALTHY. Faktisk region er eu-west-3, i avvik fra godkjent Frankfurt eu-central-1. En aggregert auth.users-kontroll viste én bruker med bekreftet e-post; ingen e-postadresser, ID-er, passordhash eller tokens ble hentet. Prosjekttilgangspunktet i issues.md er lukket; regionavvik og fortsatt utestet to-konto-isolasjon føres separat.
+
+Integrasjonen mangler Auth Admin-oppretting. Computer Use feilet fortsatt med native-pipe/os error 2, og browser inventory bekreftet at nettleserhosten er utilgjengelig. Studenten fikk et ventende spørsmål om å åpne Authentication → Users for et kort manuelt testkonto-steg. Ingen svar, nye kontoer eller nye e-poster er antatt. Ingen direkte skriving i auth.users, privilegerte nøkler eller administrativ Edge Function er brukt.
+
+Appen ble startet på 127.0.0.1:8000 med ignorert .env, én worker og PID 47644 (verktøysesjon 45682). Serveren står kjørende for videre testing. Offentlig Auth-settings svarte 200: emailEnabled=true, confirmationRequired=true, signupDisabled=false. Alle ti HTTP-grensekontroller bestod på nytt. Full offline-/nettlesersuite er ikke kjørt igjen; tidligere 155/én skip og 16 nettleserscenarier er historisk evidens. Story 2.1 forblir in-progress. Ingen appkode, database-/Auth-innstilling, abonnement, utrulling eller push er endret.
+
+Sikkerhetsrådgiveren returnerte bare advarselen om deaktivert lekket-passordbeskyttelse. Offisiell dokumentasjon oppgir Pro-krav; ingen oppgradering eller innstillingsendring ble gjort. Changelog ble kontrollert; ingen SDK-/CLI-oppgradering ble startet. auth-setup.md og refleksjonsgrunnlaget er oppdatert med faktisk tilgang, avvik, verktøybegrensning og fersk grensekontroll.
+
+Åpne punkter ved dette kontrollpunktet: manuelt testkonto-steg og etterfølgende ekte isolasjon/øvrig hosted-akseptanse, samt beslutning om regionavvik før endelig akseptanse. Ikke installer integrasjonen på nytt eller anta at administrativ provisjonering tester e-postregistrering. Punktene er speilet i issues.md.
