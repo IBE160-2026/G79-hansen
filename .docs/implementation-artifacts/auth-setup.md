@@ -1,22 +1,27 @@
 # Story 2.1 authentication setup and acceptance
 
 The user reported on 2026-11-12 that the project has been created manually after the
-organization. Local configuration and actual project settings still need verification.
+organization. Project access, the Free plan and local configuration are verified;
+email-template inspection and the remaining hosted confirmation cases are pending.
 The application implementation is locally testable. **Provider reachability and
 required email confirmation are verified. The student reports successful first
 signup/email confirmation and separate private-window password login. The interim
-independent review and its corrections are verified; remaining hosted
-negative/isolation checks and final build acceptance are pending.** The project's plan and region were not
-independently checked. Offline adapters live only in
+independent review and its corrections are verified. Hosted HTTP authentication
+and session isolation with two administrative test accounts passed 20 checks on
+2026-11-14. A further 18 lifecycle checks and 24 real-browser checks passed;
+remaining hosted email acceptance and final build acceptance are pending.** The organization's
+Free plan is independently verified. The student explicitly approved retaining
+Paris (`eu-west-3`) for this test project on 2026-11-14, superseding the original
+Frankfurt requirement for this project only. Offline adapters live only in
 `tests/`; the application has no mock-auth mode.
 
 ## Approved manual setup
 
 1. In Supabase, choose **Create an organization** first. Name it **Study Buddy**
    and select **Free**. Do not add a paid subscription or add-ons.
-2. Inside that organization create **studybuddy-test**. Choose the **specific**
-   region **Frankfurt (`eu-central-1`)**. Do not substitute an automatically chosen
-   general Europe region. Keep its database password in a password manager; the
+2. Use the existing **studybuddy-test** in **Paris (`eu-west-3`)**, explicitly
+   approved by the student on 2026-11-14. The original plan specified Frankfurt;
+   do not recreate or move the existing project. Keep its database password in a password manager; the
    application does not need that password.
 3. Enable the email/password provider and **email confirmation**. The SDK adapter
    refuses signup responses containing an immediate session, so confirmation
@@ -298,3 +303,159 @@ Administrative creation does not send a confirmation email; if used later, recor
 it as administrative provisioning, never evidence that signup/email confirmation
 was tested for that user. Do not substitute an admin-confirmed user for the
 remaining unused-confirmation-link binding test.
+
+### Connected project verification — 2026-11-14, 14:00 CET
+
+Supabase tools are available in the new conversation. Read-only organization and
+project requests verified **Study Buddy**, **Free**, **studybuddy-test** and
+**ACTIVE_HEALTHY**. The actual region is **`eu-west-3`**, rather than approved
+**`eu-central-1`**. Do not silently amend the approved specification or recreate,
+move or delete the project; record the discrepancy for the student's decision.
+An aggregate-only `auth.users` query found **one user, email confirmed**. No emails,
+user IDs, password hashes or tokens were selected.
+
+The available integration exposes database/project tools, but no Auth Admin
+create-user operation. Do not provision users by inserting into `auth.users`,
+extract privileged credentials or deploy an administrative helper. Windows
+Computer Use still fails with native-pipe error 2; browser inventory also reports
+that the browser access host is unavailable. A short manual dashboard step for
+test-user provisioning was requested; no answer or new user is assumed.
+
+The configured one-worker loopback server was restarted (PID 47644). Provider
+settings returned HTTP 200: email enabled, confirmation required, signup allowed.
+All **ten unauthenticated HTTP boundary checks passed again** against this server,
+including independent browser/CSRF bootstrap, privacy/cookie controls, Origin/CSRF
+rejection, invalid bodies/callbacks and unknown-session denial without session
+cookie mutation. This is fresh boundary evidence, not authenticated isolation.
+The full offline/browser suites were not rerun; the previously recorded 155/one
+skip and 16 browser scenarios remain historical evidence. Story 2.1 stays
+in-progress. No account/email, schema change, paid service or deployment occurred.
+
+The security advisor reported only disabled leaked-password protection. The
+[password-security documentation](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)
+states this feature requires Pro or higher. The approved Free plan is retained;
+no paid upgrade or security-setting change was made. Remaining acceptance includes
+two authenticated identities, unused-link binding and the documented hosted
+negative cases; administrative provisioning would not establish email delivery.
+
+The student answered **"Ja, jeg kan åpne Users"**. A local ignored helper
+`test-results/hosted-auth-isolation.py` now prepares two random administrative
+test-account credentials and the local copy page
+`test-results/hosted-auth-test-accounts.html`. Passwords are kept only in ignored
+local test files, never printed or committed. The student was guided to create
+both users through **Create new user**, with per-user **Auto Confirm User** enabled
+and no invitation/email; the global confirmation setting remains enabled.
+Account creation is not yet confirmed. Local configuration and Python syntax
+checks passed; **the hosted isolation run has not been executed**.
+
+After the student confirms both users were created, verify the aggregate user
+count and run `uv run python test-results/hosted-auth-isolation.py run` against the
+current server. The helper checks two real hosted logins through the application,
+independent browser/CSRF/session values, each identity after alternating requests,
+fresh-browser and foreign-cookie denial, foreign CSRF/wrong-password rejection,
+session rotation and old-cookie denial. It prints boolean checks only and writes
+a credential-free result. This is HTTP-client acceptance, not browser storage/UI,
+private document isolation, signup/email delivery, expiry or restart acceptance.
+Do not delete test users without the appropriate user authorization and session
+cleanup; no account cleanup has been performed at this checkpoint.
+
+### Two-account hosted HTTP acceptance — 2026-11-14
+
+The student confirmed that the two prepared test users were created. A read-only
+aggregate query now reports **three users, all email confirmed**, including the
+original account. No identities, password hashes or tokens were selected.
+
+The first helper run could not reach the stopped local server and completed no
+checks. The configured application was started again with ignored `.env`, one
+worker and no reload (PID 48256, tool session 19066). The subsequent command
+`uv run python test-results/hosted-auth-isolation.py run` completed successfully
+at **2026-11-14 13:16:14 UTC**: **20/20 checks passed**. The credential-free result
+is in ignored `test-results/hosted-auth-isolation-result.json`.
+
+Verified through the application against hosted Supabase:
+
+- Both administrative test accounts log in and receive distinct opaque,
+  HttpOnly, host-only, SameSite=Lax session cookies.
+- Independent browser bindings/CSRF values and alternating status requests keep
+  each account's identity separate, including after negative checks.
+- A fresh client remains unauthenticated; copying only another client's session
+  cookie does not authenticate it.
+- Foreign CSRF and wrong-password requests are rejected.
+- A new successful login rotates the session cookie and the replaced cookie is
+  rejected with its original browser binding.
+
+This closes the prepared two-account **HTTP authentication/session isolation**
+test. It does not establish private-document isolation, browser UI/storage,
+signup/email delivery, unused confirmation-link binding, expiry or refresh.
+The server restart enabled this run; no pre-restart authenticated cookie was
+retained, so this is not a dedicated restart-invalidation check. Global email
+confirmation settings were not changed. Test users remain available, and no
+account was created/deleted by the helper. No application code changed and the
+full offline/browser suites were not rerun. Story 2.1 remains in-progress;
+remaining hosted acceptance and the recorded region discrepancy stay open.
+
+### Lifecycle, browser acceptance and approved region — 2026-11-14
+
+The student approved **“Ja, behold Paris for testprosjektet”**. Paris (`eu-west-3`)
+is now accepted for the existing test project. This resolves the region issue;
+it is not a production-region decision. The original frozen specification is
+preserved with a separate dated amendment.
+
+**18/18 lifecycle checks passed**, with the final run at 13:32:22 UTC:
+
+- A separate real HTTP server with the genuine Supabase adapter rejected a
+  session after a shortened three-second idle timeout.
+- A real server restart rejected the preserved, previously authenticated cookie;
+  a fresh password login succeeded afterward.
+- To exercise refresh promptly, the test shortened only one session's local
+  `expires_at` metadata to 15 seconds from now. Genuine provider tokens were
+  retained. Status invoked the real Supabase refresh operation and get_user
+  validation; owner identity and valid future expiry were preserved. The other
+  account remained authenticated.
+- An intentionally invalid in-memory refresh token caused safe rejection and
+  local session retirement, while the other account stayed authenticated.
+- An absolute six-second lifetime expired despite intervening status activity;
+  its separate idle limit was ten seconds.
+- Captured HTTP server logs contained login/status access entries and omitted
+  both test accounts' credentials and every provider token observed by the test.
+
+These are accelerated local lifetime checks using real hosted identities, not
+wall-clock observation of the normal 30-minute/12-hour limits or natural JWT
+expiry. Only the test harness observes provider responses and adjusts local
+expiry metadata; application code and normal server settings are unchanged.
+Test servers were stopped; the regular server on port 8000 was left running.
+
+**24/24 real-browser checks passed**, at 13:31:00 UTC, against the normal configured
+server and hosted Supabase. Two independent contexts submitted the real login
+forms and retained their correct identities after reload; a third remained
+unauthenticated. A wrong password produced the safe message, cleared the password,
+retained email and focused the alert. Cookies were distinct, opaque, host-only,
+HttpOnly and SameSite=Lax. Local/session storage, IndexedDB, Cache Storage and
+JavaScript-visible cookies were empty in all three contexts. Passwords and
+session-cookie values were absent from HTML, URL and captured console output;
+API responses omitted provider-token/owner fields. Browser requests stayed on the
+application origin, URLs were clean and no script errors were observed. This
+does not claim a complete screen-reader audit or secure-cookie verification on
+HTTPS; these runs used explicit loopback HTTP.
+
+Reproduce the ignored, local-only helpers with:
+
+```powershell
+uv run --env-file .env python test-results/hosted-auth-lifecycle.py
+node test-results/hosted-auth-browser.cjs
+```
+
+Results are saved without credentials in ignored lifecycle/browser result JSON
+files beside the helpers. The final lifecycle rerun strengthened log assertions
+to check every actually issued token; it is not an additional 18 unique cases.
+The full offline suite was not rerun because application code did not change.
+
+Remaining hosted acceptance concerns the email-confirmation path: an unused
+authorized address/link, wrong-browser binding, precise replay/expiry rejection,
+overlapping signup attempts, unconfirmed-login rejection and template inspection.
+The agent initially suggested registering the already confirmed original address
+again, then withdrew that instruction before assuming any action/result. Existing
+confirmed accounts cannot establish a new-account confirmation test. Availability
+of an unused authorized team address has been requested; no answer or email
+delivery is assumed. No account/email or hosted Auth setting was changed by the
+automated checks. Story 2.1 remains in-progress.

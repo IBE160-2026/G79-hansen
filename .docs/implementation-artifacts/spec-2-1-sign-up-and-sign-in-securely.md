@@ -43,6 +43,15 @@ context:
 
 </frozen-after-approval>
 
+## Approved test-project amendment — 2026-11-14
+
+The student explicitly approved “Ja, behold Paris for testprosjektet”. Retain the
+existing `studybuddy-test` on Free in Paris (`eu-west-3`). This supersedes the
+original Frankfurt requirement for this test project only; the frozen original
+above remains an accurate record of the initial approval. No project recreation,
+move, paid service or production-region decision is implied. See
+[hosted acceptance evidence](auth-setup.md) for the verified setup and tests.
+
 ## Code Map
 
 - `app/main.py`: static routes/demo-only validation handler; add injected configuration and safe auth errors without weakening demo rejection.

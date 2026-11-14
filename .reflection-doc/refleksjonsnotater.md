@@ -347,6 +347,42 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Faglig avgrensning:** Offisielle kilder for Auth Admin, administrativ brukeroppretting og SMTP ble kontrollert. En eventuell administrativt opprettet testbruker vil bare kunne gi evidens for de flytene som faktisk kjøres; den skal ikke omtales som verifisert e-postregistrering eller ubrukt lenkebinding. Ingen konto, invitasjon, e-post, innstillingsendring eller ny funksjonstest ble gjennomført i denne tilgangsavklaringen. Tidligere beståtte tester beholdes som historisk evidens.
 
+## 14.11.2026 – Supabase-tilgang kontrollert i ny samtale
+
+**Studentens styring:** «Fortsett Study Buddy der vi slapp.» Tidligere godkjenning og ønsket om minst mulig manuelt arbeid ble beholdt.
+
+**Observert resultat:** Supabase-verktøyene er nå tilgjengelige og bekrefter organisasjonen Study Buddy, Free-planen og et aktivt studybuddy-test. En aggregert kontroll fant én bruker med bekreftet e-post, uten å hente personopplysninger eller legitimasjon. Faktisk region er `eu-west-3`, mens godkjent plan sier Frankfurt `eu-central-1`. Avviket er dokumentert og må avklares; ingen migrering eller omskriving av godkjenningen er utført.
+
+**Verktøybegrensning og kontroll:** Integrasjonen har ingen Auth Admin-funksjon for brukeroppretting. Native-pipen feiler fortsatt med os error 2, og nettlesertilgangen er utilgjengelig. Studenten ble bedt om et kort manuelt dashboard-steg; ingen bekreftelse eller ny konto er antatt. Appen ble startet med eksisterende ignorert `.env` og én worker. Leverandørinnstillinger svarte 200 med påkrevd e-postbekreftelse, og ti nye HTTP-grensekontroller bestod. Dette verifiserer ikke isolasjon mellom to innloggede brukere; Story 2.1 er fortsatt under arbeid. Ingen ny full testsuite eller studentrefleksjon er hevdet.
+
+**Kilder og vurdering:** [Oppdatert akseptansestatus](../.docs/implementation-artifacts/auth-setup.md). Sikkerhetsrådgiveren fant deaktivert kontroll av lekkede passord; [Supabases dokumentasjon](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) oppgir Pro-krav. Free-planen og eksisterende innstillinger ble beholdt.
+
+**Neste konkrete steg:** Studenten svarte «Ja, jeg kan åpne Users». KI laget en ignorert lokal side med to tilfeldige testpassord og et HTTP-testprogram som bare skriver boolske kontrollresultater. Syntaks og lokal konfigurasjon er kontrollert. Studenten fikk veiledning for manuell oppretting av to administrative testbrukere; selve opprettingen og hosted-isolasjonstesten er ennå ikke bekreftet eller kjørt. Passord er ikke lagt i chat eller Git. Dette blir en test av konto-/øktisolasjon, ikke av registrering eller e-postlevering.
+
+## 14.11.2026 – To opprettede testbrukere kontrollert
+
+**Studentens bekreftelse:** «jeg har opprettet brukerene». Aggregert Supabase-kontroll viste nå tre brukere, alle med bekreftet e-post. Det stemmer med den opprinnelige kontoen og de to klargjorte testkontoene; ingen adresser, ID-er, passordhash eller tokens ble hentet.
+
+**Kontroll og resultat:** Første testforsøk fullførte ingen kontroller fordi lokalserveren var stoppet. Etter oppstart med eksisterende ignorert konfigurasjon og én worker bestod **20 av 20 kontroller** mot ekte Supabase gjennom appen. Begge testbrukerne logget inn, beholdt separate identiteter ved vekslende forespørsler og fikk ulike øktcookies. Feil passord, fremmed CSRF, øktcookie uten riktig nettleserbinding og erstattet øktcookie ble avvist. Resultatet ble lagret uten legitimasjon i ignorert testfil. En uv-cachefeil i sandkassen ble løst ved godkjent eskalering.
+
+**Faglig avgrensning:** Dette er HTTP-kontroll av autentisering og øktisolasjon for administrativt bekreftede testkontoer. Det dokumenterer ikke e-postregistrering, ubrukt bekreftelseslenke, nettleserlagring/UI, privat dokumentisolasjon, utløp eller refresh. Omstarten ble ikke testet med en bevart gammel innlogget cookie. Ingen appkode, global Auth-innstilling, konto eller abonnement ble endret av testprogrammet. Story 2.1 og regionavviket forblir åpne; studentens egen refleksjon er ikke lagt til av KI.
+
+**Kilde:** [Akseptansestatus og reproduserbar kommando](../.docs/implementation-artifacts/auth-setup.md).
+
+## 14.11.2026 – Øktlevetid, nettlesere og godkjent testregion
+
+**Studentens beslutning:** Studenten ba «da går vi videre» og godkjente deretter «Ja, behold Paris for testprosjektet». Den eksisterende Free-instansen i eu-west-3 beholdes. Opprinnelig frosset spesifikasjon er bevart; en datert presisering dokumenterer endringen for testprosjektet. Dette er ikke en produksjonsbeslutning.
+
+**Utførte kontroller:** En separat lokal HTTP-server med ekte Supabase-adapter bestod **18/18 kontroller**: kort inaktivitetsgrense, absolutt grense til tross for aktivitet, bevart gammel cookie avvist etter reell serveromstart, ny innlogging, ekte refresh med bevart identitet og avvisning av ugyldig refresh uten å avslutte den andre kontoen. Tidsgrensene ble forkortet i testoppsettet. For å fremprovosere refresh ble bare lokal utløpsmetadata forkortet; ekte provider-tokens og leverandørvalidering ble brukt. Dette er ikke observasjon av naturlig JWT-utløp eller 30 minutter/12 timer i faktisk ventetid. Loggkontrollen ble styrket til alle utstedte testtokens, og 18/18 bestod igjen; det er samme tilfeller, ikke 36 ulike tester.
+
+**Ekte nettlesere:** **24/24 kontroller** bestod med to innloggede kontoer og et tredje uinnlogget miljø mot normalappen/hosted Supabase. Testen kontrollerte riktig identitet etter reload, cookieflagg, trygt feilpassord-svar/fokus/tømt passord, tom local/session storage, IndexedDB, Cache Storage og JavaScript-cookies, rene URL-er og fravær av provider-tokenfelter i API-svar. Ingen scriptfeil ble observert. Ikke en full manuell skjermleser- eller HTTPS-kontroll. Den vanlige serverens innstillinger ble beholdt; ekstra testservere ble stoppet.
+
+**KI-feil og korrigering:** KI ba først om ny registrering med studentens eksisterende bekreftede adresse. Det ville ikke dokumentere en ny kontos bekreftelsesflyt. Instruksen ble trukket tilbake og erstattet med avklaring om en ubrukt, allerede autorisert teamadresse finnes. Studenten spurte «Skal jeg opprette en ny bruker»; svaret presiserte at flere administrative Supabase-brukere ikke trengs, og at eventuell e-posttest må gå gjennom appen med riktig adresse. Ingen ny registrering eller e-postlevering er antatt. Studentens egen refleksjon er ikke skrevet av KI.
+
+**Kommunikasjon:** Studenten svarte «skjønner ikke» etter forklaringene om konto og teamadresse. KI presiserte at studenten ikke trenger opprette flere brukere eller gjøre noe nå. E-posttesten står fortsatt åpen; dette er ikke tolket som full akseptanse eller en uttalelse om andre adresser. De unødvendige og motstridende instruksene skapte mer manuelt arbeid enn ønsket.
+
+**Status:** E-postlenkens resterende negative tilfeller og malinspeksjon står åpne; Story 2.1 forblir under arbeid. [Akseptansestatus](../.docs/implementation-artifacts/auth-setup.md) skiller nye resultater fra historiske tester og videre arbeid. Ingen appkode eller globale Auth-innstillinger ble endret.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
