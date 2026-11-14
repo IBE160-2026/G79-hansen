@@ -135,3 +135,23 @@ Sikkerhetsrådgiveren returnerte bare advarselen om deaktivert lekket-passordbes
 Studenten svarte deretter «Ja, jeg kan åpne Users». En lokal ignorert helper, `test-results/hosted-auth-isolation.py`, genererte to tilfeldige testpassord i ignorert JSON og en lokal kopieringsside (`test-results/hosted-auth-test-accounts.html`). Ingen legitimasjon ble skrevet til chat/terminal eller Git; siden sender ingen nettverksforespørsler. Studenten ble veiledet til Create new user for A og B med per-bruker Auto Confirm User og uten invitasjon; global e-postbekreftelse beholdes. Kontooppretting er ennå ikke bekreftet.
 
 Helperens lokale konfigurasjonskontroll og Python-syntakskontroll bestod. Et første uv-forsøk fikk cache-tilgangsfeil i sandkassen; nødvendige kommandoer ble kjørt på nytt med godkjent eskalering og bestod. Den autentiserte isolasjonstesten er ikke kjørt. Ved «begge opprettet»: verifiser aggregert kontoantall og kjør `uv run python test-results/hosted-auth-isolation.py run`; resultatet gjelder ekte hosted HTTP-innlogging/øktisolasjon med administrative testkontoer, ikke e-post, nettleserlagring, dokumenter eller gjenoppretting. Fremgangsmåte/avgrensning er lagret i auth-setup.md. Ingen testkonto er slettet; opprydding krever korrekt økthåndtering og godkjenning.
+
+Oppdatert 14.11.2026 kl. 14:16 – Fredrik:
+
+### Oppgave
+Studenten ba om å fortsette med Supabase-testbrukerne og bekreftet «jeg har opprettet brukerene». Fullfør den klargjorte testen med minst mulig manuelt arbeid.
+
+### Plan
+- Kontroller aggregert kontoantall og eksisterende lokal helper uten å skrive ut legitimasjon.
+- Kjør begge testkontoene gjennom appens ekte Supabase-adapter og oppdater [akseptansestatus](../../.docs/implementation-artifacts/auth-setup.md).
+
+### Resultat
+Supabase rapporterer tre brukere, alle med bekreftet e-post. Første uv-kjøring ble stoppet av cachetilgang i sandkassen og ble kjørt på nytt med godkjent eskalering. Første faktiske helperkjøring fullførte ingen kontroller fordi lokalserveren var stoppet. Appen ble startet med eksisterende ignorert `.env`, én worker og ingen reload, PID 48256/verktøysesjon 19066. Serveren beholdes kjørende for videre testing.
+
+`uv run python test-results/hosted-auth-isolation.py run` bestod **20/20 kontroller** kl. 13:16:14 UTC. Begge administrative testkontoene logget inn gjennom appen mot hosted Supabase. Separate browser-/CSRF-/øktverdier og riktig identitet ved vekslende statuskall ble kontrollert. Fersk klient og fremmed øktcookie uten riktig browser-binding ble avvist; fremmed CSRF og feil passord ble avvist. Ny innlogging roterte cookie; erstattet cookie ble avvist med opprinnelig browser-binding. Begge gyldige identiteter var bevart etter negative tester. Resultatfilen er ignorert og uten legitimasjon. Ingen appkode eller globale Auth-innstillinger ble endret, ingen konto ble opprettet/slettet av programmet, ingen e-post ble sendt og ingen full offline-/nettlesersuite ble kjørt igjen. Changelog og relevant dokumentasjon ble kontrollert.
+
+To-konto-punktet i issues.md er lukket. Resterende akseptanse er presisert, og auth-setup.md/refleksjonsgrunnlaget er oppdatert. Dette er HTTP-autentisering/øktisolasjon, ikke registrering/e-post, dokumentisolasjon, browser UI/lagring, refresh, utløp eller dedikert omstartsinvalidering. Story 2.1 er fortsatt in-progress.
+
+### Åpne punkter
+- Gjenværende hosted-akseptanse og formell build-kontroll under «Faktisk innloggingstest» i issues.md: ubrukt lenkebinding, presis replay/utløpsavvisning, overlappende forsøk, refresh, dedikert omstart og live UI/lagrings-/loggkontroll/malinspeksjon.
+- Regionavviket eu-west-3 mot godkjent eu-central-1 må avklares før endelig akseptanse. Ingen flytting eller planendring er utført.
