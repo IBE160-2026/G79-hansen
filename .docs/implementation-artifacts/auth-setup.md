@@ -604,3 +604,21 @@ The configured local server was restarted with one worker (PID 35884, tool sessi
 privacy headers; they send no email and do not mutate an account. The spec's code
 workflow is done and Story 2.2 is at review, while the hosted checks above remain
 open. Story 2.1's remaining email-confirmation acceptance is unchanged.
+
+### Recovery redirect reported saved — 2026-11-15
+
+After being guided to add
+`http://127.0.0.1:8000/api/v1/auth/recovery/callback\?state=*`
+as a new Redirect URL in the existing project, the student answered **“lagret”**.
+Record this as student-reported configuration, not independent inspection of the
+dashboard, redirect matching or reset-email template. The agent's read-only local
+status check returned 200 with authentication available and recovery support.
+No email or password mutation was performed by that check.
+
+Next manual observation: the student may request recovery for their own existing,
+authorized team test account, open the email link in the initiating browser within
+ten minutes, and report whether the restricted new-password view appears.
+Administrative example.com test users are not email-delivery testers. Do not ask
+for a password or raw confirmation/recovery link in chat. Genuine email delivery,
+callback completion and password mutation remain pending until observed/reported;
+the saved-setting report alone does not complete hosted acceptance.
