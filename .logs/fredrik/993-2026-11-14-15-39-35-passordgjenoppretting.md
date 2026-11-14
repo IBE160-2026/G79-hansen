@@ -58,3 +58,8 @@ Walkthrough-skillen og customization-resolveren er lest/kjørt; ingen aktivering
 ### Åpne punkter
 - Walkthroughens menneskelige vurdering og neste detail-pass/testing-steg gjenstår; dette er ikke et nytt godkjenningskrav for den allerede godkjente implementeringsplanen.
 - De eksisterende hosted callback/template/e-post/passordportene og e-postgrenser før offentlig drift står fortsatt i issues.md. Avklar konkret tester før eventuell ekte e-post/passordendring.
+
+### Videreføring kl. 00:03
+Studenten svarte «lagret» etter instruks om å legge den nye recovery-callbacken til som egen Redirect URL i Supabase. Dette er rapportert lagring, ikke uavhengig inspeksjon av dashboard/allowlist/mal. Lesekontroll viste fortsatt 200, available=true og recovery-støtte i lokalappen. Ingen e-post eller passordendring ble utført av kontrollen.
+
+Neste manuelle observasjon er forespørsel fra studentens egen eksisterende autoriserte teamtestkonto og åpning av lenken i den samme nettleseren innen ti minutter. Forventet første resultat er «Velg nytt passord» og beskjed om at brukeren ikke er logget inn; passordbytte tas deretter separat. Ikke bruk de administrative example.com-kontoene til levering, opprett flere kontoer eller be om passord/lenker i chat. Ingen faktisk utsending, mottak, callback eller skjermbildeobservasjon er antatt ved dette kontrollpunktet. auth-setup.md er oppdatert med dette skillet; ingen nye automatiserte funksjonstester.
