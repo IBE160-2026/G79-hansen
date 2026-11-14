@@ -42,3 +42,19 @@ BMAD-steg 5 er fulgt: implementeringsspec done, sprint 2.2 review og faktiske ho
 - Hosted recovery-akseptanse med uttrykkelig autorisert tester gjenstår: ekstra callback-allowlist/mal, ekte e-post, passordbytte/vanlig innlogging, replay/utløp/feil nettleser/overlapp og separat brukers tilgang. Implementering/review/sluttpatcher er ferdige; ikke be om ny plangodkjenning.
 - Story 2.1s resterende hosted-e-postakseptanse beholdes i eksisterende punkt i issues.md; ikke krev nye administrative testbrukere eller merk storyen ferdig.
 - Felles bounded recipient/request-throttling før offentlig drift står i deferred-work.md og eget issues-punkt.
+
+## 2026-11-15 kl. 00:00 — Fredrik
+
+### Oppgave
+Studenten svarte «ok ta neste steg» på tilbudet om en kort gjennomgang av funksjonen. Fortsett med brukerorientert walkthrough, uten å anta autorisasjon til ekte e-post eller passordbytte.
+
+### Plan
+- Bruk BMAD walkthrough og eksisterende spec/commit som utgangspunkt; ikke spør om hvilken endring.
+- Forklar forespørsel, begrenset lenke og nytt passord/vanlig innlogging. Hold ekte leverandørtest adskilt.
+
+### Resultat
+Walkthrough-skillen og customization-resolveren er lest/kjørt; ingen aktiverings-overrides finnes. Commit 5de0fadc1ba9859c7fccf606df66a6bf15b91ad9 og planens baseline er identifisert. Diffen fra baseline omfatter 17 filer inklusive planleggingslogger og tre nye offentlige HTTP-endepunkter. En leserekkefølge er generert i samtalen fra brukerflyt til grenser/leverandør. Orientering og den korte funksjonsgjennomgangen er klargjort. Lesekontroll av den eksisterende serveren ga status 200, available=true og recoveryAvailable-felt. Ingen ny testkjøring, kode-/konfigurasjonsendring, e-post, konto eller passordmutasjon; tidligere 213/én skip og 34 browser-scenarier er historisk sluttverifikasjon fra implementeringen. Brukerens egen inspeksjon eller akseptanse er ikke bekreftet.
+
+### Åpne punkter
+- Walkthroughens menneskelige vurdering og neste detail-pass/testing-steg gjenstår; dette er ikke et nytt godkjenningskrav for den allerede godkjente implementeringsplanen.
+- De eksisterende hosted callback/template/e-post/passordportene og e-postgrenser før offentlig drift står fortsatt i issues.md. Avklar konkret tester før eventuell ekte e-post/passordendring.
