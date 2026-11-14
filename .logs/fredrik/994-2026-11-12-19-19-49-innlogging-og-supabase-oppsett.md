@@ -91,7 +91,7 @@ Kode, tester, reviewrapport, matriseaudit, README, oppsetts-/spesifikasjonsnotat
 - Første faktiske registrering/e-postbekreftelse, separat passordinnlogging, avvisning av feil passord og innlogging etter omstart er rapportert vellykket. Gjenbruk av bekreftelseslenken ga ifølge studenten bare innloggingssiden; eksplisitt feilmelding og eksakt avvisningsmekanisme er ikke bekreftet. Bare én autorisert konto er tilgjengelig. Øvrige negative/isolasjonstester, malinspeksjon og kontroll av Free/konkret region gjenstår. Ti uautentiserte HTTP-grensekontroller består, men erstatter ikke test av to forskjellige autentiserte brukere.
 - Fullfør gjenværende reell akseptanse og formell build-kontroll/status når testforutsetningene er tilgjengelige. Foreløpig firelagsgjennomgang og P1–P12-rettelser er ferdige; de erstatter ikke manglende tester med to forskjellige kontoer. Story 2.1 er fortsatt in-progress.
 
-## 2026-11-14 kl. 00:10 — Fredrik
+## 2026-11-14 kl. 13:52 — Fredrik
 
 ### Oppgave
 Studenten godkjente videre arbeid med to-konto-testen, med forbehold om minst mulig egeninnsats: «vi kan gjøre det, så lenge jeg ikke trenger å gjøre så mye». Undersøk om tilgjengelig tilgang kan automatisere dette før studenten får flere dashboard-oppgaver. Studenten avsluttet deretter med «jeg må avslutte nå»; lagre status og stopp testserveren.
@@ -116,6 +116,8 @@ Ved avslutningen ble testserveren stoppet via verktøysesjon 60984. Kontroll vis
 
 Neste økt: les siste seksjon her og `auth-setup.md`. Behold kode `c36ffd2a64589847cab30b3798b19182a25c580c`, de dokumenterte 155/én skip og 16 browser-resultatene og Story 2.1 som in-progress. Kontroller om Supabase-integrasjonen faktisk er installert/tilkoblet før noen videre admin-handling; brukerens preferanse er minst mulig manuelt arbeid. Bare én ekte autorisert konto er bekreftet. Start appen igjen ved behov med den allerede godkjente én-worker-kommandoen og ignorert `.env`.
 
+Senere samme dag spurte studenten «er den installert da?». Ny katalogkontroll bekreftet **installed:true** for Supabase. Dette erstatter den tidligere installasjonsblokkeringen: ikke be studenten installere på nytt. To kontroller av tilgjengelige verktøy viste likevel ingen Supabase-verktøy i denne samtalen. OAuth-/prosjekttilgang er derfor ikke verifisert her. Neste enkle feilsøking er ny samtale i samme prosjekt med @Supabase, slik OpenAIs pluginveiledning beskriver for første bruk. Ikke påstå at konto-/administrasjonstilgang er bekreftet bare fordi installasjonen er bekreftet. Ingen adminhandling, appkodeendring, serveroppstart eller ny funksjonstest ble utført.
+
 ### Åpne punkter
-- Avvent bekreftet Supabase-installasjon/tilkobling etter eksplisitt brukerforespørsel, oppdag de faktiske administrasjonsverktøyene og velg minst mulig manuelt arbeid for autorisert to-konto-test. Ikke be om hemmelige nøkler i chat eller endre appens nøkkelkrav.
+- Supabase er bekreftet installert. Få verktøyene tilgjengelige i en ny samtale/aktivering ved behov, kontroller faktisk tilkobling/prosjekttilgang og velg minst mulig manuelt arbeid for autorisert to-konto-test. Ikke be om hemmelige nøkler i chat eller endre appens nøkkelkrav.
 - Reell to-konto-isolasjon og øvrige gjenværende hosted-akseptansetester/formell build-kontroll er fortsatt åpne; de tidligere foreløpige reviewrettelsene er ferdige.

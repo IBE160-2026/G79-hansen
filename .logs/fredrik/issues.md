@@ -1,6 +1,6 @@
 # ?pne punkter
 
-- [ ] 2026-11-14 [Automatisert to-konto-test](994-2026-11-12-19-19-49-innlogging-og-supabase-oppsett.md) - Studenten ønsker minst mulig egeninnsats og ba assistenten utføre tilkoblingen. Supabase er gjort tilgjengelig for installasjon/tilkobling på dette eksplisitte ønsket, men ingen installasjon/tilkobling er bekreftet. Studenten må selv logge inn/godkjenne tilgangen. Kontroller faktisk verktøystøtte etter tilkobling før testkonto-provisjonering eller løfter om full automasjon. Ingen ny konto/e-post/oppsettendring utført; ekte isolasjon er fortsatt utestet.
+- [ ] 2026-11-14 [Automatisert to-konto-test](994-2026-11-12-19-19-49-innlogging-og-supabase-oppsett.md) - Supabase er nå bekreftet installert (installed:true), men ingen Supabase-verktøy er tilgjengelige i den eksisterende samtalen. Ikke be om ny installasjon. Prøv ny samtale i samme prosjekt med @Supabase og kontroller faktisk tilkobling/prosjekttilgang før testkonto-provisjonering eller løfter om full automasjon. Studenten ønsker minst mulig egeninnsats. Ingen ny konto/e-post/oppsettendring utført; ekte isolasjon er fortsatt utestet.
 
 - [x] 2026-11-01 [PRD-push og UX-oppstart](999-2026-11-01-10-39-24-prd-push-og-ux-oppstart.md) - UX-kontroll og eksempeltilstander godkjent; UX ferdigstilt (loest 2026-11-01).
 - [x] 2026-11-01 [PRD-push og UX-oppstart](999-2026-11-01-10-39-24-prd-push-og-ux-oppstart.md) - Delte BMAD-filer versjonert i bf6544a (loest 2026-11-01).
