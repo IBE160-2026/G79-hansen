@@ -1,6 +1,6 @@
 # Story 2.5 generation protocol — implementation proposal
 
-This is a proposed technical contract supporting the draft spec. All provider, access, spending, data and size/time choices remain subject to its five open questions. No protocol below has been implemented or tested.
+This technical contract supports the spec. On 15 November 2026 the student approved the plan/recommendations and asked for API setup help. Approved provider, spending, data and size/time choices are recorded in the spec; API readiness remains required before implementation. No protocol below has been implemented or tested.
 
 ## Source acceptance and command ordering
 

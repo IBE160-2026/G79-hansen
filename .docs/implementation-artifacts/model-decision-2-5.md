@@ -2,6 +2,8 @@
 
 Checked on 15 November 2026. No inference request, key validation, account creation, purchase or hosted change was performed. The recommendation below is an engineering inference from official specifications, not a measured Study Buddy quality result.
 
+**Approval update, 15 November:** The student accepted the plan and recommendations, then clarified “Trenger hjelp med oppsett”. Model, cost, data and bounds choices are now approved as recorded in the spec. API readiness remains outstanding; no new plan approval is required for this unchanged scope. The original comparison below is preserved as decision evidence.
+
 ## Repository and integration evidence
 
 The clean starting revision is `5737bbf45902f3621fc90ecb8ab62e09eecbf100`, following Story 2.4 code revision `c5b207ff8523c9b62668043f2ea69466e9e39ac7`. Cached Epic 2 context is newer than all planning artifacts. Source extraction is implemented; model adapters, workspace authority and save receipts are absent. `httpx` 0.28.1 is already locked transitively; declare it directly when implementing the HTTP adapter. No provider SDK needs to be introduced.
@@ -56,6 +58,6 @@ The proposed 256 KiB serialized provider-request bound plus a conservative 4,096
 
 An app ledger controls this app's dispatches, not another client's use of the same key/project or provider price changes. Use an appropriately isolated existing API credential; never claim a dashboard alert is a hard cap. The application refuses activation without a preinitialized budget ledger and agreed configuration. Missing/corrupt/exhausted state fails closed. No dashboard or funding changes are part of this proposal.
 
-## Decisions still required
+## Approval and remaining prerequisite
 
-The five questions in the [implementation spec](spec-2-5-generate-all-learning-parts-from-the-source.md#open-questions) are the approval record: model, API access, ceiling/live-check scope, data handling, timeout/output bounds. A short answer accepting all recommendations plus whether an existing authorized API project is available is sufficient to resolve preferences. A credential must be provided through local ignored configuration, never chat. If access or any gate remains unresolved, keep the spec draft and Story 2.5 backlog. No prior auth/PDF approval authorizes these new choices.
+The [implementation spec](spec-2-5-generate-all-learning-parts-from-the-source.md#readiness-gate) records approved decisions and the remaining API prerequisite. Follow the [setup guide](model-setup-2-5.md). A credential must be provided through local ignored configuration, never chat. Until API readiness is established, keep the spec draft and Story 2.5 backlog. Prior auth/PDF approvals remain separate.

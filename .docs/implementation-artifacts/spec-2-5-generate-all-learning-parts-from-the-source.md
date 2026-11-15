@@ -10,13 +10,15 @@ review_loop_iteration: 0
 context: [.docs/implementation-artifacts/epic-2-context.md, .docs/implementation-artifacts/model-decision-2-5.md, .docs/implementation-artifacts/generation-protocol-2-5.md]
 ---
 
-<frozen-after-approval reason="pending human decisions and approval; not authorized for implementation">
+<frozen-after-approval reason="student approved the plan and recommendations on 2026-11-15; API setup is required before implementation">
 
 ## Intent
 
 **Problem:** The workspace previews sources but cannot generate learning material.
 
 **Approach:** One action validates the current source if necessary, then makes one bounded model request producing all four learning sections and a signed generation receipt.
+
+**Approved decisions (2026-11-15):** OpenAI `gpt-6-luna`, Standard, reasoning `none`; USD 5 total usage ceiling with USD 0.05 reservations and at most four automated synthetic live checks; global processing, `store:false`, explicit cache mode without breakpoints, no training opt-in, normally up to 30-day provider abuse retention with exceptions; permitted nonsensitive material only. Generation: 60s server deadline, 70s browser wait after extraction, 8,000 output tokens, 256 KiB provider response and protocol item limits. Funding/taxes remain separate; no automatic purchases. The student needs API setup help; local credentials/billing/model access are not yet established.
 
 ## Boundaries & Constraints
 
@@ -37,13 +39,9 @@ context: [.docs/implementation-artifacts/epic-2-context.md, .docs/implementation
 
 </frozen-after-approval>
 
-## Open Questions
+## Readiness Gate
 
-1. Provider/model: recommended OpenAI `gpt-6-luna`; alternatively Gemini 3.8 Flash or Claude Sonnet 5.5 (different costs/adapter/data terms). See comparison.
-2. API access: existing authorized OpenAI API project/key with billing/model access, or owner setup needed (gate remains closed). No key was found locally; never paste secrets into chat.
-3. Cost: proposed USD 5 total usage ceiling, USD 0.05 reserved per dispatch, at most four automated synthetic live checks; alternatively zero paid calls or a different explicit ceiling. Funding/taxes are separate and never automatic.
-4. Data: proposed global processing, `store:false`, explicit cache mode without breakpoints, no training opt-in; provider abuse retention normally up to 30 days with exceptions. Only permitted nonsensitive material. Alternatively require EU processing or ZDR and resolve account prerequisites first.
-5. Bounds: proposed 60s server generation deadline, 70s browser wait after extraction, 8,000 output tokens, 256 KiB provider response and proposed item limits in the protocol; alternatively specify different limits.
+Approval recorded; do not request again. The student answered “Trenger hjelp med oppsett”. Keep draft/backlog until local key, billing and model access are established. Follow `model-setup-2-5.md`; no implementation/inference yet. Never paste secrets into chat or automatically create accounts, fund or change hosted settings.
 
 ## Code Map
 

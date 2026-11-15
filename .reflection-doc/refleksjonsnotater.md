@@ -477,6 +477,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Dokumentasjon og status:** [Draft-spesifikasjon](../.docs/implementation-artifacts/spec-2-5-generate-all-learning-parts-from-the-source.md), [modell-/kostnadssammenligning med kilder](../.docs/implementation-artifacts/model-decision-2-5.md) og [genereringsprotokoll](../.docs/implementation-artifacts/generation-protocol-2-5.md) er skrevet. De fem åpne spørsmålene gjelder modell, faktisk API-tilgang, kostnad/livekontroll, datahåndtering og tids-/størrelsesgrenser. Story 2.5 beholdes i backlog inntil porten er avklart; appkode er ikke endret. Studentens egen refleksjon eller godkjenning er ikke skrevet av KI.
 
+## 15.11.2026 – Plangodkjenning og behov for API-oppsett
+
+**Studentens beslutning:** Studenten svarte «Godkjenn planen med forslagene», men beholdt begge API-alternativene i den kopierte svarmalen. KI behandlet godkjenningen av modell, kostnadsramme, datavilkår og tids-/størrelsesgrenser som gyldig, men antok ikke at faktisk API-tilgang var på plass. På ett avklaringsspørsmål svarte studenten «Trenger hjelp med oppsett». Samme konkrete plan trenger dermed ikke ny godkjenning; API-oppsett er et utestående praktisk vilkår.
+
+**KI-bidrag og kontroll:** Spesifikasjonen ble lest fra disk før godkjenningen ble registrert. Lokal kontroll av vanlige OpenAI-nøkkelnavn viste fortsatt ingen konfigurert nøkkel, uten å vise noen verdier. Offisielle oppsett-/prosjekt-/nøkkel-/betalingsinstruksjoner ble kontrollert. Veiledningen skiller minimumskjøp av kreditt på USD 5 fra appens bruksramme, og gjør oppmerksom på at automatisk påfyll er på som standard i betalingsoppsettet. Studenten håndterer innlogging, betaling og selve nøkkelen privat. Et tomt nøkkelfelt i ignorert `.env` klargjøres uten å endre auth-verdier eller aktivere modellkall.
+
+**Status og avgrensning:** Planvalg er registrert i godkjenningsblokken, men spec/sprint står draft/backlog til API-tilgang er etablert. Ingen appimplementering, nøkkelvalidering mot leverandør, inferens, konto-/prosjektoppretting, kjøp, hosted-endring eller serverrestart er utført. Tidligere testbevis er historiske og uendret. Studentens egne refleksjoner er ikke skrevet av KI.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
