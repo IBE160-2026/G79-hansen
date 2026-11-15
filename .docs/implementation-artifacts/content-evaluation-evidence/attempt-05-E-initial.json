@@ -1,0 +1,35 @@
+{
+  "case": "E",
+  "corpusFingerprint": "5fa198aa6a318a3b6698fc9f4936d76c824cbbe0d7093d9adcc2c23d89db0a33",
+  "errorCode": 0,
+  "estimatedUsd": 0.0001098,
+  "grantAttempt": 5,
+  "implementationFingerprint": "cef5430015633ffb7fca681d6fe334dab03e486e6805333feab2f4b5f7aff621",
+  "inputTokens": 623,
+  "latencySeconds": 3.512,
+  "model": "gpt-6-luna",
+  "output": {
+    "concepts": [],
+    "flashcards": [],
+    "insufficiency": {
+      "concepts": "The source contains only an ellipsis and provides no support for learning concepts.",
+      "flashcards": "The source contains no facts or details from which to create supported flashcards.",
+      "quiz": "The source contains no facts or details from which to create supported quiz questions.",
+      "summary": "The source contains no substantive information to summarize."
+    },
+    "quiz": [],
+    "summary": [],
+    "warnings": []
+  },
+  "outputTokens": 95,
+  "phase": "initial",
+  "promptSha256": "016d7ef3b4483f94ac22188a2aa516de94f8b3ea15c830862f072e3cc7bd6dae",
+  "registrationFingerprint": "072360c75d1127b185cf8256ad4e737144a7cbdeb5633f0e4116f8a7503ddf75",
+  "semanticAssessment": "pending",
+  "settings": {
+    "detail": "short",
+    "language": "en",
+    "subject": ""
+  },
+  "status": "structurally_validated"
+}

@@ -233,11 +233,15 @@ uv run --group pdf-experiment pytest tests/test_content_evaluation.py tests/test
 uv run --group pdf-experiment python -m scripts.content_evaluation --register
 ```
 
-Registration exclusively creates a fingerprinted directory beneath
+Registration atomically publishes a complete fingerprinted directory beneath
 `.docs/implementation-artifacts/content-evaluation-evidence/`, containing fixed
 source units, settings, fifteen concept/location expectations, code/prompt hashes,
-exact visible PDF lines and a readable ordinary-font `source-c.pdf`. Render and
-inspect all five physical pages and compare those lines before inference; pages
+exact visible PDF lines, the immutable acceptance-rubric hash and a readable
+ordinary-font `source-c.pdf`. Mutable status/results are excluded from that rubric
+hash. Registration stages both files in an owned temporary directory, flushes
+them, and publishes without replacing an existing registration. A failed staging
+attempt cleans only its own temporary directory and can be retried offline.
+Render and inspect all five physical pages and compare those lines before inference; pages
 2 and 4 must be blank. Commit/fingerprint this registration before any live case.
 A changed implementation requires a new matching registration, while the frozen
 corpus fingerprint remains separately traceable.
@@ -251,26 +255,40 @@ command arguments. Execute one explicitly selected case per invocation:
 
 ```powershell
 uv run python -m scripts.content_evaluation --initialize-grant
-uv run --group pdf-experiment python -m scripts.content_evaluation --live --case A
-uv run --group pdf-experiment python -m scripts.content_evaluation --live --case A --phase recheck
+uv run --env-file .env --group pdf-experiment python -m scripts.content_evaluation --live --case A
+uv run --env-file .env --group pdf-experiment python -m scripts.content_evaluation --live --case A --phase recheck
 ```
 
 The final command is only for an approved, needed recheck. There are eight total
 attempts across restarts, including failed or uncertain attempts. Each consumes
 the evaluation grant durably before reserving USD 0.05 in the existing global
 ledger. No reservation is refunded, no retry is automatic, and a concurrent
-runner fails immediately. The original four-smoke counter stays unchanged and
+runner fails immediately. An existing destination evidence file is rejected
+under the grant lock before either allowance is consumed or a provider attempt
+starts. The original four-smoke counter stays unchanged and
 cannot be reused. Each attempt writes a new synthetic evidence file; numeric
-errors omit provider messages and raw envelopes. Error codes are 1 configuration,
+errors omit provider messages and raw envelopes. JSON evidence is fully flushed
+to an owned temporary file, then atomically published without replacement, using
+Windows write-through or POSIX directory synchronization. Registration/PDF reads
+are bounded before allocation. Error codes are 1 configuration,
 2 grant/lock, 3 global reservation, 4 provider/usage, 5 output structure/reference
 identity, 6 evidence persistence, 7 registration, 8 case selection, 9 deadline,
-and 10 other safe stop.
+10 internal/other safe stop, and 11 explicit cancellation. Attempt evidence records
+`globalReservationCompleted` and `providerAttemptStarted` booleans. These describe
+local completion/start phases only; neither proves upstream receipt or billing.
+For deadline code 9 they distinguish a stop before the provider attempt from a
+deadline during that attempt. Failed/uncertain dispatch and cancellation retain
+all consumed allowances. The five historical outputs/assessments keep their
+original metadata and registration; these added fields apply to future attempts.
 
 Structural validation establishes reference identity only. Audit every returned
 item for factual support and substantive reference correctness; score each
 registered concept semantically, retaining unsupported claims, wrong references
 and omissions separately. Preserve initial failures and link fixes, regressions
-and rechecks. A shared instruction change needs final evidence for all five
+and rechecks. Offline integrity tests validate historical observation hashes,
+complete item/reference enumeration, exact excerpts and coverage identity links;
+they establish traceability and do not judge semantic correctness.
+A shared instruction change needs final evidence for all five
 cases. Exhausted allowance or unresolved failures leave acceptance incomplete.
 Passing this controlled corpus establishes its observed synthetic results only;
 arbitrary course documents, complex PDF reading order/OCR, deployed isolation,

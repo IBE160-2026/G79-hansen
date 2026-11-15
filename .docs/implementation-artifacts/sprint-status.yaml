@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 15-11-2026 20:06
+last_updated: 15-11-2026 22:17
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -61,7 +61,11 @@ development_status:
   # Final browsers: 28 source/generation, 33 auth, 11 demo; restarted normal server passed 10 unsigned checks.
   # Four authorized synthetic live calls passed before review patches; no further automated inference.
   # USD 0.20 reserved of USD 5; ledger persists. Content quality evaluation remains Story 2.6.
-  2-6-evaluate-generated-content-against-known-sources: in-progress
+  2-6-evaluate-generated-content-against-known-sources: review
+  # Content evaluation complete: three registered sources each 5/5 concepts; conflict/insufficiency cases passed.
+  # Five new live calls; 59 items/70 references audited; USD 0.0020852 estimated usage, USD 0.25 additional reserved.
+  # Final 481 passed/1 inherited skip; 59 evaluation controls. Review corrected 13 findings, rejected 1, deferred none.
+  # Original four-smoke count intact; evaluation 5/8, global USD 0.45 of USD 5 reserved; no app/prompt/host changes.
   epic-2-retrospective: optional
 
   epic-3: backlog

@@ -1,0 +1,499 @@
+{
+  "case": "B",
+  "observation": "attempt-02-B-initial.json",
+  "observationSha256": "d0d0a365a30b32a325b7222de852d1bd4369fe4a1907fb82dfda2ca6d9ec26e6",
+  "assessmentMethod": "Parent read every returned item, all references and all explanations against the pre-registered source. This script only transcribes those judgments and evidence links; it does not grade text.",
+  "corpusFingerprint": "5fa198aa6a318a3b6698fc9f4936d76c824cbbe0d7093d9adcc2c23d89db0a33",
+  "promptSha256": "016d7ef3b4483f94ac22188a2aa516de94f8b3ea15c830862f072e3cc7bd6dae",
+  "result": "pass",
+  "unsupportedClaims": [],
+  "wrongReferences": [],
+  "omissions": [],
+  "items": [
+    {
+      "part": "summary",
+      "position": 1,
+      "itemId": "226c5c54-d38a-483e-828f-2de6aeaaf38d",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": null,
+      "claims": [
+        {
+          "exactOutputExcerpt": "Before each run, measure the reference disk; it must read ten units or the run is stopped.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-1",
+              "location": 1,
+              "exactSourceExcerpt": "In the fictional Lumen laboratory, calibration means measuring the reference disk before every run. The reference disk must read ten units; otherwise the run is stopped."
+            }
+          ]
+        },
+        {
+          "exactOutputExcerpt": "Record the empty-tray baseline before adding a sample.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-2",
+              "location": 2,
+              "exactSourceExcerpt": "The baseline is the measurement of an empty tray. Record the baseline before adding a sample; do not replace it with a sample measurement."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 1",
+        "Avsnitt 2"
+      ]
+    },
+    {
+      "part": "summary",
+      "position": 2,
+      "itemId": "fef52952-dd44-4922-b62d-1369a1bf4f1e",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": null,
+      "claims": [
+        {
+          "exactOutputExcerpt": "During a trial, record sample temperature every thirty seconds for three minutes, keeping the interval consistent.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-3",
+              "location": 3,
+              "exactSourceExcerpt": "A trial records sample temperature every thirty seconds for three minutes. Use the same recording interval throughout that trial."
+            }
+          ]
+        },
+        {
+          "exactOutputExcerpt": "Replicate the same procedure three times under the same recorded conditions and keep results separate.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-4",
+              "location": 4,
+              "exactSourceExcerpt": "Replication means performing the same trial procedure three times under the same recorded conditions. Keep the three results separate in the notebook."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 3",
+        "Avsnitt 4"
+      ]
+    },
+    {
+      "part": "summary",
+      "position": 3,
+      "itemId": "f788cb02-ad18-479d-b84d-2c6e278c72fd",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": null,
+      "claims": [
+        {
+          "exactOutputExcerpt": "A result more than four units different from the baseline is an anomaly: flag it for review rather than silently discarding it.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-5",
+              "location": 5,
+              "exactSourceExcerpt": "An anomaly is a difference above four units between a result and the baseline. Flag an anomaly for review; do not silently discard the result."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 5"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 1,
+      "itemId": "d73e9e22-eb93-44bb-bfef-c024722ede1c",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Calibration",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Calibration means measuring the reference disk before every run. It must read ten units; otherwise, stop the run.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-1",
+              "location": 1,
+              "exactSourceExcerpt": "In the fictional Lumen laboratory, calibration means measuring the reference disk before every run. The reference disk must read ten units; otherwise the run is stopped."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 1"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 2,
+      "itemId": "833707de-7228-4777-aa3b-0eba23707975",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Baseline",
+      "claims": [
+        {
+          "exactOutputExcerpt": "The baseline is the measurement of an empty tray. Record it before adding a sample, and do not substitute a sample measurement for it.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-2",
+              "location": 2,
+              "exactSourceExcerpt": "The baseline is the measurement of an empty tray. Record the baseline before adding a sample; do not replace it with a sample measurement."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 2"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 3,
+      "itemId": "4ab3593d-0b0c-40a7-a114-adab4dd0add2",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Replication",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Replication means performing the same trial procedure three times under the same recorded conditions. Keep each result separate in the notebook.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-4",
+              "location": 4,
+              "exactSourceExcerpt": "Replication means performing the same trial procedure three times under the same recorded conditions. Keep the three results separate in the notebook."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 4"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 4,
+      "itemId": "5ea7074d-da6d-4bc3-822c-632a4c88f0b8",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Anomaly",
+      "claims": [
+        {
+          "exactOutputExcerpt": "An anomaly is a difference above four units between a result and the baseline. Flag it for review rather than silently discarding the result.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-5",
+              "location": 5,
+              "exactSourceExcerpt": "An anomaly is a difference above four units between a result and the baseline. Flag an anomaly for review; do not silently discard the result."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 5"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 1,
+      "itemId": "5f84cd67-5b07-492a-a095-ac3acdab341a",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "How should calibration be performed?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Measure the reference disk before every run. If it does not read ten units, stop the run.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-1",
+              "location": 1,
+              "exactSourceExcerpt": "In the fictional Lumen laboratory, calibration means measuring the reference disk before every run. The reference disk must read ten units; otherwise the run is stopped."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 1"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 2,
+      "itemId": "46842f94-5e6b-4a34-8485-d07ea2bbb716",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "How should the baseline be recorded?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Measure the empty tray before adding a sample. Do not replace this measurement with a sample measurement.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-2",
+              "location": 2,
+              "exactSourceExcerpt": "The baseline is the measurement of an empty tray. Record the baseline before adding a sample; do not replace it with a sample measurement."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 2"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 3,
+      "itemId": "e3e7ac2a-220c-43ac-8e9c-d2cf25830ca0",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "What is the temperature-recording schedule for a trial?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Record sample temperature every thirty seconds for three minutes, using the same interval throughout the trial.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-3",
+              "location": 3,
+              "exactSourceExcerpt": "A trial records sample temperature every thirty seconds for three minutes. Use the same recording interval throughout that trial."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 3"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 4,
+      "itemId": "06dd6809-c3ae-4a3f-b841-cb49c1920c2f",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "What does replication require?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Perform the same trial procedure three times under the same recorded conditions, and keep the results separate in the notebook.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-4",
+              "location": 4,
+              "exactSourceExcerpt": "Replication means performing the same trial procedure three times under the same recorded conditions. Keep the three results separate in the notebook."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 4"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 5,
+      "itemId": "dc24aaab-3555-4e95-8be8-cd7bb04ebeff",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "What should be done with an anomaly?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Flag it for review; do not silently discard the result.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-5",
+              "location": 5,
+              "exactSourceExcerpt": "An anomaly is a difference above four units between a result and the baseline. Flag an anomaly for review; do not silently discard the result."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 5"
+      ]
+    },
+    {
+      "part": "quiz",
+      "position": 1,
+      "itemId": "6702fb4b-1b0b-44f0-bdab-3fa097d7d507",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Before a run, the reference disk reads eight units. What should you do?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Stop the run because the reference disk must read ten units.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-1",
+              "location": 1,
+              "exactSourceExcerpt": "In the fictional Lumen laboratory, calibration means measuring the reference disk before every run. The reference disk must read ten units; otherwise the run is stopped."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 1"
+      ],
+      "reasoningNote": "The question supplies a transparent hypothetical value, not an observation attributed to the source. Eight differs from the required ten; five exceeds four. The answer correctly applies the cited source rule without adding a source fact."
+    },
+    {
+      "part": "quiz",
+      "position": 2,
+      "itemId": "ef951162-cc58-4ccb-93ba-e782a95b1be7",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "A sample has already been added. Which measurement should have been recorded as the baseline, and when?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Record the empty-tray measurement before adding the sample; do not use the sample measurement as the baseline.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-2",
+              "location": 2,
+              "exactSourceExcerpt": "The baseline is the measurement of an empty tray. Record the baseline before adding a sample; do not replace it with a sample measurement."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 2"
+      ]
+    },
+    {
+      "part": "quiz",
+      "position": 3,
+      "itemId": "2c5c13e8-5e5d-4598-8c5b-544a2e5cece1",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "What interval and duration should be used to record sample temperature during a trial?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Record the sample temperature every thirty seconds for three minutes, using that interval throughout the trial.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-3",
+              "location": 3,
+              "exactSourceExcerpt": "A trial records sample temperature every thirty seconds for three minutes. Use the same recording interval throughout that trial."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 3"
+      ]
+    },
+    {
+      "part": "quiz",
+      "position": 4,
+      "itemId": "89306675-82d3-4df2-ab99-6a9d641d3295",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "How should a replicated trial be conducted and recorded?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Perform the same procedure three times under the same recorded conditions and keep the three results separate.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-4",
+              "location": 4,
+              "exactSourceExcerpt": "Replication means performing the same trial procedure three times under the same recorded conditions. Keep the three results separate in the notebook."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 4"
+      ]
+    },
+    {
+      "part": "quiz",
+      "position": 5,
+      "itemId": "a9c1a5b4-73aa-4bbf-a7cd-64402794b67f",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "A result differs from the baseline by five units. What should you do?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Flag the result for review rather than silently discarding it.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "paragraph-5",
+              "location": 5,
+              "exactSourceExcerpt": "An anomaly is a difference above four units between a result and the baseline. Flag an anomaly for review; do not silently discard the result."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Avsnitt 5"
+      ],
+      "reasoningNote": "The question supplies a transparent hypothetical value, not an observation attributed to the source. Eight differs from the required ten; five exceeds four. The answer correctly applies the cited source rule without adding a source fact."
+    }
+  ],
+  "coverage": [
+    {
+      "conceptId": "B1",
+      "requiredMeaning": "Before every run; reference disk must read ten or stop",
+      "sourceLocation": 1,
+      "covered": true,
+      "itemId": "d73e9e22-eb93-44bb-bfef-c024722ede1c",
+      "exactOutputExcerpt": "Calibration means measuring the reference disk before every run. It must read ten units; otherwise, stop the run."
+    },
+    {
+      "conceptId": "B2",
+      "requiredMeaning": "Empty-tray measurement recorded before sample",
+      "sourceLocation": 2,
+      "covered": true,
+      "itemId": "833707de-7228-4777-aa3b-0eba23707975",
+      "exactOutputExcerpt": "The baseline is the measurement of an empty tray. Record it before adding a sample, and do not substitute a sample measurement for it."
+    },
+    {
+      "conceptId": "B3",
+      "requiredMeaning": "Temperature every 30 seconds for three minutes",
+      "sourceLocation": 3,
+      "covered": true,
+      "itemId": "e3e7ac2a-220c-43ac-8e9c-d2cf25830ca0",
+      "exactOutputExcerpt": "Record sample temperature every thirty seconds for three minutes, using the same interval throughout the trial."
+    },
+    {
+      "conceptId": "B4",
+      "requiredMeaning": "Same procedure three times, same recorded conditions, separate results",
+      "sourceLocation": 4,
+      "covered": true,
+      "itemId": "4ab3593d-0b0c-40a7-a114-adab4dd0add2",
+      "exactOutputExcerpt": "Replication means performing the same trial procedure three times under the same recorded conditions. Keep each result separate in the notebook."
+    },
+    {
+      "conceptId": "B5",
+      "requiredMeaning": "Above four units relative to baseline; flag rather than discard",
+      "sourceLocation": 5,
+      "covered": true,
+      "itemId": "5ea7074d-da6d-4bc3-822c-632a4c88f0b8",
+      "exactOutputExcerpt": "An anomaly is a difference above four units between a result and the baseline. Flag it for review rather than silently discarding the result."
+    }
+  ],
+  "languageAndDetail": "pass: selected language throughout generated prose; summary respects selected bound and preserves central facts; practice answers agree with source.",
+  "qualificationsChecked": {
+    "concepts": null,
+    "flashcards": null,
+    "quiz": null,
+    "summary": null
+  },
+  "warningsChecked": [],
+  "styleObservation": "Trial is absent as a standalone concept, but its complete interval/duration meaning appears in summary, flashcard and quiz; corpus coverage is therefore 5/5, not an omission."
+}

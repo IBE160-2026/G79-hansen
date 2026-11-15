@@ -1,0 +1,225 @@
+{
+  "case": "A",
+  "corpusFingerprint": "5fa198aa6a318a3b6698fc9f4936d76c824cbbe0d7093d9adcc2c23d89db0a33",
+  "errorCode": 0,
+  "estimatedUsd": 0.0004373,
+  "grantAttempt": 1,
+  "implementationFingerprint": "cef5430015633ffb7fca681d6fe334dab03e486e6805333feab2f4b5f7aff621",
+  "inputTokens": 813,
+  "latencySeconds": 9.759,
+  "model": "gpt-6-luna",
+  "output": {
+    "concepts": [
+      {
+        "explanation": "Låneperioden for vanlige bøker er 14 dager fra utlån til innleveringsfristen.",
+        "id": "0b189800-2be4-4abe-a2df-7b4c73df29ff",
+        "references": [
+          {
+            "label": "Avsnitt 1",
+            "sourceUnitId": "paragraph-1"
+          }
+        ],
+        "term": "Låneperiode"
+      },
+      {
+        "explanation": "Et lån kan fornyes én gang når ingen andre har reservert boken. Fornyelsen gir en ny periode på 14 dager.",
+        "id": "c428de17-8854-47dd-bf7c-91e444a994c5",
+        "references": [
+          {
+            "label": "Avsnitt 2",
+            "sourceUnitId": "paragraph-2"
+          }
+        ],
+        "term": "Fornyelse"
+      },
+      {
+        "explanation": "En reservasjon setter en leser i kø for en bok. Når boken er klar, holdes den av i tre dager før tilbudet går videre.",
+        "id": "e63c998f-e9eb-4a97-a32f-5ac970da2c46",
+        "references": [
+          {
+            "label": "Avsnitt 3",
+            "sourceUnitId": "paragraph-3"
+          }
+        ],
+        "term": "Reservasjon"
+      },
+      {
+        "explanation": "Stillesonen er for individuelt arbeid uten samtaler, mens gruppearbeid skal foregå i grupperommet.",
+        "id": "8f31d9fc-2691-4510-95b9-ccd6e2d29790",
+        "references": [
+          {
+            "label": "Avsnitt 4",
+            "sourceUnitId": "paragraph-4"
+          }
+        ],
+        "term": "Arbeidsområder"
+      },
+      {
+        "explanation": "Veiledning er en forhåndsbestilt samtale om litteratursøk som varer i 20 minutter.",
+        "id": "b2adbb99-405f-4ad8-b6b2-dee2f2aabdbe",
+        "references": [
+          {
+            "label": "Avsnitt 5",
+            "sourceUnitId": "paragraph-5"
+          }
+        ],
+        "term": "Veiledning"
+      }
+    ],
+    "flashcards": [
+      {
+        "answer": "14 dager.",
+        "id": "42b2b7b4-aab1-4c1a-b80d-29bc2b405cab",
+        "question": "Hvor lang er låneperioden for vanlige bøker?",
+        "references": [
+          {
+            "label": "Avsnitt 1",
+            "sourceUnitId": "paragraph-1"
+          }
+        ]
+      },
+      {
+        "answer": "Én gang, dersom ingen andre har reservert boken. Fornyelsen gir 14 nye dager.",
+        "id": "2838fd60-6ff6-403d-a457-21901194e807",
+        "question": "Når og hvor mange ganger kan et lån fornyes?",
+        "references": [
+          {
+            "label": "Avsnitt 2",
+            "sourceUnitId": "paragraph-2"
+          }
+        ]
+      },
+      {
+        "answer": "I tre dager før tilbudet går videre til neste leser.",
+        "id": "17a074a0-08f5-4deb-aa6d-da4995469ac9",
+        "question": "Hvor lenge holdes en reservert bok av når den er klar?",
+        "references": [
+          {
+            "label": "Avsnitt 3",
+            "sourceUnitId": "paragraph-3"
+          }
+        ]
+      },
+      {
+        "answer": "Gruppearbeid skal foregå i grupperommet.",
+        "id": "cc885c94-a5af-4e35-a42c-6ea3c8169985",
+        "question": "Hvor skal gruppearbeid foregå?",
+        "references": [
+          {
+            "label": "Avsnitt 4",
+            "sourceUnitId": "paragraph-4"
+          }
+        ]
+      },
+      {
+        "answer": "Samtalen varer 20 minutter og må bestilles på forhånd.",
+        "id": "c4b8fa54-aeca-4dce-8184-d7208841bfb1",
+        "question": "Hva gjelder for en veiledningssamtale om litteratursøk?",
+        "references": [
+          {
+            "label": "Avsnitt 5",
+            "sourceUnitId": "paragraph-5"
+          }
+        ]
+      }
+    ],
+    "insufficiency": {
+      "concepts": null,
+      "flashcards": null,
+      "quiz": null,
+      "summary": null
+    },
+    "quiz": [
+      {
+        "answer": "Fra utlån til innleveringsfristen.",
+        "id": "2d10ab98-ff4d-4122-9023-8b1144eeda75",
+        "question": "Hva betyr «låneperiode»?",
+        "references": [
+          {
+            "label": "Avsnitt 1",
+            "sourceUnitId": "paragraph-1"
+          }
+        ]
+      },
+      {
+        "answer": "Nei. Lånet kan fornyes én gang bare dersom ingen andre har reservert boken.",
+        "id": "dadaff75-74da-4d39-b5c9-f3b905d530c0",
+        "question": "Kan et lån fornyes hvis noen andre har reservert boken?",
+        "references": [
+          {
+            "label": "Avsnitt 2",
+            "sourceUnitId": "paragraph-2"
+          }
+        ]
+      },
+      {
+        "answer": "Et rom for individuelt arbeid uten samtaler.",
+        "id": "230f6d94-443d-4422-a6e4-be8b1380e4ab",
+        "question": "Hva brukes stillesonen til?",
+        "references": [
+          {
+            "label": "Avsnitt 4",
+            "sourceUnitId": "paragraph-4"
+          }
+        ]
+      },
+      {
+        "answer": "En avtalt samtale om litteratursøk.",
+        "id": "f4c671ac-c4fa-46d0-b479-4f63d63ec5b5",
+        "question": "Hva er veiledning?",
+        "references": [
+          {
+            "label": "Avsnitt 5",
+            "sourceUnitId": "paragraph-5"
+          }
+        ]
+      }
+    ],
+    "summary": [
+      {
+        "id": "90a94704-1c6b-4f78-a8b0-018aaf250cdc",
+        "references": [
+          {
+            "label": "Avsnitt 1",
+            "sourceUnitId": "paragraph-1"
+          },
+          {
+            "label": "Avsnitt 2",
+            "sourceUnitId": "paragraph-2"
+          }
+        ],
+        "text": "Vanlige bøker lånes i 14 dager. Et lån kan fornyes én gang dersom ingen andre har reservert boken; fornyelsen gir 14 nye dager."
+      },
+      {
+        "id": "ece13d35-e58d-4834-bb82-a6bc90c3b212",
+        "references": [
+          {
+            "label": "Avsnitt 3",
+            "sourceUnitId": "paragraph-3"
+          },
+          {
+            "label": "Avsnitt 4",
+            "sourceUnitId": "paragraph-4"
+          },
+          {
+            "label": "Avsnitt 5",
+            "sourceUnitId": "paragraph-5"
+          }
+        ],
+        "text": "Reserverte bøker holdes av i tre dager når de er klare. Stillesonen er for individuelt arbeid uten samtaler, og gruppearbeid foregår i grupperommet. Veiledning om litteratursøk må bestilles på forhånd og varer i 20 minutter."
+      }
+    ],
+    "warnings": []
+  },
+  "outputTokens": 712,
+  "phase": "initial",
+  "promptSha256": "016d7ef3b4483f94ac22188a2aa516de94f8b3ea15c830862f072e3cc7bd6dae",
+  "registrationFingerprint": "072360c75d1127b185cf8256ad4e737144a7cbdeb5633f0e4116f8a7503ddf75",
+  "semanticAssessment": "pending",
+  "settings": {
+    "detail": "short",
+    "language": "nb",
+    "subject": ""
+  },
+  "status": "structurally_validated"
+}

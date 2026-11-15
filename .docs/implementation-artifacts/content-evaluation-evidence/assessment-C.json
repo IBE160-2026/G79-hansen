@@ -1,0 +1,438 @@
+{
+  "case": "C",
+  "observation": "attempt-03-C-initial.json",
+  "observationSha256": "de41d7f24f6a8680558afa23ab2624380d14b279912185baeeadeccb67d6fee5",
+  "assessmentMethod": "Parent read every returned item, all references and all explanations against the pre-registered source. This script only transcribes those judgments and evidence links; it does not grade text.",
+  "corpusFingerprint": "5fa198aa6a318a3b6698fc9f4936d76c824cbbe0d7093d9adcc2c23d89db0a33",
+  "promptSha256": "016d7ef3b4483f94ac22188a2aa516de94f8b3ea15c830862f072e3cc7bd6dae",
+  "result": "pass",
+  "unsupportedClaims": [],
+  "wrongReferences": [],
+  "omissions": [],
+  "items": [
+    {
+      "part": "summary",
+      "position": 1,
+      "itemId": "35ceb64d-539d-4e3d-b5f1-35f722860084",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": null,
+      "claims": [
+        {
+          "exactOutputExcerpt": "Turleder fører deltakerlisten og teller deltakerne ved avgang og ved hver samling.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-1",
+              "location": 1,
+              "exactSourceExcerpt": "I det fiktive feltkurset Varde er turleder personen som fører deltakerlisten.\nTurleder teller deltakerne ved avgang og ved hver samling.\nKartansvarlig følger ruten på papirkartet. Kartansvarlig bekrefter neste\nsamlingspunkt med turleder før gruppen går videre."
+            }
+          ]
+        },
+        {
+          "exactOutputExcerpt": "Kartansvarlig følger ruten og bekrefter neste samlingspunkt med turleder før gruppen går videre.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-1",
+              "location": 1,
+              "exactSourceExcerpt": "I det fiktive feltkurset Varde er turleder personen som fører deltakerlisten.\nTurleder teller deltakerne ved avgang og ved hver samling.\nKartansvarlig følger ruten på papirkartet. Kartansvarlig bekrefter neste\nsamlingspunkt med turleder før gruppen går videre."
+            }
+          ]
+        },
+        {
+          "exactOutputExcerpt": "Ved ruteavvik stopper gruppen ved neste trygge sted, og turleder og kartansvarlig avklarer ruten før turen fortsetter.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-3",
+              "location": 3,
+              "exactSourceExcerpt": "Et samlingspunkt er et sted der hele gruppen stopper og samles. Gruppen venter\nder til turleder har telt alle deltakerne.\nHvis noen oppdager et avvik fra ruten, skal gruppen stoppe ved neste trygge\nsted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 1",
+        "Side 3"
+      ]
+    },
+    {
+      "part": "summary",
+      "position": 2,
+      "itemId": "01c69759-5b50-42de-9d80-9feb1fa1280a",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": null,
+      "claims": [
+        {
+          "exactOutputExcerpt": "På et samlingspunkt samles hele gruppen og venter til turleder har telt alle.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-3",
+              "location": 3,
+              "exactSourceExcerpt": "Et samlingspunkt er et sted der hele gruppen stopper og samles. Gruppen venter\nder til turleder har telt alle deltakerne.\nHvis noen oppdager et avvik fra ruten, skal gruppen stoppe ved neste trygge\nsted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter."
+            }
+          ]
+        },
+        {
+          "exactOutputExcerpt": "Etter turen skriver turleder en feltlogg med dato, besøkte samlingspunkter og eventuelle ruteavvik.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-5",
+              "location": 5,
+              "exactSourceExcerpt": "Etter turen skriver turleder en feltlogg. Loggen skal inneholde dato, besøkte\nsamlingspunkter og eventuelle ruteavvik."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 3",
+        "Side 5"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 1,
+      "itemId": "14929be2-5981-4a2d-bd33-10ddc92c3389",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Turleder",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Turleder fører deltakerlisten og teller deltakerne ved avgang og ved hver samling.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-1",
+              "location": 1,
+              "exactSourceExcerpt": "I det fiktive feltkurset Varde er turleder personen som fører deltakerlisten.\nTurleder teller deltakerne ved avgang og ved hver samling.\nKartansvarlig følger ruten på papirkartet. Kartansvarlig bekrefter neste\nsamlingspunkt med turleder før gruppen går videre."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 1"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 2,
+      "itemId": "8c5fe9c7-21da-4eb6-9d36-a5aaea0ffcd7",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Kartansvarlig",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Kartansvarlig følger ruten på papirkartet og bekrefter neste samlingspunkt med turleder før gruppen går videre.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-1",
+              "location": 1,
+              "exactSourceExcerpt": "I det fiktive feltkurset Varde er turleder personen som fører deltakerlisten.\nTurleder teller deltakerne ved avgang og ved hver samling.\nKartansvarlig følger ruten på papirkartet. Kartansvarlig bekrefter neste\nsamlingspunkt med turleder før gruppen går videre."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 1"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 3,
+      "itemId": "4a2c5e4f-445c-4c85-affd-a9e77dcd6ce7",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Samlingspunkt",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Et samlingspunkt er et sted der hele gruppen stopper og samles. Gruppen venter der til turleder har telt alle deltakerne.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-3",
+              "location": 3,
+              "exactSourceExcerpt": "Et samlingspunkt er et sted der hele gruppen stopper og samles. Gruppen venter\nder til turleder har telt alle deltakerne.\nHvis noen oppdager et avvik fra ruten, skal gruppen stoppe ved neste trygge\nsted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 3"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 4,
+      "itemId": "d691b6f5-ddd9-4769-ae54-95722ed5670a",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Håndtering av ruteavvik",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Hvis noen oppdager et ruteavvik, stopper gruppen ved neste trygge sted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-3",
+              "location": 3,
+              "exactSourceExcerpt": "Et samlingspunkt er et sted der hele gruppen stopper og samles. Gruppen venter\nder til turleder har telt alle deltakerne.\nHvis noen oppdager et avvik fra ruten, skal gruppen stoppe ved neste trygge\nsted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 3"
+      ]
+    },
+    {
+      "part": "concepts",
+      "position": 5,
+      "itemId": "b840d974-e3cd-4fd4-957d-c8f04a1d8c82",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Feltlogg",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Etter turen skriver turleder en feltlogg med dato, besøkte samlingspunkter og eventuelle ruteavvik.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-5",
+              "location": 5,
+              "exactSourceExcerpt": "Etter turen skriver turleder en feltlogg. Loggen skal inneholde dato, besøkte\nsamlingspunkter og eventuelle ruteavvik."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 5"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 1,
+      "itemId": "7094d1ae-85d0-4b73-b274-1957fc09a3c4",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Hvilke oppgaver har turleder under turen?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Turleder fører deltakerlisten og teller deltakerne ved avgang og ved hver samling.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-1",
+              "location": 1,
+              "exactSourceExcerpt": "I det fiktive feltkurset Varde er turleder personen som fører deltakerlisten.\nTurleder teller deltakerne ved avgang og ved hver samling.\nKartansvarlig følger ruten på papirkartet. Kartansvarlig bekrefter neste\nsamlingspunkt med turleder før gruppen går videre."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 1"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 2,
+      "itemId": "bf3e21d7-3fb4-4294-beff-f282276ddc2e",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Hva gjør kartansvarlig før gruppen går videre?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Kartansvarlig følger ruten på papirkartet og bekrefter neste samlingspunkt med turleder før gruppen går videre.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-1",
+              "location": 1,
+              "exactSourceExcerpt": "I det fiktive feltkurset Varde er turleder personen som fører deltakerlisten.\nTurleder teller deltakerne ved avgang og ved hver samling.\nKartansvarlig følger ruten på papirkartet. Kartansvarlig bekrefter neste\nsamlingspunkt med turleder før gruppen går videre."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 1"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 3,
+      "itemId": "c8d9f2c3-72d9-47cb-b0ea-41e3fa4a4494",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Hva gjør gruppen ved et samlingspunkt?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Gruppen venter ved samlingspunktet til turleder har telt alle deltakerne.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-3",
+              "location": 3,
+              "exactSourceExcerpt": "Et samlingspunkt er et sted der hele gruppen stopper og samles. Gruppen venter\nder til turleder har telt alle deltakerne.\nHvis noen oppdager et avvik fra ruten, skal gruppen stoppe ved neste trygge\nsted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 3"
+      ]
+    },
+    {
+      "part": "flashcards",
+      "position": 4,
+      "itemId": "6798a22d-26e0-4678-8d89-70996043770d",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Hva skal feltloggen inneholde?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Turleder skriver en feltlogg med dato, besøkte samlingspunkter og eventuelle ruteavvik.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-5",
+              "location": 5,
+              "exactSourceExcerpt": "Etter turen skriver turleder en feltlogg. Loggen skal inneholde dato, besøkte\nsamlingspunkter og eventuelle ruteavvik."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 5"
+      ]
+    },
+    {
+      "part": "quiz",
+      "position": 1,
+      "itemId": "ff7d4770-e844-40cb-b194-bfce13966105",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Hva skal gruppen gjøre hvis noen oppdager et avvik fra ruten?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Gruppen skal stoppe ved neste trygge sted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-3",
+              "location": 3,
+              "exactSourceExcerpt": "Et samlingspunkt er et sted der hele gruppen stopper og samles. Gruppen venter\nder til turleder har telt alle deltakerne.\nHvis noen oppdager et avvik fra ruten, skal gruppen stoppe ved neste trygge\nsted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 3"
+      ]
+    },
+    {
+      "part": "quiz",
+      "position": 2,
+      "itemId": "1b54cdac-836a-479d-9b0a-862922cd0791",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Når teller turleder deltakerne?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Turleder teller deltakerne ved avgang og ved hver samling.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-1",
+              "location": 1,
+              "exactSourceExcerpt": "I det fiktive feltkurset Varde er turleder personen som fører deltakerlisten.\nTurleder teller deltakerne ved avgang og ved hver samling.\nKartansvarlig følger ruten på papirkartet. Kartansvarlig bekrefter neste\nsamlingspunkt med turleder før gruppen går videre."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 1"
+      ]
+    },
+    {
+      "part": "quiz",
+      "position": 3,
+      "itemId": "2f5b9164-525a-4b7d-b402-9c48ba8fe40c",
+      "supportVerdict": "supported",
+      "referenceVerdict": "correct",
+      "questionOrTerm": "Hvilke opplysninger skal være med i feltloggen?",
+      "claims": [
+        {
+          "exactOutputExcerpt": "Dato, besøkte samlingspunkter og eventuelle ruteavvik.",
+          "verdict": "supported",
+          "support": [
+            {
+              "sourceUnitId": "pdf-page-5",
+              "location": 5,
+              "exactSourceExcerpt": "Etter turen skriver turleder en feltlogg. Loggen skal inneholde dato, besøkte\nsamlingspunkter og eventuelle ruteavvik."
+            }
+          ]
+        }
+      ],
+      "checkedReferenceLabels": [
+        "Side 5"
+      ]
+    }
+  ],
+  "coverage": [
+    {
+      "conceptId": "C1",
+      "requiredMeaning": "Maintains list and counts at departure and every assembly",
+      "sourceLocation": 1,
+      "covered": true,
+      "itemId": "14929be2-5981-4a2d-bd33-10ddc92c3389",
+      "exactOutputExcerpt": "Turleder fører deltakerlisten og teller deltakerne ved avgang og ved hver samling."
+    },
+    {
+      "conceptId": "C2",
+      "requiredMeaning": "Uses paper map; confirms next assembly point with leader",
+      "sourceLocation": 1,
+      "covered": true,
+      "itemId": "8c5fe9c7-21da-4eb6-9d36-a5aaea0ffcd7",
+      "exactOutputExcerpt": "Kartansvarlig følger ruten på papirkartet og bekrefter neste samlingspunkt med turleder før gruppen går videre."
+    },
+    {
+      "conceptId": "C3",
+      "requiredMeaning": "Whole group stops; waits for complete count",
+      "sourceLocation": 3,
+      "covered": true,
+      "itemId": "4a2c5e4f-445c-4c85-affd-a9e77dcd6ce7",
+      "exactOutputExcerpt": "Et samlingspunkt er et sted der hele gruppen stopper og samles. Gruppen venter der til turleder har telt alle deltakerne."
+    },
+    {
+      "conceptId": "C4",
+      "requiredMeaning": "Stop safely; leader/map responsible clarify before continuing",
+      "sourceLocation": 3,
+      "covered": true,
+      "itemId": "d691b6f5-ddd9-4769-ae54-95722ed5670a",
+      "exactOutputExcerpt": "Hvis noen oppdager et ruteavvik, stopper gruppen ved neste trygge sted. Turleder og kartansvarlig avklarer ruten før gruppen fortsetter."
+    },
+    {
+      "conceptId": "C5",
+      "requiredMeaning": "Leader records date, visited assembly points and route deviations",
+      "sourceLocation": 5,
+      "covered": true,
+      "itemId": "b840d974-e3cd-4fd4-957d-c8f04a1d8c82",
+      "exactOutputExcerpt": "Etter turen skriver turleder en feltlogg med dato, besøkte samlingspunkter og eventuelle ruteavvik."
+    }
+  ],
+  "languageAndDetail": "pass: selected language throughout generated prose; summary respects selected bound and preserves central facts; practice answers agree with source.",
+  "qualificationsChecked": {
+    "concepts": null,
+    "flashcards": null,
+    "quiz": null,
+    "summary": null
+  },
+  "warningsChecked": [
+    "Bare tekst som kan hentes ut av PDF-en vises. Bilder, tabeller og figurer tolkes ikke.",
+    "Disse fysiske sidene har ingen lesbar tekst: 2, 4. Dekningen er delvis."
+  ]
+}

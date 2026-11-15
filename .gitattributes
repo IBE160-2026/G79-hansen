@@ -1,2 +1,4 @@
 # Preserve PDF xref byte offsets and registered fixture hashes on Windows.
 *.pdf binary
+# Retained observations are addressed by exact byte hashes in semantic audits.
+.docs/implementation-artifacts/content-evaluation-evidence/** -text

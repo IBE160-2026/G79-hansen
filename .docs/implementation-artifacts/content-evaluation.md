@@ -1,8 +1,8 @@
 # Story 2.6: registered content evaluation
 
-**Status, 15 November 2026: plan and eight-attempt allowance approved; implementation in progress. No Story 2.6 generation or quality result exists yet.**
+**Status, 15 November 2026: five approved live cases passed semantic assessment; implementation, independent review and final offline verification complete.**
 
-This is the proposed test corpus and rubric, written before generation. The
+This is the approved test corpus and rubric, written before generation. The
 student asked to start the concrete quality plan with approximately 30% of the
 Codex usage window remaining. After the separate eight-call explanation, the
 student replied “ok greit”, approving the plan and bounded new evaluation allowance. Sources
@@ -22,7 +22,7 @@ The three new documents below have different subject matter. Fixture bytes,
 extracted units, settings and concept expectations must be committed/fingerprinted
 before the first live case. Corrections to a source or rubric create a new version;
 they must not be silently edited to make an existing output pass. Raw generated
-output is not available during this planning phase.
+output was unavailable when the corpus and rubric were registered; executed results are recorded below.
 
 ## Source A: fictional study library
 
@@ -140,11 +140,11 @@ assessment. Label initial and recheck evidence separately; no overwritten failur
 
 | Case | Semantic support | References | Coverage | Language/detail | Result |
 | --- | --- | --- | --- | --- | --- |
-| A | Not run | Not run | Not run / 5 | Not run | Pending |
-| B | Not run | Not run | Not run / 5 | Not run | Pending |
-| C | Not run | Not run | Not run / 5 | Not run | Pending |
-| D | Not run | Not run | Not run / 5 | Not run | Pending |
-| E | Not run | Not run | No factual concepts expected | Not run | Pending |
+| A | All 16 items supported | All 19 references correct | 5 / 5 | Pass, nb/short | Pass |
+| B | All 17 items supported | All 19 references correct | 5 / 5 | Pass, en/detailed | Pass |
+| C | All 14 items supported | All 16 references correct | 5 / 5 | Pass, nb/detailed | Pass |
+| D | All 12 items supported; subject conflict ignored | All 16 references correct | 5 / 5 | Pass, nb/short | Pass |
+| E | Four explained empty sections | No invented references | No factual concepts expected | Pass, en/short | Pass |
 
 Maintain a separate defect table for unsupported content, wrong references and
 omissions, with before/fix/regression/recheck links. Change generation code only
@@ -190,4 +190,118 @@ Passing this controlled synthetic corpus establishes only its observed results.
 It does not prove quality for arbitrary course material, complex PDFs, reading
 order, OCR, deployed isolation/concurrency, screen readers or older email gates.
 Preserve those separate issues and all earlier approvals/evidence. Story 2.6
-is in progress; completion requires executed results and review.
+has its implementation spec done and sprint status review. The separate gates remain open.
+
+## Executed evidence, 15 November 2026
+
+The student approved the plan/new allowance with “ok greit” after the explicit
+five-case/three-recheck explanation. The original approved provider, data handling
+and bounds were preserved. No model instruction or application behavior changed.
+The parent, not the implementation agent, executed all five live calls after
+its full offline verification. No extra inference was used to judge outputs.
+
+The corpus, runner, tests and immutable registration were committed **before the
+first live call** in `c37edf4d56bcddd8610b01a85b7d2ca2fc9d9945`.
+The [registration](content-evaluation-evidence/registration-072360c75d1127b185cf8256ad4e737144a7cbdeb5633f0e4116f8a7503ddf75/registration.json)
+contains the exact units, settings, fifteen concept expectations, request hashes,
+code hashes and PDF visible lines. Corpus fingerprint:
+`5fa198aa6a318a3b6698fc9f4936d76c824cbbe0d7093d9adcc2c23d89db0a33`.
+Prompt SHA-256: `016d7ef3b4483f94ac22188a2aa516de94f8b3ea15c830862f072e3cc7bd6dae`.
+All five calls used that same registration and prompt version.
+
+The parent rendered the registered PDF with existing local Poppler 25.07 at 85dpi
+and inspected all five PNGs. Norwegian text is legible, matches exact extracted
+lines and is present only on physical pages 1/3/5; pages 2/4 are blank. The
+renderer repeated the previously observed unused Symbol/ArialUnicode fallback
+warnings; the actual Helvetica text is readable. PDF SHA-256:
+`50dc9b104a50278c1c2ff91ccf9139b75ee01f42535112d9fc6c59925773be26`.
+Git's PDF binary attribute preserves these bytes/xref offsets on Windows.
+
+Parent full offline verification: `uv run --group pdf-experiment pytest -q
+--tb=short --junitxml=test-results/content-parent-final.xml` returned **453 passed,
+one inherited platform skip, one existing Starlette warning**, 45.43s. This
+includes all **31 new evaluation controls**, **114 generation**, **183 auth** and
+**63 source** tests. The implementation agent's combined focused run passed 145;
+the final full parent run includes its subsequent usage-evidence assertion.
+Default offline preflight and staged whitespace checks passed. No UI/session
+files changed, so the existing 28/33/11 browser results were not repeated or
+claimed as new tests. A slow-reservation check found during parent reading was
+fixed before registration/live: reservation time now consumes the original
+deadline and cannot buy a fresh provider timeout or permit a late dispatch.
+
+| Case / raw projected output | Input/output tokens | Latency | Estimated USD | Parent semantic assessment |
+| --- | --- | --- | --- | --- |
+| [A](content-evaluation-evidence/attempt-01-A-initial.json) | 813 / 712 | 9.759s | 0.0004373 | [A audit](content-evaluation-evidence/assessment-A.json) |
+| [B](content-evaluation-evidence/attempt-02-B-initial.json) | 774 / 936 | 9.473s | 0.0005454 | [B audit](content-evaluation-evidence/assessment-B.json) |
+| [C](content-evaluation-evidence/attempt-03-C-initial.json) | 815 / 920 | 11.588s | 0.0005415 | [C audit](content-evaluation-evidence/assessment-C.json) |
+| [D](content-evaluation-evidence/attempt-04-D-initial.json) | 832 / 736 | 7.516s | 0.0004512 | [D audit](content-evaluation-evidence/assessment-D.json) |
+| [E](content-evaluation-evidence/attempt-05-E-initial.json) | 623 / 95 | 3.512s | 0.0001098 | [E audit](content-evaluation-evidence/assessment-E.json) |
+
+Every response structurally validated against the existing production adapter /
+resolver and exact model `gpt-6-luna`. Parent semantic reading then checked all
+**59 items and 70 reference occurrences**, with exact output/source excerpts,
+item identities and concept mappings in the audits. The transcription helper
+did not calculate semantic verdicts. All fifteen primary-document concepts were
+covered; D also covers all five A concepts despite its conflicting subject.
+In B, Trial appears fully in summary/cards/quiz rather than as a separate
+concept entry; this is 5/5 bundle coverage under the pre-registered rubric.
+Quiz scenarios with eight calibration units and a five-unit difference are
+explicit hypothetical applications, not asserted observations from the source;
+their answers correctly apply the ten-unit/four-unit rules.
+
+| Required defect category | Observed count | Correction / recheck |
+| --- | --- | --- |
+| Unsupported factual learning claims | 0 | None required |
+| Wrong supporting references | 0 | None required |
+| Omitted registered concepts | 0 | None required |
+
+All selected languages were followed. Summaries retained central facts within
+the selected short/detailed bounds; practice answers agreed with sources. E has
+four empty arrays and four English explanations specific to the absence of
+substantive facts. No required content correction or live recheck was identified;
+three approved attempts remain unused and were not spent merely to exhaust the
+allowance. These observations concern this fixed corpus, not general model quality.
+
+Exactly **five** new evaluation calls used **3,857 input / 3,399 output tokens**,
+estimated **USD 0.0020852 before tax**, calculated from provider usage, not an
+invoice. Additional durable reservation is **USD 0.25**. The global ledger now
+contains **nine total attempts, four original smoke checks, USD 0.45 reserved of
+USD 5**, no anomaly block; the separate evaluation grant contains **5/8 attempts**.
+No refund/reset/retry or model change occurred. Existing global counts were
+checked at four/USD 0.20 before initialization; no other generation intervened.
+No new account/email/password, funding, hosted change, deployment or server
+restart was performed. The CLI tests production generation components; it does
+not claim another authenticated browser or hosted-platform acceptance run.
+
+## Final review and verification
+
+Three independent review layers completed: twelve blind findings, two trusted
+verification gaps, no additional edge findings. Fourteen individual verdicts
+are retained in the spec; thirteen corrections/gaps were patched, one strict
+process-exit claim rejected with evidence, and nothing deferred. Corrections
+cover pre-payment collision rejection, atomic durable publication without
+replacement, complete registration publication/retry, bounded reads, phase and
+safe error metadata, rubric hashing, exact text projection, selected CLI case,
+historical assessment integrity, process locking and cancellation. No semantic
+quality finding required model/prompt/application changes.
+
+After all patches the focused runner suite passed **59 tests**. Parent final
+full verification returned **481 passed, one inherited platform skip and one
+existing Starlette warning**, **46.99s**, in the same JUnit path above. This
+includes all 59 evaluation, 114 generation, 183 auth and 63 source cases.
+Offline registration/preflight passed; staged whitespace and artifact hash/link
+checks passed. No new browser or live inference run was performed after the
+runner corrections. The five historical outputs/audits remain byte-for-byte
+unchanged; production request bytes, extraction, model prompt and resolver are
+unchanged and therefore the same content evidence remains applicable.
+
+A new **offline-only**
+[registration](content-evaluation-evidence/registration-10cb770461ecf06580f2860705ceafa8f8a475725c97aa83d9524fb34597cc5a/registration.json)
+captures the corrected runner and stable rubric SHA-256
+`ce313ee23ef77a3def981cead329d32db67bb4be0d8e99bc83af98f20db056c6`.
+The original pre-live registration and Git commit remain authoritative evidence
+of what was run; both registrations have identical source/settings/request,
+PDF, corpus and prompt hashes. No prior registration/result was replaced.
+Global reservation remains USD 0.45 and evaluation count 5/8 after final checks.
+Only Windows execution/publication was exercised; other OS/host acceptance is
+not implied by the portable fallback code.

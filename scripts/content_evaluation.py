@@ -12,9 +12,14 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
 import sys
+import tempfile
 from threading import Lock
 import time
+from uuid import uuid4
+
+from pydantic import ValidationError
 
 from app.adapters.model import INSTRUCTIONS, MODEL, ModelFailure, OpenAIModel, request_bytes
 from app.config import Settings
@@ -28,6 +33,7 @@ EVIDENCE_DIR = ROOT / '.docs' / 'implementation-artifacts' / 'content-evaluation
 CASES = ('A', 'B', 'C', 'D', 'E')
 PARTS = ('summary', 'concepts', 'flashcards', 'quiz')
 DEADLINE_SECONDS = 60
+RUBRIC_PATH = ROOT / '.docs' / 'implementation-artifacts' / 'content-evaluation.md'
 
 
 def fixtures():
@@ -96,7 +102,7 @@ class EvaluationGrant(ModelBudget):
             raise BudgetFailure() from None
 
     @contextmanager
-    def claim(self):
+    def claim(self, preflight=lambda _attempt: None):
         if not self.running.acquire(blocking=False):
             raise BudgetFailure()
         try:
@@ -104,6 +110,7 @@ class EvaluationGrant(ModelBudget):
                 value = self.read()
                 if value['attempts'] >= 8:
                     raise BudgetFailure()
+                preflight(value['attempts'] + 1)
                 value['attempts'] += 1
                 self.write(value)
                 yield value['attempts']
@@ -113,6 +120,22 @@ class EvaluationGrant(ModelBudget):
 
 def digest(value):
     return hashlib.sha256(value).hexdigest()
+
+
+def read_bounded(path, limit):
+    with Path(path).open('rb') as source:
+        value = source.read(limit + 1)
+    if len(value) > limit:
+        raise ValueError()
+    return value
+
+
+def rubric_prose(text):
+    text = text.replace('\r\n', '\n')
+    section = text.split('## Assessment and acceptance\n', 1)[1]
+    before, after = section.split('| Case | Semantic support |', 1)
+    paragraph = after.split('Maintain a separate defect table', 1)[1].split('\n\n', 1)[0]
+    return before.strip() + '\n\n' + ('Maintain a separate defect table' + paragraph).strip() + '\n'
 
 
 def registration():
@@ -140,6 +163,7 @@ def registration():
     frozen_corpus = {**corpus_data, 'cases': {case: {key: value for key, value in details.items()
         if key != 'requestSha256'} for case, details in cases.items()}}
     result = {**corpus_data, 'corpusFingerprint': digest(canonical(frozen_corpus)),
+        'rubricSha256': digest(rubric_prose(read_bounded(RUBRIC_PATH, 128_000).decode('utf-8')).encode('utf-8')),
         'promptSha256': digest(INSTRUCTIONS.encode('utf-8')), 'implementationFiles': hashes,
         'implementationFingerprint': digest(canonical(hashes)), 'model': MODEL,
         'bounds': {'deadlineSeconds': 60, 'maxOutputTokens': 8000, 'maxProviderBytes': 262144,
@@ -153,32 +177,88 @@ def registration_directory(data, evidence_dir):
     return Path(evidence_dir) / ('registration-' + data['registrationFingerprint'])
 
 
+def sync_directory(directory):
+    if os.name != 'nt':
+        descriptor = os.open(directory, os.O_RDONLY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+
+
+def publish_new(temporary, destination, *, directory=False):
+    """Atomic no-replace publication; Windows write-through / POSIX dir fsync."""
+    if os.name == 'nt':
+        import ctypes
+        from ctypes import wintypes
+        move = ctypes.WinDLL('kernel32', use_last_error=True).MoveFileExW
+        move.argtypes = (wintypes.LPCWSTR, wintypes.LPCWSTR, wintypes.DWORD)
+        move.restype = wintypes.BOOL
+        if not move(str(temporary.resolve()), str(destination.absolute()), 0x8):
+            raise ctypes.WinError(ctypes.get_last_error())
+    elif directory:
+        import ctypes
+        libc = ctypes.CDLL(None, use_errno=True)
+        if sys.platform.startswith('linux'):
+            rename = libc.renameat2
+            rename.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint)
+            result = rename(-100, os.fsencode(temporary), -100, os.fsencode(destination), 1)
+        elif sys.platform == 'darwin':
+            rename = libc.renamex_np
+            rename.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint)
+            result = rename(os.fsencode(temporary), os.fsencode(destination), 4)
+        else:
+            raise OSError('atomic exclusive directory publication unavailable')
+        if result:
+            raise OSError(ctypes.get_errno(), 'exclusive directory publication failed')
+    else:
+        os.link(temporary, destination)
+        temporary.unlink()
+    sync_directory(destination.parent)
+
+
 def write_json_exclusive(path, value):
-    with Path(path).open('x', encoding='utf-8', newline='\n') as target:
-        json.dump(value, target, ensure_ascii=False, indent=2, sort_keys=True)
-        target.write('\n')
-        target.flush()
-        os.fsync(target.fileno())
+    path = Path(path)
+    temporary = path.with_name('.' + path.name + '.' + uuid4().hex + '.tmp')
+    try:
+        with temporary.open('x', encoding='utf-8', newline='\n') as target:
+            json.dump(value, target, ensure_ascii=False, indent=2, sort_keys=True)
+            target.write('\n')
+            target.flush()
+            os.fsync(target.fileno())
+        publish_new(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def register(data, evidence_dir=EVIDENCE_DIR):
     directory = registration_directory(data, evidence_dir)
-    directory.mkdir(parents=True, exist_ok=False)
-    write_json_exclusive(directory / 'registration.json', data)
-    with (directory / 'source-c.pdf').open('xb') as target:
-        target.write(fixtures().readable_pdf())
-        target.flush()
-        os.fsync(target.fileno())
+    directory.parent.mkdir(parents=True, exist_ok=True)
+    temporary = Path(tempfile.mkdtemp(prefix='.registration-', dir=directory.parent))
+    try:
+        write_json_exclusive(temporary / 'registration.json', data)
+        with (temporary / 'source-c.pdf').open('xb') as target:
+            target.write(fixtures().readable_pdf())
+            target.flush()
+            os.fsync(target.fileno())
+        sync_directory(temporary)
+        publish_new(temporary, directory, directory=True)
+    finally:
+        # Only this call's randomly named owned directory can be removed.
+        if temporary.exists():
+            if temporary.resolve().parent != directory.parent.resolve() or not temporary.name.startswith('.registration-'):
+                raise OSError('owned temporary directory boundary mismatch')
+            shutil.rmtree(temporary)
     return directory
 
 
 def verify_registration(data, evidence_dir):
     directory = registration_directory(data, evidence_dir)
     try:
-        raw = (directory / 'registration.json').read_bytes()
-        if len(raw) > 100_000 or json.loads(raw) != data:
+        raw = read_bounded(directory / 'registration.json', 100_000)
+        if json.loads(raw) != data:
             raise ValueError()
-        if digest((directory / 'source-c.pdf').read_bytes()) != data['pdfSha256']:
+        if digest(read_bounded(directory / 'source-c.pdf', 1_000_000)) != data['pdfSha256']:
             raise ValueError()
     except (OSError, ValueError, TypeError):
         raise EvaluationFailure(7) from None
@@ -222,6 +302,17 @@ async def run_case(case, *, settings, data, accepted, grant_path=GRANT_PATH,
     grant = EvaluationGrant(grant_path)
     ledger = ModelBudget(settings.model_budget_path)
     adapter = OpenAIModel(settings, transport=transport)
+    def destination_for(attempt):
+        return Path(evidence_dir) / f'attempt-{attempt:02d}-{case}-{phase}.json'
+
+    def preflight_destination(attempt):
+        try:
+            destination_for(attempt).lstat()
+        except FileNotFoundError:
+            return
+        except OSError:
+            pass
+        raise EvaluationFailure(6)
     # Grant first, global reservation second. Failures at either stage never
     # refund previous durable state. Lock remains held until all cleanup exits.
     try:
@@ -229,17 +320,20 @@ async def run_case(case, *, settings, data, accepted, grant_path=GRANT_PATH,
             remaining()
         except TimeoutError:
             raise EvaluationFailure(9) from None
-        with grant.claim() as attempt:
+        with grant.claim(preflight_destination) as attempt:
             observation = {'case': case, 'phase': phase, 'grantAttempt': attempt,
                 'registrationFingerprint': data['registrationFingerprint'],
                 'corpusFingerprint': data['corpusFingerprint'],
                 'implementationFingerprint': data['implementationFingerprint'],
                 'promptSha256': data['promptSha256'], 'model': MODEL,
+                'rubricSha256': data['rubricSha256'],
                 'settings': data['cases'][case]['settings'],
+                'globalReservationCompleted': False, 'providerAttemptStarted': False,
                 'status': 'failed', 'errorCode': 3, 'semanticAssessment': 'pending'}
             try:
                 remaining()
                 ledger.reserve()
+                observation['globalReservationCompleted'] = True
                 ledger.check_dispatch()
                 # Synchronous durable IO retains its cleanup ownership. Its
                 # elapsed time never buys a fresh provider deadline afterward.
@@ -247,6 +341,7 @@ async def run_case(case, *, settings, data, accepted, grant_path=GRANT_PATH,
                 observation['errorCode'] = 4
                 async with asyncio.timeout(seconds):
                     try:
+                        observation['providerAttemptStarted'] = True
                         completion = await adapter.complete(body)
                     except ModelFailure as failure:
                         if failure.usage is not None:
@@ -267,11 +362,16 @@ async def run_case(case, *, settings, data, accepted, grant_path=GRANT_PATH,
                     observation.update(status='structurally_validated', errorCode=0, output=project(bundle))
             except TimeoutError:
                 observation['errorCode'] = 9
-            except (Exception, asyncio.CancelledError):
-                # Never persist exception/provider strings or raw envelopes.
-                pass
+            except asyncio.CancelledError:
+                observation['errorCode'] = 11
+            except BudgetFailure:
+                observation['errorCode'] = 4 if observation['providerAttemptStarted'] else 3
+            except (ModelFailure, ValidationError):
+                observation['errorCode'] = 5 if observation['errorCode'] == 5 else 4
+            except Exception:
+                observation['errorCode'] = 10
             observation['latencySeconds'] = round(time.monotonic() - started, 3)
-            destination = Path(evidence_dir) / f'attempt-{attempt:02d}-{case}-{phase}.json'
+            destination = destination_for(attempt)
             try:
                 write_json_exclusive(destination, observation)
             except (OSError, ValueError, TypeError):
