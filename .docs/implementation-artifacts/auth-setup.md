@@ -660,7 +660,7 @@ No new automated suite was run for this observation.
 The local contract now includes protected `POST /api/v1/auth/logout` with an
 empty JSON object. Before any provider work, one registry transition ends every
 session, recovery grant and pending confirmation/recovery attempt belonging to
-the initiating browser. The response deletes `sb_session`, retains the browser
+the initiating browser. The response deletes request-supplied session cookie generations, retains the browser
 binding for fresh login, and then attempts provider revocation using the user's
 JWT and explicit `local` scope. It does not install an SDK session, refresh a
 token or use a privileged key. Other browsers remain independent even when they
@@ -668,7 +668,7 @@ use the same account. Unknown or spent session cookies are idempotent.
 
 After-response revocation has 16 active slots, no queue or retries, and one
 shared ten-second cooperative operation deadline per admitted batch, including
-worker-admission time. Saturation or provider failure never restores authority.
+worker-admission time. A separate 16-permit limiter avoids the shared request pool. Saturation or provider failure never restores authority.
 In-flight validation is still coalesced and survives waiter cancellation;
 browser revisions fence installations across logout, expiry and provider denial.
 An admitted password update may still finish remotely; its late response cannot
@@ -714,3 +714,85 @@ blind review and a verification-gap report require triage/fixes, and edge-case
 review was interrupted when the student requested commit and session end.
 The implementation is saved for continuation, not accepted as a finished build.
 See the Story 2.3 spec's Review Triage Log for the concrete remaining reports.
+
+
+## Story 2.3 review completion ? 2026-11-15
+
+The interrupted build resumed at step 4 without a new planning/approval round.
+B1?B8 and V1 were corrected; B9 was already resolved by the session-ending
+handoff. The completed independent edge layer reproduced B1?B8 and reported no
+additional root cause. Its final read-only inspection of the corrections found
+no remaining defect. No review finding was deferred. The frozen approved block
+is unchanged; implementation spec is done and the sprint story remains review.
+
+Session cookies now use `sb_session_<16 hex generation digest>`. Their values
+remain opaque HttpOnly credentials with the original flags/binding; only a live
+browser-bound registry entry is accepted, irrespective of header order. Rotation
+and logout retire only eligible names in the incoming request (maximum 32),
+including legacy `sb_session`. A delayed logout cannot delete a later generation.
+Status never writes session cookies. Old browser state still fails after restart.
+Failed logout keeps its intent, hides private display and repeats POST on retry,
+obtaining a fresh CSRF binding without restoring identity if necessary. Signals
+trigger server observation after active work; local timers do not broadcast.
+Passive latency leaves controls/drafts/focus usable, and observed lifetime is
+reduced by request/JSON elapsed time. Late rejected login/callback identities
+receive the same bounded local provider cleanup. Native/DNS blocking still has
+only a cooperative budget; a hard OS-level deadline is not claimed.
+
+Final parent offline verification: **243 passed, one unchanged optional PDF
+platform skip**, all **181 auth cases** passed; **33 auth-browser scenarios** and
+**11 demo scenarios / 21 generation requests** passed. New regressions cover
+provider denial while signup/recovery callbacks remain unfinished, rejected
+identity cleanup, delayed cookie deletion/header ordering/browser binding, shared
+worker saturation, failed logout retry, old tab signals/timers, delayed normal
+and restricted lifetime snapshots, passive recovery controls and acknowledgement
+of restricted logout. The 200% account screenshot was inspected without clipping.
+
+### Executed against hosted Supabase
+
+`uv run --env-file .env node test-results/hosted-logout-browser.cjs` completed at
+**2026-11-15 09:00:27 UTC** with **25/25 unique checks passed**. The harness uses
+the existing authorized administrative test account in two independent browser
+contexts, real Supabase identity validation/revocation and real refresh. It starts
+and stops its own loopback test server; it is never imported by the normal app.
+Credential-free evidence is in ignored `test-results/hosted-logout-result.json`.
+
+- Ordinary UI logout acknowledges, deletes its cookie and denies local access;
+  actual `scope=local` provider revocation completes successfully.
+- Another browser on the same account remains authenticated and completes an
+  actual Supabase refresh after the first browser logs out. Fresh login works.
+- A restricted grant made locally from a genuine hosted identity is displayed,
+  logged out and revoked; normal/restricted authority is denied afterward. This
+  instruments grant admission and does **not** establish real recovery PKCE/email
+  behavior. No recovery email or password write was performed.
+- Idle and absolute metadata were shortened locally to a one-second remainder;
+  the focused page cleared at its observed deadline and the server denied access.
+  Default 30-minute/12-hour limits were separately verified offline; no claim of
+  waiting those durations against hosted Supabase is made.
+- A revoke failure injected at the adapter seam still acknowledges/denies locally
+  and preserves the other browser. A genuine Supabase outage was not induced.
+- An actual test-server process was stopped/restarted with the browser cookie and
+  open page preserved. Focus clears identity; the old authority is denied and a
+  fresh login succeeds. Storage/cookie visibility and script-error checks pass.
+
+### Normal configured server
+
+The old worker **35884** was identified by its project virtualenv/uvicorn command
+before replacement. It had been running the previous Python code. It was stopped
+and the existing ignored `.env` started one worker, **PID 11748**, bound to
+`127.0.0.1:8000` (launcher 34908). Ten checks passed against this worker: health,
+new UI/JS, private headers, available configuration, existing test-account login,
+generation-specific cookie issuance, protected logout, local denial and cookie
+removal. Evidence: ignored `test-results/logout-main-server-result.json`.
+The isolated acceptance server was stopped; the normal configured server remains
+running. Restart ends prior local sessions, so the student's page needs login.
+
+### Remaining acceptance
+
+Story 2.3 implementation/review is complete, with the precise hosted limitations
+above. Genuine unused recovery/confirmation-link negative cases, email-template
+inspection and the previously recorded Story 2.1/2.2 gates remain open. They need
+appropriate unused authorized links; **do not automatically send emails, create
+accounts, repeat the successful password change or change hosted Auth settings**.
+No private document/storage, HTTPS production deployment, full screen-reader
+acceptance, billing or persistence claim is added. Free/Paris is unchanged.

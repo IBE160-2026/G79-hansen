@@ -8,6 +8,7 @@ from threading import RLock
 import time
 
 from starlette.concurrency import run_in_threadpool
+from anyio import CapacityLimiter, to_thread
 
 from app.adapters.auth import AuthFailure, Identity
 
@@ -155,6 +156,16 @@ class Registry:
                                   session.created + self.absolute_seconds) - self.clock())
             if grant and grant.browser_id == browser_id:
                 return max(0, grant.expires - self.clock())
+            return None
+
+    def select_session(self, candidates, browser_id):
+        """Cookie ordering never decides authority; only a live browser-bound entry does."""
+        with self.lock:
+            self._prune()
+            for candidate in candidates:
+                value = self.sessions.get(candidate) or self.recoveries.get(candidate)
+                if value and value.browser_id == browser_id:
+                    return candidate
             return None
 
     def consume(self, state, browser_id, purpose="signup"):
@@ -308,6 +319,9 @@ class Revocations:
         self.active = 0
         self.lock = RLock()
         self.tasks = set()
+        # Independent from Starlette's shared validation/request pool. Every admitted
+        # batch has a worker permit, so unrelated work cannot queue revocation forever.
+        self.limiter = CapacityLimiter(capacity)
 
     async def after_response(self, adapter, identities):
         from app.adapters.auth import OperationBudget
@@ -325,7 +339,7 @@ class Revocations:
 
     async def _own(self, adapter, identities, budget):
         try:
-            await run_in_threadpool(self._batch, adapter, identities, budget)
+            await to_thread.run_sync(self._batch, adapter, identities, budget, limiter=self.limiter)
         finally:
             with self.lock:
                 self.active -= 1

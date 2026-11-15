@@ -110,22 +110,29 @@ Story 1.1 venter fortsatt på studentens gjennomgang.
 Story 2.3 adds browser-local **Logg ut** for normal and password-recovery access.
 `POST /api/v1/auth/logout` requires the existing Origin/CSRF protection and an
 empty JSON object. Local sessions, recovery grants and pending attempts end
-atomically; the response deletes the session cookie before best-effort provider
+atomically; the response deletes request-supplied session cookie generations before best-effort provider
 revocation with explicit `local` scope. Provider failure never restores local
 access or ends a different browser's session, including the same account.
 Revocation admits at most 16 batches without a queue or retry, with one shared
-ten-second cooperative deadline per batch. User JWTs are sent directly to the
+ten-second cooperative deadline per batch and a separate worker limiter. User JWTs are sent directly to the
 SDK logout endpoint; logout never refreshes tokens or uses a privileged key.
 
 Status observation does not renew the 30-minute idle / 12-hour absolute maxima.
 Normal and restricted status include bounded `expiresInSeconds`; the account
 page clears its display at that deadline and checks status every 30 seconds
 while visible, on focus and on page restoration. Restart requires fresh login.
-Sibling tabs receive a secret-free termination signal; sequence guards discard
-late replies. Opaque HttpOnly cookies remain the only browser credentials.
+Sibling tabs reconcile secret-free termination signals against server status;
+old tab timers cannot end a newer login. Lifetime timing includes response delay,
+and passive observations preserve forms/focus. Failed logout retains its intent
+and retries the protected POST. Each opaque HttpOnly session cookie has its own
+generation name, so delayed logout headers cannot delete a newer login cookie.
 No private document endpoints or saved-data durability are introduced here;
-durability belongs to Story 3.2. Hosted logout/expiry/restart checks remain
-separate manual acceptance gates; synthetic tests do not establish them.
+durability belongs to Story 3.2. Review corrections pass 243 Python tests (one
+unchanged optional PDF skip), 33 auth-browser scenarios and 11 demo scenarios.
+A separate real-Supabase run passed 25 checks of logout, same-account isolation,
+refresh and restart; restricted grants/deadline metadata and revoke failure were
+instrumented locally. See [precise acceptance limits](.docs/implementation-artifacts/auth-setup.md#story-23-review-completion--2026-11-15).
+Remaining email/recovery-link acceptance is kept separate.
 
 ## Medlemmer
 

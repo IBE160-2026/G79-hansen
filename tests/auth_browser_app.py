@@ -96,7 +96,8 @@ def restart():
 @app.post("/__test/deadline")
 def short_deadline(request: Request):
     registry = app.state.auth_registry
-    session_id = request.cookies.get("sb_session")
+    from app.api.auth import current_session
+    session_id = current_session(request)
     with registry.lock:
         session = registry.sessions.get(session_id)
         grant = registry.recoveries.get(session_id)

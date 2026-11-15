@@ -1,6 +1,7 @@
 """Same-origin, cookie/CSRF protected authentication endpoints."""
 
 import asyncio
+import hashlib
 import re
 from uuid import uuid4
 from urllib.parse import urlencode
@@ -85,9 +86,35 @@ def cookie(response, name, value, settings):
                         samesite="lax", path="/")
 
 
-def clear_session(response, settings):
-    response.delete_cookie(SESSION_COOKIE, path="/", secure=settings.secure_cookies,
-                           httponly=True, samesite="lax")
+def session_names(request):
+    # Limit cookie-name processing; only our exact legacy/generation formats qualify.
+    return [name for name in request.cookies
+            if name == SESSION_COOKIE or re.fullmatch(r"sb_session_[0-9a-f]{16}", name)][:32]
+
+
+def current_session(request):
+    registry = request.app.state.auth_registry
+    return registry.select_session([request.cookies[name] for name in session_names(request)],
+                                   request.cookies.get(BROWSER_COOKIE))
+
+
+def clear_session(response, settings, request):
+    for name in session_names(request):
+        response.delete_cookie(name, path="/", secure=settings.secure_cookies,
+                               httponly=True, samesite="lax")
+
+
+def install_session(response, value, settings, request):
+    clear_session(response, settings, request)
+    # A delayed response may retire its own generation, never a newer login's cookie.
+    name = SESSION_COOKIE + "_" + hashlib.sha256(value.encode()).hexdigest()[:16]
+    cookie(response, name, value, settings)
+
+
+def revoke_after_response(request, response, identities):
+    response.background = BackgroundTask(request.app.state.auth_revocations.after_response,
+                                         request.app.state.auth_adapter, identities)
+    return response
 
 
 async def credentials(request, schema=Credentials):
@@ -118,10 +145,10 @@ async def status(request: Request):
         return error("request_rejected")
     try:
         browser_id, browser = registry.browser(request.cookies.get(BROWSER_COOKIE))
-        identity = await registry.authenticated_async(request.cookies.get(SESSION_COOKIE), browser_id, adapter, touch=False)
+        identity = await registry.authenticated_async(current_session(request), browser_id, adapter, touch=False)
         display = {"available": True, "authenticated": identity is not None, "csrfToken": browser.csrf,
-                   "recoveryAvailable": registry.recovery_available(request.cookies.get(SESSION_COOKIE), browser_id)}
-        remaining = registry.remaining(request.cookies.get(SESSION_COOKIE), browser_id)
+                   "recoveryAvailable": registry.recovery_available(current_session(request), browser_id)}
+        remaining = registry.remaining(current_session(request), browser_id)
         if remaining is not None:
             display["expiresInSeconds"] = min(43200, remaining)
         if identity and remaining is not None:
@@ -144,6 +171,7 @@ async def submit(request, action):
     if not settings.available:
         return error("auth_unavailable")
     state = None
+    identity = None
     try:
         browser_id = request.cookies[BROWSER_COOKIE]
         revision = registry.retain_browser(browser_id)
@@ -155,14 +183,14 @@ async def submit(request, action):
             return JSONResponse({"status": "check_email", "message": "Hvis kontoen kan opprettes, får du en e-post. Åpne bekreftelsen i nettleseren der du startet registreringen."})
         registry.check_revision(browser_id, revision)
         identity = await run_in_threadpool(adapter.login, submitted.email, submitted.password)
-        session_id = registry.rotate(request.cookies.get(SESSION_COOKIE), browser_id, identity, expected_revision=revision)
+        session_id = registry.rotate(current_session(request), browser_id, identity, expected_revision=revision)
         response = JSONResponse({"authenticated": True, "email": identity.email})
-        cookie(response, SESSION_COOKIE, session_id, settings)
+        install_session(response, session_id, settings, request)
         return response
     except AuthFailure as exc:
         if state:
             registry.discard_attempt(state)
-        return error(exc.code)
+        return revoke_after_response(request, error(exc.code), (identity,) if identity else ())
 
 
 @router.post("/signup")
@@ -196,20 +224,21 @@ async def complete_callback(request, purpose):
             len(params.getlist("code")) != 1 or not 1 <= len(params["code"]) <= 2048 or
             not 40 <= len(params["state"]) <= 128):
         return response
+    identity = None
     try:
         browser_id = request.cookies.get(BROWSER_COOKIE)
         pending = registry.consume(params["state"], browser_id, purpose)
         identity = await run_in_threadpool(adapter.exchange, params["code"], pending)
         if registry.clock() >= pending.expires:
-            return response
-        session_id = registry.rotate(request.cookies.get(SESSION_COOKIE), browser_id, identity,
+            return revoke_after_response(request, response, (identity,))
+        session_id = registry.rotate(current_session(request), browser_id, identity,
                                      recovery=purpose == "recovery",
                                      expected_revision=pending.authority_revision)
         response = RedirectResponse(f"/account?{outcome}=success", status_code=303)
-        cookie(response, SESSION_COOKIE, session_id, settings)
+        install_session(response, session_id, settings, request)
         return response
     except AuthFailure:
-        return response
+        return revoke_after_response(request, response, (identity,) if identity else ())
 
 
 @router.post("/recovery/request")
@@ -244,7 +273,7 @@ async def recovery_password(request: Request):
     admitted = False
     try:
         submitted = await credentials(request, RecoveryPassword)
-        grant = registry.claim_recovery(request.cookies.get(SESSION_COOKIE), request.cookies[BROWSER_COOKIE])
+        grant = registry.claim_recovery(current_session(request), request.cookies[BROWSER_COOKIE])
         admitted = True
         await run_in_threadpool(adapter.update_password, grant.identity, submitted.password, expires_at=grant.expires)
         # The spent cookie is harmless. Clearing it could erase a newer login cookie.
@@ -264,9 +293,8 @@ async def logout(request: Request):
         await credentials(request, EmptyBody)
         identities = registry.terminate(request.cookies[BROWSER_COOKIE])
         response = JSONResponse({"authenticated": False, "recoveryAvailable": False})
-        clear_session(response, settings)
+        clear_session(response, settings, request)
         # Starlette sends response headers and body before starting this work.
-        response.background = BackgroundTask(request.app.state.auth_revocations.after_response, adapter, identities)
-        return response
+        return revoke_after_response(request, response, identities)
     except AuthFailure as exc:
         return error(exc.code)

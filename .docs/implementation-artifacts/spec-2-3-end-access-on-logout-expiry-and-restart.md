@@ -2,7 +2,7 @@
 title: End access on logout expiry and restart
 type: feature
 created: 2026-11-15
-status: in-review
+status: done
 route: dispatch
 story_key: 2-3-end-access-on-logout-expiry-and-restart
 baseline_commit: e46308987f89998ae9623ea050a801a50a7ec19c
@@ -39,10 +39,10 @@ context: [.docs/implementation-artifacts/epic-2-context.md]
 
 ## Code Map
 
-- `app/services/sessions.py`: reuse pruning, coalesced validation and authority_revision; only recovery rotation is fenced. Separate validation from caller activity.
-- `app/api/auth.py`: reuse protection, cookie helpers and complete_callback; clear_session is unused. Fence login/signup across body/provider awaits. Status never mutates session cookies.
-- `app/adapters/auth.py`: installed SDK admin.sign_out(jwt, scope="local") directly uses user JWT, no privileged key/session installation. Ordinary sign_out defaults global and may refresh.
-- `app/static/account.*`: reuse sequence/abort/focus guards; add termination observation. Existing auth/browser fixtures supply tests, never production debug routes.
+- `app/services/sessions.py`: atomic browser termination, revision/expiry fences, live browser-bound cookie selection, non-touching snapshots, coalesced validation and separately limited revocation workers.
+- `app/api/auth.py`: protected logout, revision-fenced login/callback, generation-specific cookie installation/retirement, safe lifetime status and bounded after-response cleanup of rejected identities.
+- `app/adapters/auth.py`: pinned SDK admin.sign_out(jwt, scope="local") directly uses the user JWT, without privileged keys, session installation or refresh for revocation.
+- `app/static/account.*`: logout retry intent, sequence/abort guards, latency-aware deadline/passive observations and authoritative reconciliation of secret-free fan signals; focused browser fixtures supply regressions without production debug routes.
 
 ## Tasks & Acceptance
 
@@ -62,28 +62,40 @@ context: [.docs/implementation-artifacts/epic-2-context.md]
 
 ## Implementation Notes
 
+Completed review corrections preserve the approved intent. Session cookies now use `sb_session_<16 hex generation digest>` with opaque values and the same HttpOnly/SameSite/Secure rules; legacy names are accepted only against live browser-bound registry authority. Resolution considers at most 32 eligible cookie names and ignores retired/foreign authority, independent of header order. Rotation/logout retire only the request's names, so delayed deletion cannot erase a later generation. Status still never changes session cookies.
+
+Logout intent remains pending after transport failure: private display stays cleared, retry obtains a fresh CSRF binding without rendering its identity and repeats the protected POST. Fan signals request authoritative passive observation, deferred during active work; a local display deadline does not broadcast server termination. Lifetime snapshots subtract elapsed request/JSON time. Background checks preserve panels, drafts, focus and controls; explicit user work aborts/supersedes the observation. Revocation uses a separate 16-permit AnyIO limiter and retains running-worker ownership; its ten-second network budget remains cooperative, not a hard bound on OS/native work. Late login/callback identities rejected by fencing/expiry receive bounded after-response local cleanup.
+
 ## Spec Change Log
+
+2026-11-15 resumed review: no approved/frozen requirement changed and no new planning round. Non-frozen implementation notes document generation-specific cookie retirement, retry intent, signal reconciliation, elapsed lifetime and dedicated revocation admission. KEEP: atomic local denial, response-before-provider ordering, explicit local scope/no-refresh, browser independence, revision fences, existing recovery/demo behavior, no new persistence/cost/settings/email/password operations.
 
 ## Review Triage Log
 
-Review was interrupted at the student's explicit request to end the session and commit on 2026-11-15 at 09:42. Final triage and fixes are pending; this build is not complete. Do not restart planning or ask for approval again. The three layers were launched together after parent verification. Blind and verification reviewers returned; edge-case review was interrupted before its final report. No review fixes have been applied.
+Resumed at step 4 on 2026-11-15 under the student's explicit instruction to finish fixes without replanning or another approval. The saved blind/verification reports were retained; the interrupted independent edge layer completed against the baseline diff before triage. Its eight reports reproduce B1?B8, with no additional root cause. The old implementation agent is unavailable in this resumed session; the parent applies corrections. All verified cases are resolved within the approved intent and frozen block; the explicit continuation instruction takes precedence over a workflow loopback/re-approval.
 
-Outstanding reports to verify individually before grouping/routing:
+| ID | Verdict | Route | Verified evidence / required correction |
+| --- | --- | --- | --- |
+| B1 | medium | patch | Logout catch exposes retry but its handler only calls bootstrap; an aborted POST leaves authority valid and restores identity. Retain pending logout intent and retry POST before allowing login. |
+| B2 | medium | patch | Bare `ended` broadcasts unconditionally call endAccess and abort active requests. Old timers/signals can clear a later login. Treat signals as non-touching server observations; reconcile after active work, and never broadcast a local timer as server termination. |
+| B3 | medium | patch | armLifetime starts the entire server snapshot duration upon delivery. Subtract measured request/JSON elapsed time and reject already-expired snapshots. |
+| B4 | medium | patch | _own awaits the shared thread limiter before _batch checks budget. Sixteen slots can remain occupied indefinitely behind unrelated work. Use a separate limiter with the same capacity as admitted revocations; keep running-worker cancellation ownership. |
+| B5 | medium | patch | submit/complete_callback discard a returned Identity when rotate rejects its obsolete revision or callback expires. Attach bounded after-response local revocation to these rejected responses; never revoke another browser's identity. |
+| B6 | medium | patch | A probe replayed the actual logout deletion headers after a fresh login: the new cookie disappeared while its registry authority remained live. Use generation-specific session cookie names; delete only names supplied by the old request and select live authority by registry/browser binding. |
+| B7 | medium | patch | Background bootstrap unconditionally clearDisplay/setBusy, hiding recovery and disabling inputs during provider latency. Preserve current display/drafts and controls while observing; an explicit action supersedes the observation. |
+| B8 | medium | patch | ready() can resolve at synchronous endAccess before POST acknowledgement. Wait for logout response/completion and assert cookie deletion and server normal/recovery denial. |
+| B9 | false | reject | The session-ending log and issue already distinguish saved implementation from incomplete review. No remaining application defect at the cited location. |
+| V1 | medium | patch | Trusted pre-verified coverage gap: outage/old-session-removal tests cannot detect loss of revision fencing for an unfinished callback. Add blocked callback plus failed current-session validation and assert late authority denial. |
+| E1 | medium | patch (B1) | Independently traced same logout retry failure; same verified outcome/correction as B1. |
+| E2 | medium | patch (B2) | Independently traced unconditional old fanesignal; same verified outcome/correction as B2. |
+| E3 | medium | patch (B3) | Independently traced delayed lifetime delivery; same verified outcome/correction as B3. |
+| E4 | medium | patch (B4) | Independently traced shared-worker admission; same verified outcome/correction as B4. |
+| E5 | medium | patch (B5) | Independently traced late rejected provider login; same verified outcome/correction as B5. |
+| E6 | medium | patch (B6) | Independently traced delayed cookie deletion; same verified outcome/correction as B6. |
+| E7 | medium | patch (B7) | Independently traced passive panel/control interruption; same verified outcome/correction as B7. |
+| E8 | medium | patch (B8) | Independently traced premature browser assertion; same verified outcome/correction as B8. |
 
-| ID | Reported issue | Current evidence/status |
-| --- | --- | --- |
-| B1 | Failed logout hides its buttons; retry only checks status and can restore the old signed-in view when POST never reached the server. | Inspect logout catch/retry in `../../app/static/account.js`; final verdict pending. |
-| B2 | A prior tab's timer/termination broadcast can clear or abort a newer login in another tab. | Broadcast has only `ended`, no generation; reproduce ordering before choosing the smallest fix. |
-| B3 | Delayed status delivery starts the client lifetime later than the server snapshot. | Timer uses received `expiresInSeconds`; add delayed-response evidence. |
-| B4 | Revocation slots may wait indefinitely for shared thread-pool admission despite a ten-second cooperative budget. | Budget is checked in worker; existing test releases admission after advancing clock. Assess actual bound and disposition. |
-| B5 | Identity returned by a late login/callback and rejected by revision fencing is never included in local provider revocation. | Local denial works; determine required provider cleanup and scope from approved intent. |
-| B6 | Delayed logout cookie deletion may overwrite a sibling tab's newer login cookie. | Reproduce actual response ordering; immediate after-response provider ordering alone does not prove network ordering. |
-| B7 | Passive observations hide current panels/disable controls during every provider request. | Trace background bootstrap and recovery focus under latency. |
-| B8 | Restricted browser logout test may finish at synchronous display clearing before server acknowledgement. | Add response/cookie/server authority assertions if confirmed. |
-| B9 | Active log/issue still described implementation in progress. | Corrected in the user-requested session-ending handoff; no app change required. |
-| V1 | Provider-denial revision fencing is not directly tested against an unfinished callback. | Pre-verified regression gap: old session removal would pass outage tests while allowing a late callback. Add a synthetic blocked callback + failed current-session validation test; reviewer recommended patch. |
-
-Resume Build step 4 with these reports and the existing implementation agent if available. Read the snapshot's step-04-review instructions, verify B1–B8 individually, trust V1's filed gap evidence, and complete edge-case review. If code changes, run all spec verification commands again. Do not mark done until triage/fixes/review are complete. No genuine hosted account operations are authorized by these synthetic checks.
+Grouping: E1?E8 join their matching B rows only. V1 remains a separate verification correction. No findings deferred. Fix/verification completion is recorded below after actual execution.
 
 ## Design Notes
 
@@ -111,4 +123,41 @@ Matrix audit (all listed Python cases are present and passed in the parent JUnit
 | Races | `test_logout_fences_inflight_authority_after_provider_await` (six flows); `test_logout_during_body_stream_prevents_subsequent_provider_work` (three flows); validation-expiry fence; existing password stale-reply tests and sibling-tab late-login scenario |
 | Protection | `test_logout_protection_empty_json_and_configuration_precede_provider` (eight cases); SDK exact local wire test; privacy/reflow browser scenarios and full no-config demo |
 
-Initial task/matrix verification passed against the inspected implementation and executed offline checks. Independent review subsequently raised the reports above; review and final acceptance are incomplete. Hosted acceptance remains unexecuted and is separately documented.
+At the initial checkpoint, task/matrix verification passed and independent review remained incomplete. The dated completion below supersedes that handoff; earlier counts remain historical evidence.
+
+
+### Review completion and final parent verification ? 2026-11-15
+
+All B1?B8/E1?E8 corrections and V1 are complete; B9 was already resolved.
+The independent edge reviewer inspected the final patch and found no further
+concrete defect (read-only, no separate test rerun). No review finding was
+deferred. The parent inspected the application patch, fixture/test changes,
+full verification results and 200% screenshot. The approved frozen-block SHA-256
+remains `0669a8ae87bcd57293b81ccc0cee6567e7795f60388dde9e08aa8946d82fc64e`.
+
+Final executed commands/results:
+
+- `uv run --group pdf-experiment pytest --junitxml=test-results/logout-parent-verification-final.xml`: **243 passed, 1 unchanged optional PDF platform skip**, all **181 auth cases** passed; one existing Starlette deprecation warning. Last full Python run: 56.38 seconds.
+- `node tests/browser-auth.cjs`: **33 passed** after final regression-fixture sequencing correction, including actual old-timer firing while a newer login response is held. The synthetic 33-scenario run before that strengthening also passed; the intermediate strengthened run failed because its own test signal revalidated the old timer. No production change followed the passing full Python/demo runs.
+- `node tests/browser-demo.cjs`: **11 passed / 21 generation requests**.
+- `git diff --check`: passed.
+- Genuine provider/browser acceptance: **25/25 checks** using existing authorized test accounts; **10/10 checks** on the restarted normal configured server. See [acceptance details and limitations](auth-setup.md#story-23-review-completion--2026-11-15).
+
+The added Python regressions prove provider-denial fencing during unfinished
+signup/recovery callbacks, local cleanup of rejected late identities, generation
+cookie deletion/header ordering/binding, and revocation progress with the shared
+worker limiter occupied. Browser regressions prove POST retry without identity
+restoration, old timer/signal safety, elapsed normal/restricted snapshots, usable
+recovery controls during passive latency, acknowledged restricted logout and real
+late logout-header ordering across tabs.
+
+Hosted evidence uses real Supabase validation, local revocation and refresh,
+including same-account independence and actual local server-process restart.
+Restricted grant admission and expiry metadata were locally instrumented;
+revocation outage was injected at the adapter seam. No actual recovery-email/PKCE
+acceptance, natural 30-minute/12-hour wait or genuine provider outage is claimed.
+No emails, account provisioning, password writes, Auth settings, costs or
+deployment were performed. Existing Story 2.1/2.2 link/template gates remain
+open and are not retriggered. Normal server PID 11748 runs one worker with the
+existing ignored `.env`; the isolated test server is stopped. Spec is done;
+sprint Story 2.3 remains review for final product acceptance.

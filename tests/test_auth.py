@@ -96,6 +96,10 @@ def setup(settings=SETTINGS, registry=None):
     return TestClient(app, base_url=settings.app_origin or ORIGIN), fake, app.state.auth_registry
 
 
+def session_cookie(client):
+    return next((value for name, value in client.cookies.items() if name.startswith("sb_session")), None)
+
+
 def headers(client):
     status = client.get("/api/v1/auth/status")
     return {"Origin": str(client.base_url).rstrip("/"), "X-CSRF-Token": status.json()["csrfToken"]}
@@ -141,20 +145,20 @@ def test_explicit_loopback_and_https_configs_and_legacy_anon_key():
 def test_signup_is_generic_and_confirmation_validates_rotates_and_cleans_url():
     client, fake, registry = setup()
     assert post(client).json()["status"] == "check_email"
-    assert "sb_session" not in client.cookies
+    assert session_cookie(client) is None
     assert len(registry.pending) == 1
     response = callback(client, fake.redirects[0])
     assert response.status_code == 303
     assert response.headers["location"] == "/account?confirmation=success"
     assert response.headers["cache-control"] == "no-store"
     assert response.headers["referrer-policy"] == "no-referrer"
-    original = client.cookies["sb_session"]
+    original = session_cookie(client)
     assert original not in ("PRIVATE_ACCESS", "PRIVATE_REFRESH")
     display = client.get("/api/v1/auth/status").json()
     assert display["authenticated"] and display["email"] == EMAIL
     assert "ownerId" not in display and "token" not in json.dumps(display).lower().replace("csrftoken", "")
     assert post(client, "login").status_code == 200
-    assert client.cookies["sb_session"] != original
+    assert session_cookie(client) != original
     assert original not in registry.sessions
     assert len(registry.sessions) == 1
 
@@ -192,7 +196,7 @@ def test_bad_callback_rejects_before_exchange(case):
         response = callback(client, redirect)
     assert response.headers["location"] == "/account?confirmation=invalid"
     assert "exchange" not in fake.calls
-    assert "sb_session" not in client.cookies
+    assert session_cookie(client) is None
 
 
 def test_overlapping_attempts_and_simultaneous_callbacks_consume_exactly_once():
@@ -264,14 +268,14 @@ def test_browser_isolation_unknown_sessions_outage_and_restart():
     second = TestClient(client.app, base_url=ORIGIN)
     assert post(client, "login").status_code == 200
     assert post(second, "login", {**PAYLOAD, "email": "second@example.test"}).status_code == 200
-    assert client.cookies["sb_session"] != second.cookies["sb_session"]
+    assert session_cookie(client) != session_cookie(second)
     assert client.get("/api/v1/auth/status").json()["email"] == EMAIL
     assert second.get("/api/v1/auth/status").json()["email"] == "second@example.test"
     fake.fail = True
-    retired = client.cookies["sb_session"]
+    retired = session_cookie(client)
     response = client.get("/api/v1/auth/status")
     assert response.status_code == 503
-    assert client.cookies["sb_session"] == retired
+    assert session_cookie(client) == retired
     assert retired not in registry.sessions
     assert "set-cookie" not in response.headers
     fake.fail = False
@@ -424,7 +428,7 @@ def test_sdk_signup_requires_confirmation_and_does_not_enumerate_existing_accoun
     client = TestClient(create_app(SETTINGS, auth_adapter=existing), base_url=ORIGIN)
     response = post(client)
     assert response.json()["status"] == "check_email"
-    assert "PRIVATE" not in response.text and "sb_session" not in client.cookies
+    assert "PRIVATE" not in response.text and session_cookie(client) is None
 
 
 @pytest.mark.parametrize("case", ["unconfirmed", "mismatch", "missing_session", "expired", "missing_refresh", "timeout", "server_error", "malformed", "redirect"])
@@ -452,7 +456,7 @@ def test_sdk_rejects_incomplete_mismatched_and_failed_provider_responses_without
     client = TestClient(create_app(SETTINGS, auth_adapter=adapter), base_url=ORIGIN)
     response = post(client, "login")
     assert response.status_code in (401, 503)
-    assert "sb_session" not in client.cookies
+    assert session_cookie(client) is None
     assert "PRIVATE" not in response.text
 
 
@@ -732,17 +736,17 @@ def test_old_status_validation_cannot_erase_new_login_cookie_in_arrival_order(fa
             boot = await client.get("/api/v1/auth/status")
             protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]}
             await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
-            old_cookie = client.cookies["sb_session"]
+            old_cookie = session_cookie(client)
             old_status = asyncio.create_task(client.get("/api/v1/auth/status"))
             assert await asyncio.to_thread(entered.wait, 2)
             login = await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
-            new_cookie = client.cookies["sb_session"]
+            new_cookie = session_cookie(client)
             assert new_cookie != old_cookie and login.status_code == 200
             release.set()
             response = await old_status
             assert not response.json().get("authenticated", False)
-            assert "sb_session=" not in response.headers.get("set-cookie", "")
-            assert client.cookies["sb_session"] == new_cookie
+            assert "sb_session" not in response.headers.get("set-cookie", "")
+            assert session_cookie(client) == new_cookie
             assert new_cookie in app.state.auth_registry.sessions
     asyncio.run(scenario())
 
@@ -759,10 +763,10 @@ def test_already_completed_denial_response_cannot_erase_a_later_login(error):
     stale = client.get("/api/v1/auth/status")
     fake.fail = False
     client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
-    newest = client.cookies["sb_session"]
+    newest = session_cookie(client)
     client.cookies.extract_cookies(stale)
-    assert client.cookies["sb_session"] == newest
-    assert "sb_session=" not in stale.headers.get("set-cookie", "")
+    assert session_cookie(client) == newest
+    assert "sb_session" not in stale.headers.get("set-cookie", "")
 
 
 def test_http_signup_passes_each_exact_callback_state_to_real_sdk_transport():
@@ -802,14 +806,14 @@ def test_real_sdk_status_retires_invalid_existing_identity_without_cookie_mutati
     registry = Registry()
     client = TestClient(create_app(SETTINGS, auth_adapter=adapter, registry=registry), base_url=ORIGIN)
     assert post(client, "login").status_code == 200
-    old_cookie = client.cookies["sb_session"]
+    old_cookie = session_cookie(client)
     status_validation[0] = True
     response = client.get("/api/v1/auth/status")
     assert response.status_code in (401, 503)
     assert not response.json().get("authenticated", False)
     assert old_cookie not in registry.sessions
-    assert client.cookies["sb_session"] == old_cookie
-    assert "sb_session=" not in response.headers.get("set-cookie", "")
+    assert session_cookie(client) == old_cookie
+    assert "sb_session" not in response.headers.get("set-cookie", "")
     assert response.headers["cache-control"] == "no-store"
     assert "PRIVATE" not in response.text
 
@@ -818,13 +822,13 @@ def recovery_grant(client, fake):
     assert post(client, "recovery/request", {"email": EMAIL}).json()["status"] == "check_email"
     response = callback(client, fake.redirects[-1])
     assert response.headers["location"] == "/account?recovery=success"
-    return client.cookies["sb_session"]
+    return session_cookie(client)
 
 
 def test_recovery_replaces_local_session_with_restricted_authority_and_requires_login():
     client, fake, registry = setup()
     assert post(client, "login").status_code == 200
-    original = client.cookies["sb_session"]
+    original = session_cookie(client)
     grant = recovery_grant(client, fake)
     assert grant != original and original not in registry.sessions
     assert not registry.sessions and grant in registry.recoveries
@@ -834,12 +838,12 @@ def test_recovery_replaces_local_session_with_restricted_authority_and_requires_
     assert "email" not in display and fake.calls == before
     updated = post(client, "recovery/password", {"password": PASSWORD})
     assert updated.json() == {"status": "password_updated", "authenticated": False, "recoveryAvailable": False}
-    assert "sb_session=" not in updated.headers.get("set-cookie", "")
+    assert "sb_session" not in updated.headers.get("set-cookie", "")
     assert not registry.recoveries and fake.calls.count("update_password") == 1
     assert post(client, "recovery/password", {"password": PASSWORD}).status_code == 401
     assert client.get("/api/v1/auth/status").json()["authenticated"] is False
     assert post(client, "login").status_code == 200
-    assert client.cookies["sb_session"] != grant
+    assert session_cookie(client) != grant
 
 
 @pytest.mark.parametrize("case", ["wrong_browser", "missing_binding", "missing_state", "missing_code", "missing_verifier", "purpose", "expired", "replay", "restart", "duplicate_state", "implicit"])
@@ -965,15 +969,15 @@ def test_concurrent_password_updates_claim_once_and_late_reply_never_changes_new
             assert duplicate.status_code == 401
             login = await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
             assert login.status_code == 200
-            newest = client.cookies["sb_session"]
+            newest = session_cookie(client)
             release.set()
             response = await pending
             assert response.status_code == (503 if fail else 200)
             if fail:
                 assert response.json()["code"] == "recovery_failed"
                 assert "kan være endret" in response.json()["message"]
-            assert "sb_session=" not in response.headers.get("set-cookie", "")
-            assert client.cookies["sb_session"] == newest
+            assert "sb_session" not in response.headers.get("set-cookie", "")
+            assert session_cookie(client) == newest
             assert newest in registry.sessions and not registry.recoveries
             assert fake.calls.count("update_password") == 1
     asyncio.run(scenario())
@@ -1019,7 +1023,7 @@ def test_http_recovery_exact_sdk_redirect_challenge_actual_verifier_and_password
     assert verifiers[0] != verifiers[1]
     for index, redirect in enumerate(recoveries):
         assert callback(client, redirect, "PRIVATE_CODE_" + str(index)).headers["location"] == "/account?recovery=success"
-        grant = client.cookies["sb_session"]
+        grant = session_cookie(client)
         assert grant in registry.recoveries and not registry.sessions
         display = client.get("/api/v1/auth/status").json()
         assert display["authenticated"] is False and display["recoveryAvailable"] is True
@@ -1081,7 +1085,7 @@ def test_recovery_request_nonexistent_account_ack_and_provider_outage_are_safe()
         client = TestClient(create_app(SETTINGS, auth_adapter=adapter), base_url=ORIGIN)
         response = post(client, "recovery/request", {"email": EMAIL})
         assert response.status_code == (503 if provider_status == 503 else 200)
-        assert "PRIVATE" not in response.text and "sb_session" not in client.cookies
+        assert "PRIVATE" not in response.text and session_cookie(client) is None
 
 
 @pytest.mark.parametrize("action,payload", [("recovery/request", {"email": EMAIL}), ("recovery/password", {"password": PASSWORD})])
@@ -1201,19 +1205,19 @@ def test_blocked_recovery_exchange_cannot_replace_intervening_login_and_other_at
             assert await asyncio.to_thread(entered.wait, 2)
             response = await client.post("/api/v1/auth/login", json={"email": "other@example.test", "password": PASSWORD}, headers=protection)
             assert response.status_code == 200
-            newest = client.cookies["sb_session"]
+            newest = session_cookie(client)
             release.set()
             response = await blocked
             assert response.headers["location"] == "/account?recovery=invalid"
-            assert "sb_session=" not in response.headers.get("set-cookie", "")
-            assert client.cookies["sb_session"] == newest
+            assert "sb_session" not in response.headers.get("set-cookie", "")
+            assert session_cookie(client) == newest
             assert newest in registry.sessions and not registry.recoveries
             display = (await client.get("/api/v1/auth/status")).json()
             assert display["authenticated"] is True and display["email"] == "other@example.test"
             independent = await client.get(independent_link + "&code=PRIVATE_CODE")
             assert independent.headers["location"] == "/account?recovery=success"
             assert newest not in registry.sessions
-            grant = client.cookies["sb_session"]
+            grant = session_cookie(client)
             assert grant in registry.recoveries and not registry.sessions
             assert not registry.pending
     asyncio.run(scenario())
@@ -1267,13 +1271,13 @@ def test_logout_ends_all_browser_authority_and_attempts_but_retains_fresh_login(
     if restricted:
         recovery_grant(client, fake)
     assert post(client).status_code == 200
-    old = client.cookies["sb_session"]
+    old = session_cookie(client)
     binding = client.cookies["sb_browser"]
     protection = headers(client)
     revision = registry.browsers[binding].authority_revision
     response = client.post("/api/v1/auth/logout", json={}, headers=protection)
     assert response.json() == {"authenticated": False, "recoveryAvailable": False}
-    assert 'sb_session=""' in response.headers["set-cookie"]
+    assert 'sb_session_' in response.headers["set-cookie"]
     assert "Max-Age=0" in response.headers["set-cookie"]
     assert "HttpOnly" in response.headers["set-cookie"]
     assert response.headers["cache-control"] == "no-store"
@@ -1292,7 +1296,7 @@ def test_logout_protection_empty_json_and_configuration_precede_provider(case):
     client, fake, registry = setup()
     post(client, "login")
     protection = headers(client)
-    session = client.cookies["sb_session"]
+    session = session_cookie(client)
     body = b"{}"
     protection["Content-Type"] = "application/json"
     if case == "origin":
@@ -1326,7 +1330,7 @@ def test_local_logout_provider_outage_preserves_other_browser_even_for_same_acco
     fake.login, fake.revoke = independent_login, revoke
     for current in (client, second):
         assert post(current, "login").status_code == 200
-    second_id = second.cookies["sb_session"]
+    second_id = session_cookie(second)
     protection = headers(client)
     fake.fail = True
     assert client.post("/api/v1/auth/logout", json={}, headers=protection).status_code == 200
@@ -1345,7 +1349,7 @@ def test_passive_status_cannot_renew_idle_but_authenticated_work_can():
     registry = Registry(clock=lambda: now[0], idle_seconds=30, absolute_seconds=120)
     client, fake, _ = setup(registry=registry)
     post(client, "login")
-    session, browser = client.cookies["sb_session"], client.cookies["sb_browser"]
+    session, browser = session_cookie(client), client.cookies["sb_browser"]
     assert client.get("/api/v1/auth/status").json()["expiresInSeconds"] == 30
     now[0] += 20
     assert client.get("/api/v1/auth/status").json()["expiresInSeconds"] == 10
@@ -1424,10 +1428,12 @@ def test_logout_fences_inflight_authority_after_provider_await(flow):
             assert (await client.post("/api/v1/auth/logout", json={}, headers=protection)).status_code == 200
             release.set()
             response = await pending
-            assert "sb_session=" not in response.headers.get("set-cookie", "")
+            assert "sb_session" not in response.headers.get("set-cookie", "")
             registry = app.state.auth_registry
             assert not registry.sessions and not registry.recoveries and not registry.pending
             assert binding in registry.browsers
+            if flow in ("login", "signup_callback", "recovery_callback"):
+                assert fake.calls.count("revoke") == 1
             fake.login = FakeAuth().login
             assert (await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)).status_code == 200
     asyncio.run(scenario())
@@ -1454,13 +1460,13 @@ def test_revocation_admission_cancellation_and_shared_batch_deadline(monkeypatch
         manager = Revocations(clock=lambda: now[0])
         admitted, release = asyncio.Event(), asyncio.Event()
         entered = [0]
-        async def blocked(action, *args):
+        async def blocked(action, *args, **kwargs):
             entered[0] += 1
             if entered[0] == 16:
                 admitted.set()
             await release.wait()
             return action(*args)
-        monkeypatch.setattr("app.services.sessions.run_in_threadpool", blocked)
+        monkeypatch.setattr("app.services.sessions.to_thread.run_sync", blocked)
         fake = FakeAuth()
         waiters = [asyncio.create_task(manager.after_response(fake, (fake.identity(),))) for _ in range(16)]
         await asyncio.wait_for(admitted.wait(), 2)
@@ -1492,7 +1498,7 @@ def test_logout_response_is_sent_before_revocation_starts_and_old_cookie_is_deni
         client, fake, registry = setup()
         post(client, "login")
         protection = headers(client)
-        binding, old = client.cookies["sb_browser"], client.cookies["sb_session"]
+        binding, old = client.cookies["sb_browser"], session_cookie(client)
         sent = []
         def revoke(identity, *, budget):
             assert any(message["type"] == "http.response.body" and not message.get("more_body") for message in sent)
@@ -1559,4 +1565,79 @@ def test_logout_during_body_stream_prevents_subsequent_provider_work(flow):
             assert (await request).status_code in (401, 503)
             assert not fake.calls
             assert not app.state.auth_registry.pending and not app.state.auth_registry.sessions
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("purpose", ["signup", "recovery"])
+def test_provider_denial_fences_unfinished_callback_and_revokes_rejected_identity(purpose):
+    async def scenario():
+        fake, registry = FakeAuth(), Registry()
+        app = create_app(SETTINGS, auth_adapter=fake, registry=registry)
+        entered, release = Event(), Event()
+        revoked = []
+        fake.revoke = lambda identity, *, budget: revoked.append(identity.access_token)
+        original = fake.exchange
+        def blocked(code, pending):
+            entered.set()
+            assert release.wait(3)
+            return replace(original(code, pending), access_token="PRIVATE_LATE_IDENTITY")
+        fake.exchange = blocked
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]}
+            await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
+            await client.post("/api/v1/auth/" + ("signup" if purpose == "signup" else "recovery/request"),
+                              json=PAYLOAD if purpose == "signup" else {"email": EMAIL}, headers=protection)
+            callback = asyncio.create_task(client.get(fake.redirects[-1] + "&code=PRIVATE_CODE"))
+            assert await asyncio.to_thread(entered.wait, 2)
+            def denied(identity):
+                raise AuthFailure()
+            fake.validate = denied
+            assert (await client.get("/api/v1/auth/status")).status_code == 503
+            release.set()
+            late = await callback
+            assert late.headers["location"].endswith("=invalid")
+            assert "set-cookie" not in late.headers
+            assert not registry.sessions and not registry.recoveries
+            assert revoked == ["PRIVATE_LATE_IDENTITY"]
+    asyncio.run(scenario())
+
+
+def test_delayed_logout_deletion_preserves_new_cookie_and_ignores_retired_cookie_order():
+    client, fake, registry = setup()
+    post(client, "login")
+    protection = headers(client)
+    old_names = dict(client.cookies)
+    ended = client.post("/api/v1/auth/logout", json={}, headers=protection)
+    assert client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection).status_code == 200
+    newest = session_cookie(client)
+    newest_names = dict(client.cookies)
+    client.cookies.extract_cookies(ended)
+    assert session_cookie(client) == newest
+    # Both HTTP header orders must select only live, browser-bound authority.
+    for cookies in (old_names | newest_names, newest_names | old_names):
+        request_cookies = "; ".join(f"{key}={value}" for key, value in cookies.items())
+        assert client.get("/api/v1/auth/status", headers={"Cookie": request_cookies}).json()["authenticated"]
+    assert newest in registry.sessions
+    stranger = TestClient(client.app, base_url=ORIGIN)
+    stranger.get("/api/v1/auth/status")
+    binding = stranger.cookies["sb_browser"]
+    forged = {**newest_names, "sb_browser": binding}
+    assert not stranger.get("/api/v1/auth/status", headers={"Cookie": "; ".join(f"{k}={v}" for k, v in forged.items())}).json()["authenticated"]
+
+
+def test_revocation_has_no_shared_worker_admission_queue():
+    import anyio
+    async def scenario():
+        limiter = anyio.to_thread.current_default_thread_limiter()
+        prior = limiter.total_tokens
+        limiter.total_tokens = 1
+        await limiter.acquire()
+        try:
+            manager, fake = Revocations(seconds=0.2), FakeAuth()
+            await asyncio.wait_for(manager.after_response(fake, (fake.identity(),)), 1)
+            assert fake.calls == ["revoke"] and manager.active == 0
+        finally:
+            limiter.release()
+            limiter.total_tokens = prior
     asyncio.run(scenario())

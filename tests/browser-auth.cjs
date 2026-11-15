@@ -143,7 +143,7 @@ async function main() {
       const links = await (await fetch(`${baseURL}/__test/links`)).json();
       assert.equal(links.length, 2);
       assert.notEqual(links[0].url, links[1].url);
-      assert.equal((await first.cookies()).some(cookie => cookie.name === 'sb_session'), false);
+      assert.equal((await first.cookies()).some(cookie => cookie.name.startsWith('sb_session_')), false);
     });
 
     await check('wrong browser cannot consume confirmation; correct browser confirms and replay fails cleanly', async () => {
@@ -156,13 +156,13 @@ async function main() {
       await page.locator('#account-signed-in').waitFor({state: 'visible'});
       assert.equal(await page.locator('#account-email').innerText(), 'first@example.test');
       assert.equal(page.url(), `${baseURL}/account`);
-      const original = (await first.cookies()).find(cookie => cookie.name === 'sb_session').value;
+      const original = (await first.cookies()).find(cookie => cookie.name.startsWith('sb_session_')).value;
       await page.goto(links[0].url);
       await page.locator('#account-error').waitFor({state: 'visible'});
       assert.equal(page.url(), `${baseURL}/account`);
       await page.goto(links[1].url);
       await page.locator('#account-signed-in').waitFor({state: 'visible'});
-      const rotated = (await first.cookies()).find(cookie => cookie.name === 'sb_session').value;
+      const rotated = (await first.cookies()).find(cookie => cookie.name.startsWith('sb_session_')).value;
       assert.notEqual(rotated, original);
     });
 
@@ -182,7 +182,7 @@ async function main() {
       await page.reload();
       await page.locator('#account-signed-in').waitFor({state: 'visible'});
       assert.equal(await page.locator('#account-email').innerText(), 'first@example.test');
-      assert.notEqual((await first.cookies()).find(c => c.name === 'sb_session').value, (await second.cookies()).find(c => c.name === 'sb_session').value);
+      assert.notEqual((await first.cookies()).find(c => c.name.startsWith('sb_session_')).value, (await second.cookies()).find(c => c.name.startsWith('sb_session_')).value);
     });
 
     await check('confirmation error is consumed once and cannot return after login and focus', async () => {
@@ -206,7 +206,7 @@ async function main() {
     await check('opaque HttpOnly cookies and no tokens/passwords in browser storage, DOM, URL or output', async () => {
       for (const [context, current] of [[first, page], [second, other]]) {
         const cookies = await context.cookies();
-        for (const cookie of cookies.filter(c => ['sb_session', 'sb_browser'].includes(c.name))) {
+        for (const cookie of cookies.filter(c => c.name.startsWith('sb_session_') || c.name === 'sb_browser')) {
           assert.equal(cookie.httpOnly, true);
           assert.equal(cookie.sameSite, 'Lax');
           assert.doesNotMatch(cookie.value, /BROWSER_PRIVATE/);
@@ -482,7 +482,7 @@ async function main() {
       try {
         const writes = (await (await fetch(`${baseURL}/__test/updates`)).json()).length;
         const cookies = await context.cookies();
-        const grant = cookies.find(cookie => cookie.name === 'sb_session').value;
+        const grant = cookies.find(cookie => cookie.name.startsWith('sb_session_')).value;
         const binding = cookies.find(cookie => cookie.name === 'sb_browser').value;
         await current.locator('#recovery-password').fill('BROWSER_NAVIGATION_DRAFT');
         await current.locator('#recovery-login').click();
@@ -622,7 +622,7 @@ async function main() {
         assert.match(await sibling.locator('#account-status').innerText(), /Logg inn/);
         assert.equal((await (await right.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, true);
         assert.equal((await (await left.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, false);
-        assert.equal((await left.cookies()).some(cookie => cookie.name === 'sb_session'), false);
+        assert.equal((await left.cookies()).some(cookie => cookie.name.startsWith('sb_session_')), false);
         await fill(a, 'login', 'same-account@example.test'); await submit(a, 'login');
         await a.locator('#account-signed-in').waitFor({state: 'visible'});
       } finally { await left.close(); await right.close(); }
@@ -698,8 +698,9 @@ async function main() {
         await fill(sibling, 'login', 'late-tab@example.test'); await submit(sibling, 'login');
         await sibling.waitForFunction(() => window.__loginReady);
         await a.locator('#account-signed-in [data-account-logout]').click(); await ready(a);
-        await sibling.waitForFunction(() => document.querySelector('#account-status').textContent.includes('avsluttet'));
+        assert.equal(await sibling.locator('#login-form button').isDisabled(), true);
         await sibling.evaluate(() => window.__releaseLogin());
+        await sibling.waitForFunction(() => document.querySelector('#account-status').textContent.includes('avsluttet'));
         await sibling.waitForTimeout(150);
         assert.equal(await sibling.locator('#account-signed-in').isVisible(), false);
         assert.equal(await sibling.locator('#account-email').textContent(), '');
@@ -714,10 +715,165 @@ async function main() {
         await current.setViewportSize({width: 320, height: 800});
         await current.locator('#recovery-password').fill('UNSUBMITTED_PRIVATE_DRAFT');
         await current.locator('#account-recovery [data-account-logout]').focus();
-        await current.keyboard.press('Enter'); await ready(current);
+        const acknowledged = current.waitForResponse(r => r.url().endsWith('/api/v1/auth/logout'));
+        await current.keyboard.press('Enter');
+        assert.equal((await acknowledged).status(), 200);
+        await ready(current);
+        const denied = await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json();
+        assert.equal(denied.authenticated, false);
+        assert.equal(denied.recoveryAvailable, false);
+        assert.equal((await context.cookies()).some(c => c.name.startsWith('sb_session_')), false);
         assert.equal(await current.locator('#recovery-password').inputValue(), '');
         assert.equal(await current.locator('#account-recovery').isVisible(), false);
         assert(await current.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      } finally { await context.close(); }
+    });
+
+    await check('failed logout retries the POST and never restores identity from status', async () => {
+      const context = await browser.newContext();
+      try {
+        const current = await context.newPage();
+        await current.goto(`${baseURL}/account`); await ready(current);
+        await fill(current, 'login', 'retry-logout@example.test'); await submit(current, 'login');
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+        await current.route('**/api/v1/auth/logout', route => route.abort(), {times: 1});
+        await current.locator('[data-account-logout]').first().click();
+        await current.locator('#account-error').waitFor({state: 'visible'});
+        assert.equal((await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, true);
+        assert.equal(await current.locator('#account-forms').isVisible(), false);
+        await current.evaluate(() => window.dispatchEvent(new Event('focus')));
+        assert.equal(await current.locator('#account-signed-in').isVisible(), false);
+        const done = current.waitForResponse(r => r.url().endsWith('/api/v1/auth/logout'));
+        await current.locator('#account-retry').click();
+        assert.equal((await done).status(), 200);
+        await ready(current);
+        assert.equal((await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, false);
+        assert.equal((await context.cookies()).some(c => c.name.startsWith('sb_session_')), false);
+      } finally { await context.close(); }
+    });
+
+    await check('old tab timers and delayed signals preserve a newer completed and in-flight login', async () => {
+      const context = await browser.newContext();
+      try {
+        const old = await context.newPage();
+        await old.goto(`${baseURL}/account`); await ready(old);
+        await fill(old, 'login', 'generation@example.test'); await submit(old, 'login');
+        await old.locator('#account-signed-in').waitFor({state: 'visible'});
+        await old.route('**/api/v1/auth/status', async route => {
+          const response = await route.fetch(); const data = await response.json();
+          data.expiresInSeconds = 2; await route.fulfill({json: data});
+        }, {times: 1});
+        const snapshot = old.waitForResponse(r => r.url().endsWith('/api/v1/auth/status'));
+        await old.evaluate(() => window.dispatchEvent(new Event('focus'))); await snapshot;
+        const current = await context.newPage();
+        await current.goto(`${baseURL}/account`);
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+        await current.locator('#account-show-forms').click();
+        let release, entered;
+        const held = new Promise(resolve => { release = resolve; });
+        const started = new Promise(resolve => { entered = resolve; });
+        await current.route('**/api/v1/auth/login', async route => {
+          const response = await route.fetch(); entered(); await held; await route.fulfill({response});
+        }, {times: 1});
+        await fill(current, 'login', 'generation@example.test'); await submit(current, 'login');
+        await started;
+        // Let the older snapshot timer fire while the newer login response is held.
+        await old.waitForFunction(() => document.querySelector('#account-status').textContent.includes('avsluttet'));
+        assert.equal(await current.locator('#login-form button').isDisabled(), true);
+        await old.evaluate(() => { const c = new BroadcastChannel('studybuddy-session'); c.postMessage('ended'); c.close(); });
+        await current.waitForTimeout(100);
+        assert.equal(await current.locator('#login-form button').isDisabled(), true);
+        release();
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+        const observed = current.waitForResponse(r => r.url().endsWith('/api/v1/auth/status'));
+        await old.evaluate(() => { const c = new BroadcastChannel('studybuddy-session'); c.postMessage('ended'); c.close(); });
+        await observed;
+        assert.equal(await current.locator('#account-signed-in').isVisible(), true);
+        assert.equal((await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, true);
+      } finally { await context.close(); }
+    });
+
+    await check('delayed normal and restricted snapshots expire from request start', async () => {
+      for (const restricted of [false, true]) {
+        const context = await browser.newContext();
+        try {
+          const current = await context.newPage();
+          if (restricted) await openRecovery(current, 'slow-snapshot@example.test');
+          else {
+            await current.goto(`${baseURL}/account`); await ready(current);
+            await fill(current, 'login', 'slow-snapshot@example.test'); await submit(current, 'login');
+            await current.locator('#account-signed-in').waitFor({state: 'visible'});
+          }
+          await current.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+          await current.route('**/api/v1/auth/status', async route => {
+            const response = await route.fetch();
+            const data = await response.json(); data.expiresInSeconds = 0.15;
+            await pause(300); await route.fulfill({json: data});
+          }, {times: 1});
+          const response = current.waitForResponse(r => r.url().endsWith('/api/v1/auth/status'));
+          await current.evaluate(() => window.dispatchEvent(new Event('focus')));
+          await response;
+          await current.waitForFunction(() => document.querySelector('#account-status').textContent.includes('avsluttet'));
+          assert.equal(await current.locator('#account-recovery').isVisible(), false);
+          assert.equal(await current.locator('#account-signed-in').isVisible(), false);
+        } finally { await context.close(); }
+      }
+    });
+
+    await check('passive latency preserves recovery controls and a user action supersedes it', async () => {
+      const {context, current} = await recoveryPage('background-latency@example.test');
+      try {
+        let release, entered;
+        const held = new Promise(resolve => { release = resolve; });
+        const started = new Promise(resolve => { entered = resolve; });
+        await current.route('**/api/v1/auth/status', async route => {
+          const response = await route.fetch(); entered(); await held; await route.fulfill({response});
+        }, {times: 1});
+        await current.locator('#recovery-password').fill('BROWSER_DRAFT');
+        await current.locator('#recovery-password').focus();
+        await current.evaluate(() => window.dispatchEvent(new Event('focus')));
+        await started;
+        assert.equal(await current.locator('#account-recovery').isVisible(), true);
+        assert.equal(await current.locator('#recovery-login').isEnabled(), true);
+        assert.equal(await current.locator('#recovery-password').inputValue(), 'BROWSER_DRAFT');
+        assert.equal(await current.evaluate(() => document.activeElement.id), 'recovery-password');
+        await current.locator('#recovery-login').click();
+        release(); await current.waitForTimeout(100);
+        assert.equal(await current.locator('#account-forms').isVisible(), true);
+        assert.equal(await current.locator('#account-recovery').isVisible(), false);
+      } finally { await context.close(); }
+    });
+
+    await check('delayed logout headers cannot erase a sibling fresh login cookie', async () => {
+      const context = await browser.newContext();
+      try {
+        const current = await context.newPage();
+        await current.goto(`${baseURL}/account`); await ready(current);
+        await fill(current, 'login', 'cookie-order@example.test'); await submit(current, 'login');
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+        const sibling = await context.newPage(); await sibling.goto(`${baseURL}/account`);
+        await sibling.locator('#account-signed-in').waitFor({state: 'visible'});
+        let release, entered;
+        const held = new Promise(resolve => { release = resolve; });
+        const started = new Promise(resolve => { entered = resolve; });
+        await current.route('**/api/v1/auth/logout', async route => {
+          // Isolated API context: deliver deletion headers only after sibling login.
+          const response = await require('playwright').request.newContext();
+          try {
+            const upstream = await response.post(route.request().url(), {headers: route.request().headers(), data: '{}'});
+            entered(); await held; await route.fulfill({response: upstream});
+          } finally { await response.dispose(); }
+        }, {times: 1});
+        await current.locator('[data-account-logout]').first().click(); await started;
+        await sibling.reload(); await ready(sibling);
+        await fill(sibling, 'login', 'cookie-order@example.test'); await submit(sibling, 'login');
+        await sibling.locator('#account-signed-in').waitFor({state: 'visible'});
+        const done = current.waitForResponse(r => r.url().endsWith('/api/v1/auth/logout'));
+        release(); await done; await ready(current);
+        const observed = sibling.waitForResponse(r => r.url().endsWith('/api/v1/auth/status'));
+        await sibling.evaluate(() => window.dispatchEvent(new Event('focus'))); await observed;
+        assert.equal((await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, true);
+        assert.equal(await sibling.locator('#account-signed-in').isVisible(), true);
       } finally { await context.close(); }
     });
 

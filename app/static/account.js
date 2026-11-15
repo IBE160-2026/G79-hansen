@@ -9,6 +9,7 @@
   const recovery = document.getElementById('account-recovery');
   let csrf = null, busy = false, sequence = 0, active = null, formsRequested = false;
   let deadlineTimer = null, hasAuthority = false;
+  let logoutPending = false, observePending = false;
   const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('studybuddy-session') : null;
   const endedMessage = 'Tilgangen er avsluttet. Logg inn på nytt.';
   function endAccess(message = endedMessage, {broadcast = false} = {}) {
@@ -21,20 +22,29 @@
     clearPasswords();
     clearDisplay();
     setBusy(false);
-    forms.hidden = !csrf;
+    forms.hidden = logoutPending || !csrf;
     error.hidden = true;
     retry.hidden = !!csrf;
     status.textContent = message;
     if (broadcast) channel?.postMessage('ended');
   }
-  function armLifetime(value) {
-    const seconds = value.expiresInSeconds;
-    if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0 || seconds > 43200) throw new AccountError(unavailable);
+  function armLifetime(value, started) {
+    const snapshot = value.expiresInSeconds;
+    if (typeof snapshot !== 'number' || !Number.isFinite(snapshot) || snapshot <= 0 || snapshot > 43200) throw new AccountError(unavailable);
+    const seconds = snapshot - (performance.now() - started) / 1000;
     clearTimeout(deadlineTimer);
+    if (seconds <= 0) { endAccess(); return false; }
     hasAuthority = true;
-    deadlineTimer = setTimeout(() => endAccess(endedMessage, {broadcast: true}), seconds * 1000);
+    deadlineTimer = setTimeout(() => endAccess(), seconds * 1000);
+    return true;
   }
-  channel?.addEventListener('message', event => { if (event.data === 'ended') endAccess(); });
+  function observe() {
+    if (logoutPending) return;
+    if (busy) { observePending = true; return; }
+    observePending = false;
+    bootstrap({background: true});
+  }
+  channel?.addEventListener('message', event => { if (event.data === 'ended') observe(); });
   const initial = new URL(location.href);
   const outcomeKind = initial.searchParams.has('recovery') ? 'recovery' : 'confirmation';
   const outcome = initial.searchParams.get(outcomeKind);
@@ -60,6 +70,7 @@
     document.querySelectorAll('form button, [data-account-navigation]').forEach(button => { button.disabled = value; });
     forms.setAttribute('aria-busy', String(value));
     recovery.setAttribute('aria-busy', String(value));
+    if (!value && observePending) queueMicrotask(observe);
   }
   function fail(message) {
     error.textContent = message;
@@ -112,20 +123,22 @@
     status.textContent = 'Du er logget inn.';
   }
   async function bootstrap({background = false} = {}) {
+    if (logoutPending) return;
     active?.abort();
     const id = ++sequence;
+    const started = performance.now();
     const hadRecovery = !recovery.hidden;
     const hadAuthority = hasAuthority;
     const preserveDraft = background && (!forms.hidden || hadRecovery);
-    const focused = preserveDraft ? document.activeElement : null;
     if (!preserveDraft) clearPasswords();
-    clearDisplay();
-    csrf = null;
+    if (!background) { clearDisplay(); csrf = null; }
     if (!preserveDraft) forms.hidden = true;
     retry.hidden = true;
-    error.hidden = true;
-    status.textContent = 'Kontrollerer innlogging …';
-    setBusy(true);
+    if (!background) {
+      error.hidden = true;
+      status.textContent = 'Kontrollerer innlogging …';
+      setBusy(true);
+    }
     try {
       const data = await request('status', {}, id);
       if (!data) return;
@@ -139,15 +152,17 @@
       }
       if (typeof data.csrfToken !== 'string' || !data.csrfToken || typeof data.authenticated !== 'boolean') throw new AccountError(unavailable);
       csrf = data.csrfToken;
-      if (data.authenticated || data.recoveryAvailable === true) armLifetime(data);
+      if (data.authenticated || data.recoveryAvailable === true) {
+        if (!armLifetime(data, started)) return;
+      }
       else {
         clearTimeout(deadlineTimer);
         hasAuthority = false;
         if (hadAuthority) {
           formsRequested = false;
-          channel?.postMessage('ended');
         }
       }
+      if (!data.authenticated && data.recoveryAvailable !== true) clearDisplay();
       if (formsRequested) {
         forms.hidden = false;
         status.textContent = data.authenticated ? 'Du er fortsatt logget inn. Du kan logge inn på nytt eller gjenopprette passord.' : 'Velg innlogging eller be om en ny gjenopprettingslenke.';
@@ -178,7 +193,6 @@
     } finally {
       if (id === sequence) {
         setBusy(false);
-        if (preserveDraft && (!forms.hidden || !recovery.hidden) && error.hidden && focused?.isConnected) focused.focus();
       }
     }
   }
@@ -187,6 +201,7 @@
     if (busy || !csrf) return;
     const body = JSON.stringify({email: document.getElementById('recovery-email').value.trim()});
     const id = ++sequence;
+    active?.abort();
     setBusy(true);
     error.hidden = true;
     status.textContent = 'Sender gjenopprettingslenken …';
@@ -227,6 +242,7 @@
     const body = JSON.stringify({password: newPassword.value});
     clearPasswords();
     const id = ++sequence;
+    active?.abort();
     setBusy(true);
     error.hidden = true;
     retry.hidden = true;
@@ -289,6 +305,8 @@
       const body = JSON.stringify({email: submittedEmail, password: document.getElementById(`${action}-password`).value});
       clearPasswords();
       const id = ++sequence;
+      active?.abort();
+      if (action === 'login') clearTimeout(deadlineTimer);
       setBusy(true);
       error.hidden = true;
       status.textContent = action === 'signup' ? 'Sender registreringen …' : 'Logger inn …';
@@ -297,7 +315,9 @@
         if (!data) return;
         if (action === 'login') {
           confirmation = null;
-          showIdentity(data);
+          if (data.authenticated !== true || typeof data.email !== 'string' || !data.email) throw new AccountError(unavailable);
+          formsRequested = false;
+          observePending = false;
           await bootstrap({background: true});
         }
         else {
@@ -314,33 +334,41 @@
       }
     });
   }
-  for (const button of document.querySelectorAll('[data-account-logout]')) button.addEventListener('click', async () => {
-    if (!csrf) return;
-    const token = csrf;
+  async function performLogout() {
+    const refreshBinding = logoutPending || !csrf;
+    logoutPending = true;
     endAccess('Logger ut …');
     const id = sequence;
     setBusy(true);
     try {
-      const data = await request('logout', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': token}, body: '{}'}, id);
+      if (refreshBinding) {
+        const binding = await request('status', {}, id);
+        if (!binding) return;
+        if (binding.available !== true || typeof binding.csrfToken !== 'string' || !binding.csrfToken) throw new AccountError(unavailable);
+        csrf = binding.csrfToken;
+      }
+      const data = await request('logout', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrf}, body: '{}'}, id);
       if (!data) return;
       if (data.authenticated !== false || data.recoveryAvailable !== false) throw new AccountError(unavailable);
+      logoutPending = false;
       endAccess('Du er logget ut. Logg inn igjen når du vil.', {broadcast: true});
       document.getElementById('login-email').focus();
     } catch (failure) {
       if (id !== sequence) return;
       endAccess();
-      fail('Utlogging kunne ikke bekreftes. Prøv igjen for å kontrollere tilgangen.');
+      fail('Utlogging kunne ikke bekreftes. Velg Prøv igjen for å logge ut.');
       retry.hidden = false;
     } finally {
       if (id === sequence) setBusy(false);
     }
-  });
-  retry.addEventListener('click', () => bootstrap());
+  }
+  for (const button of document.querySelectorAll('[data-account-logout]')) button.addEventListener('click', performLogout);
+  retry.addEventListener('click', () => logoutPending ? performLogout() : bootstrap());
   window.addEventListener('pagehide', () => {
-    endAccess();
     csrf = null;
+    endAccess();
   });
-  window.addEventListener('pageshow', event => { if (event.persisted) bootstrap(); });
+  window.addEventListener('pageshow', event => { if (event.persisted) logoutPending ? performLogout() : bootstrap(); });
   window.addEventListener('hashchange', () => {
     confirmation = 'invalid';
     history.replaceState(null, '', '/account');
