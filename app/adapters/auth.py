@@ -185,9 +185,9 @@ class SupabaseAuth:
         self.budget_clock, self.operation_seconds = budget_clock, operation_seconds
 
     @contextmanager
-    def client(self, storage=None):
+    def client(self, storage=None, *, budget=None):
         # An SDK and HTTP client per operation: never share mutable auth state.
-        budget = OperationBudget(self.operation_seconds, self.budget_clock)
+        budget = budget if budget is not None else OperationBudget(self.operation_seconds, self.budget_clock)
         limits = httpx.Limits(max_connections=2, max_keepalive_connections=0)
         transport = self.transport
         if transport is None:
@@ -314,3 +314,9 @@ class SupabaseAuth:
         with self.client() as auth:
             response = auth.refresh_session(identity.refresh_token)
             return self._validated(auth, response, expected_email=identity.email, expected_owner=identity.owner_id)
+
+    def revoke(self, identity, *, budget):
+        # admin.sign_out is a direct user-JWT request, despite the SDK name.
+        # Never install a session, refresh, or use the default global scope.
+        with self.client(budget=budget) as auth:
+            auth.admin.sign_out(identity.access_token, scope="local")

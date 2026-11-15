@@ -66,9 +66,10 @@ class Registry:
 
     def _prune(self):
         now = self.clock()
-        for key, value in list(self.sessions.items()):
-            if self._expired(value, now):
-                del self.sessions[key]
+        ended = {value.browser_id for value in self.sessions.values() if self._expired(value, now)}
+        ended.update(value.browser_id for value in self.recoveries.values() if now >= value.expires)
+        for browser_id in ended:
+            self.terminate(browser_id)
         for table in (self.browsers, self.pending, self.recoveries):
             for key, value in list(table.items()):
                 if now >= value.expires:
@@ -90,9 +91,10 @@ class Registry:
             browser = self.browsers.get(browser_id)
             return bool(browser and opaque_equal(browser.csrf, csrf))
 
-    def start_attempt(self, browser_id, email, purpose="signup"):
+    def start_attempt(self, browser_id, email, purpose="signup", *, expected_revision=None):
         with self.lock:
             self._prune()
+            self.check_revision(browser_id, expected_revision)
             if purpose not in ("signup", "recovery"):
                 raise AuthFailure("invalid_request")
             if (browser_id not in self.browsers or len(self.pending) >= self.capacity or
@@ -116,6 +118,44 @@ class Registry:
             if browser is None:
                 raise AuthFailure("request_rejected")
             browser.expires = max(browser.expires, self.clock() + self.pending_ttl)
+            return browser.authority_revision
+
+    def check_revision(self, browser_id, revision):
+        with self.lock:
+            self._prune()
+            browser = self.browsers.get(browser_id)
+            if browser is None or (revision is not None and browser.authority_revision != revision):
+                raise AuthFailure("invalid_credentials")
+
+    def terminate(self, browser_id):
+        """One atomic browser-local transition; retain its CSRF binding for fresh login."""
+        with self.lock:
+            identities = {}
+            for table in (self.sessions, self.recoveries):
+                for key, value in list(table.items()):
+                    if value.browser_id == browser_id:
+                        identities[value.identity.access_token] = value.identity
+                        del table[key]
+            for key, value in list(self.pending.items()):
+                if value.browser_id == browser_id:
+                    del self.pending[key]
+            browser = self.browsers.get(browser_id)
+            if browser:
+                browser.authority_revision += 1
+            return tuple(identities.values())
+
+    def remaining(self, session_id, browser_id):
+        """Non-touching lifetime snapshot, never a credential or renewal."""
+        with self.lock:
+            self._prune()
+            session = self.sessions.get(session_id)
+            grant = self.recoveries.get(session_id)
+            if session and session.browser_id == browser_id:
+                return max(0, min(session.touched + self.idle_seconds,
+                                  session.created + self.absolute_seconds) - self.clock())
+            if grant and grant.browser_id == browser_id:
+                return max(0, grant.expires - self.clock())
+            return None
 
     def consume(self, state, browser_id, purpose="signup"):
         with self.lock:
@@ -135,8 +175,7 @@ class Registry:
             if browser_id not in self.browsers:
                 raise AuthFailure("invalid_credentials")
             browser = self.browsers[browser_id]
-            if expected_revision is not None and browser.authority_revision != expected_revision:
-                raise AuthFailure("invalid_recovery")
+            self.check_revision(browser_id, expected_revision)
             old = self.sessions.get(old_id) or self.recoveries.get(old_id)
             replacing = old is not None and old.browser_id == browser_id
             if len(self.sessions) + len(self.recoveries) >= self.capacity and not replacing:
@@ -183,6 +222,7 @@ class Registry:
     def _finish_validation(self, session_id, session, future, adapter):
         try:
             with self.lock:
+                self._prune()
                 if self.sessions.get(session_id) is not session or self._expired(session, self.clock()):
                     self.sessions.pop(session_id, None)
                     future.set_result(None)
@@ -197,15 +237,17 @@ class Registry:
                     raise AuthFailure("invalid_credentials")
             except AuthFailure:
                 with self.lock:
-                    self.sessions.pop(session_id, None)
+                    if self.sessions.get(session_id) is session:
+                        self.terminate(session.browser_id)
                 raise
             with self.lock:
                 # Expiry/rotation during a bounded network request must still win.
+                self._prune()
                 if self.sessions.get(session_id) is not session or self._expired(session, self.clock()):
                     self.sessions.pop(session_id, None)
                     future.set_result(None)
                     return
-                session.identity, session.touched = identity, self.clock()
+                session.identity = identity
                 session.validation = None
                 future.set_result(identity)
         except BaseException as exc:
@@ -215,20 +257,24 @@ class Registry:
                 if session.validation is future:
                     session.validation = None
 
-    def _current_result(self, session_id, session, identity):
+    def _current_result(self, session_id, session, identity, touch):
         with self.lock:
             self._prune()
-            return identity if self.sessions.get(session_id) is session else None
+            if self.sessions.get(session_id) is not session:
+                return None
+            if touch and identity is not None:
+                session.touched = self.clock()
+            return identity
 
-    def authenticated(self, session_id, browser_id, adapter):
+    def authenticated(self, session_id, browser_id, adapter, *, touch=True):
         session, future, leader = self._begin_validation(session_id, browser_id)
         if session is None:
             return None
         if leader:
             self._finish_validation(session_id, session, future, adapter)
-        return self._current_result(session_id, session, future.result())
+        return self._current_result(session_id, session, future.result(), touch)
 
-    async def authenticated_async(self, session_id, browser_id, adapter):
+    async def authenticated_async(self, session_id, browser_id, adapter, *, touch=True):
         session, future, leader = self._begin_validation(session_id, browser_id)
         if session is None:
             return None
@@ -240,15 +286,56 @@ class Registry:
             task.add_done_callback(self._validation_tasks.discard)
         # Followers wait on the event loop, without retaining thread-pool workers.
         identity = await asyncio.shield(asyncio.wrap_future(future))
-        return self._current_result(session_id, session, identity)
+        return self._current_result(session_id, session, identity, touch)
 
     async def _own_validation(self, session_id, session, future, adapter):
         try:
             await run_in_threadpool(self._finish_validation, session_id, session, future, adapter)
         except BaseException:
             with self.lock:
-                self.sessions.pop(session_id, None)
+                if self.sessions.get(session_id) is session:
+                    self.terminate(session.browser_id)
                 if session.validation is future:
                     session.validation = None
                 if not future.done():
                     future.set_exception(AuthFailure())
+
+
+class Revocations:
+    """No queue or retry; cancellation cannot release a running worker's slot."""
+    def __init__(self, *, capacity=16, seconds=10, clock=time.monotonic):
+        self.capacity, self.seconds, self.clock = capacity, seconds, clock
+        self.active = 0
+        self.lock = RLock()
+        self.tasks = set()
+
+    async def after_response(self, adapter, identities):
+        from app.adapters.auth import OperationBudget
+        if not identities:
+            return
+        with self.lock:
+            if self.active >= self.capacity:
+                return
+            self.active += 1
+        budget = OperationBudget(self.seconds, self.clock)
+        task = asyncio.create_task(self._own(adapter, identities, budget))
+        self.tasks.add(task)
+        task.add_done_callback(self.tasks.discard)
+        await asyncio.shield(task)
+
+    async def _own(self, adapter, identities, budget):
+        try:
+            await run_in_threadpool(self._batch, adapter, identities, budget)
+        finally:
+            with self.lock:
+                self.active -= 1
+
+    @staticmethod
+    def _batch(adapter, identities, budget):
+        for identity in identities:
+            try:
+                budget.remaining()
+                adapter.revoke(identity, budget=budget)
+            except Exception:
+                # Provider details never escape into the response or logs.
+                pass

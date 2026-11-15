@@ -2,11 +2,14 @@
 
 import os
 import time
+from secrets import token_urlsafe
 from uuid import uuid5, NAMESPACE_DNS
 
 from app.adapters.auth import AuthFailure, Identity
 from app.config import Settings
 from app.main import create_app
+from app.services.sessions import Registry
+from fastapi import Request
 
 
 class BrowserAuth:
@@ -14,10 +17,16 @@ class BrowserAuth:
         self.links = []
         self.passwords = {}
         self.updates = []
+        self.revoked = set()
+
+    def revoke(self, identity, *, budget):
+        budget.remaining()
+        self.revoked.add(identity.access_token)
 
     def identity(self, email):
         return Identity(str(uuid5(NAMESPACE_DNS, email)), email,
-                        "BROWSER_PRIVATE_ACCESS", "BROWSER_PRIVATE_REFRESH", time.time() + 3600)
+                        "BROWSER_PRIVATE_ACCESS_" + token_urlsafe(16),
+                        "BROWSER_PRIVATE_REFRESH_" + token_urlsafe(16), time.time() + 3600)
 
     def signup(self, email, password, pending, redirect):
         pending.verifier = "v" * 43
@@ -36,6 +45,8 @@ class BrowserAuth:
         return self.identity(pending.email)
 
     def validate(self, identity):
+        if identity.access_token in self.revoked:
+            raise AuthFailure("invalid_credentials")
         return identity
 
     def refresh(self, identity):
@@ -74,3 +85,23 @@ def end_sessions():
 @app.get("/__test/updates")
 def updates():
     return adapter.updates
+
+
+@app.post("/__test/restart")
+def restart():
+    app.state.auth_registry = Registry()
+    return {"ok": True}
+
+
+@app.post("/__test/deadline")
+def short_deadline(request: Request):
+    registry = app.state.auth_registry
+    session_id = request.cookies.get("sb_session")
+    with registry.lock:
+        session = registry.sessions.get(session_id)
+        grant = registry.recoveries.get(session_id)
+        if session:
+            session.touched = registry.clock() - registry.idle_seconds + 1
+        if grant:
+            grant.expires = registry.clock() + 1
+    return {"ok": True}

@@ -411,6 +411,22 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Videre retning:** Studenten spurte «hva er neste steg». Neste planlagte utviklingsoppgave er Story 2.3, Logg ut og tydelig avslutning ved utløp/omstart. Det er en beskrivelse av backloggen, ikke godkjenning av en ny konkret implementeringsplan eller full akseptanse av alle gjenværende hosted-tester. Studentens egen refleksjon er ikke skrevet av KI.
 
+## 15.11.2026 – Utlogging konkretisert før implementering
+
+**Studentens styring:** «da fortsetter vi», etter forklaring av Story 2.3 som neste utviklingsoppgave. Tidligere positiv passordtest og de åpne hosted-portene ble beholdt som separate fakta.
+
+**Undersøkelse og KI-forslag:** BMAD build og én read-only-agent ble brukt til å konkretisere utlogging og øktavslutning. SDK-koden viste at vanlig sign_out som standard kan logge ut alle økter og kan fornye tokens før revokering. Planen krever eksplisitt local scope med allerede beholdt bruker-JWT, lokal avslutning/cookie-sletting før best-effort providerarbeid og en grense for samtidige bakgrunnskall. En annen sentral beslutning er at passive statuskontroller ikke skal telle som aktivitet og dermed holde en ubrukt økt i live.
+
+**Status:** [Planen for Story 2.3](../.docs/implementation-artifacts/spec-2-3-end-access-on-logout-expiry-and-restart.md) er draft og presentert til konkret godkjenning. Den legger opp til automatisk kontroll av samme konto i uavhengige nettlesere, utløp/omstart og sene svar. Ingen implementering eller nye testresultater er hevdet, og ingen faktisk bruker er logget ut av KI. Studentens egen refleksjon er ikke lagt til.
+
+**Etterfølgende beslutning:** Studenten valgte «Godkjenn og fortsett med implementering». Frosset intensjon ble låst, og spec/sprint ble satt under arbeid. Én implementeringsagent fikk hele spesifikasjonen i frisk kontekst; senere review og hovedagentens verifikasjon skal skje før ferdigmelding. Pågående implementering er ikke registrert som ferdige tester eller hosted-kontroll.
+
+**Kontroll og avslutning kl. 09:42:** Implementeringen legger til lokal utlogging, revisjonskontroll rundt sene innloggingsforsøk, ikke-forlengende status og synlig rydding ved utløp/omstart. Hovedagenten leste hele diffen og kjørte 239 beståtte tester/én uendret plattformskip, 177 auth-tilfeller, 28 auth-nettleserscenarier og 11 demo-scenarier. Godkjent blokk beholdt SHA-256 `0669a8ae87bcd57293b81ccc0cee6567e7795f60388dde9e08aa8946d82fc64e`. Tidlig kontroll oppdaget manglende revisjonsendring når utløp skjedde under validering, norske tekster med spørsmålstegn og for svake like-token-fixtures; implementeringsagenten rettet disse før hovedkontrollen.
+
+**Fortsatt uferdig:** To uavhengige reviewrapporter foreligger, men funnene er ikke ferdig triagert/rettet. De gjelder blant annet retry ved mislykket utlogging, sene svar/cookies, gamle fanesignaler og en manglende test av leverandøravvisning samtidig med callback. Tredje review ble avbrutt da studenten ba «jeg vil avslutte denne sesjonen, commit». Dette overstyrte videre arbeid; spec/sprint blir review, ikke done. Ingen hosted-utlogging, nye e-poster, passordmutasjoner eller utrulling ble utført. Studentens egen refleksjon er ikke skrevet av KI.
+
+**Parallelt arbeid:** Studenten ba om en oppgave til en annen sesjon. KI foreslo en kun-lesende kartlegging av Story 2.4/PDF-prototypen, uten filendringer, Git-operasjoner, serverstart eller Supabase-endringer for å unngå kollisjon i samme arbeidskopi.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

@@ -9,6 +9,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 from starlette.concurrency import run_in_threadpool
+from starlette.background import BackgroundTask
 
 from app.adapters.auth import AuthFailure
 
@@ -25,6 +26,10 @@ MESSAGES = {
     "invalid_recovery": "Gjenopprettingslenken er ugyldig eller utløpt. Be om en ny lenke og åpne den i samme nettleser.",
     "recovery_failed": "Passordendringen kunne ikke bekreftes. Passordet kan være endret. Prøv å logge inn, eller be om en ny lenke.",
 }
+
+
+class EmptyBody(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
 
 
 class Credentials(BaseModel):
@@ -113,11 +118,16 @@ async def status(request: Request):
         return error("request_rejected")
     try:
         browser_id, browser = registry.browser(request.cookies.get(BROWSER_COOKIE))
-        identity = await registry.authenticated_async(request.cookies.get(SESSION_COOKIE), browser_id, adapter)
+        identity = await registry.authenticated_async(request.cookies.get(SESSION_COOKIE), browser_id, adapter, touch=False)
         display = {"available": True, "authenticated": identity is not None, "csrfToken": browser.csrf,
                    "recoveryAvailable": registry.recovery_available(request.cookies.get(SESSION_COOKIE), browser_id)}
-        if identity:
+        remaining = registry.remaining(request.cookies.get(SESSION_COOKIE), browser_id)
+        if remaining is not None:
+            display["expiresInSeconds"] = min(43200, remaining)
+        if identity and remaining is not None:
             display["email"] = identity.email
+        elif identity:
+            display["authenticated"] = False
         response = JSONResponse(display)
         cookie(response, BROWSER_COOKIE, browser_id, settings)
         # Status never mutates sb_session. Even a completed denial response can
@@ -135,16 +145,17 @@ async def submit(request, action):
         return error("auth_unavailable")
     state = None
     try:
-        submitted = await credentials(request)
         browser_id = request.cookies[BROWSER_COOKIE]
+        revision = registry.retain_browser(browser_id)
+        submitted = await credentials(request)
         if action == "signup":
-            state, pending = registry.start_attempt(browser_id, submitted.email)
+            state, pending = registry.start_attempt(browser_id, submitted.email, expected_revision=revision)
             redirect = settings.app_origin + "/api/v1/auth/callback?" + urlencode({"state": state})
             await run_in_threadpool(adapter.signup, submitted.email, submitted.password, pending, redirect)
             return JSONResponse({"status": "check_email", "message": "Hvis kontoen kan opprettes, får du en e-post. Åpne bekreftelsen i nettleseren der du startet registreringen."})
-        registry.retain_browser(browser_id)
+        registry.check_revision(browser_id, revision)
         identity = await run_in_threadpool(adapter.login, submitted.email, submitted.password)
-        session_id = registry.rotate(request.cookies.get(SESSION_COOKIE), browser_id, identity)
+        session_id = registry.rotate(request.cookies.get(SESSION_COOKIE), browser_id, identity, expected_revision=revision)
         response = JSONResponse({"authenticated": True, "email": identity.email})
         cookie(response, SESSION_COOKIE, session_id, settings)
         return response
@@ -193,7 +204,7 @@ async def complete_callback(request, purpose):
             return response
         session_id = registry.rotate(request.cookies.get(SESSION_COOKIE), browser_id, identity,
                                      recovery=purpose == "recovery",
-                                     expected_revision=pending.authority_revision if purpose == "recovery" else None)
+                                     expected_revision=pending.authority_revision)
         response = RedirectResponse(f"/account?{outcome}=success", status_code=303)
         cookie(response, SESSION_COOKIE, session_id, settings)
         return response
@@ -210,9 +221,10 @@ async def recovery_request(request: Request):
         return error("auth_unavailable")
     state = None
     try:
-        submitted = await credentials(request, RecoveryEmail)
         browser_id = request.cookies[BROWSER_COOKIE]
-        state, pending = registry.start_attempt(browser_id, submitted.email, "recovery")
+        revision = registry.retain_browser(browser_id)
+        submitted = await credentials(request, RecoveryEmail)
+        state, pending = registry.start_attempt(browser_id, submitted.email, "recovery", expected_revision=revision)
         redirect = settings.app_origin + "/api/v1/auth/recovery/callback?" + urlencode({"state": state})
         await run_in_threadpool(adapter.request_recovery, submitted.email, pending, redirect)
         return JSONResponse({"status": "check_email", "message": "Hvis kontoen finnes, får du en e-post. Åpne lenken i samme nettleser innen 10 minutter."})
@@ -239,3 +251,22 @@ async def recovery_password(request: Request):
         return JSONResponse({"status": "password_updated", "authenticated": False, "recoveryAvailable": False})
     except AuthFailure as exc:
         return error("recovery_failed" if admitted else exc.code)
+
+
+@router.post("/logout")
+async def logout(request: Request):
+    settings, registry, adapter = context(request)
+    if not protected(request, settings, registry):
+        return error("request_rejected")
+    if not settings.available:
+        return error("auth_unavailable")
+    try:
+        await credentials(request, EmptyBody)
+        identities = registry.terminate(request.cookies[BROWSER_COOKIE])
+        response = JSONResponse({"authenticated": False, "recoveryAvailable": False})
+        clear_session(response, settings)
+        # Starlette sends response headers and body before starting this work.
+        response.background = BackgroundTask(request.app.state.auth_revocations.after_response, adapter, identities)
+        return response
+    except AuthFailure as exc:
+        return error(exc.code)

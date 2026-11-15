@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 15-11-2026 00:17
+last_updated: 15-11-2026 09:42
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -46,7 +46,10 @@ development_status:
   # Recovery implementation/review verified offline (213 passed/1 skipped; 23 auth + 11 demo browser scenarios).
   # 15 Nov: real recovery email/password change passed by student report; request/callback/update and later login successes observed.
   # Negative hosted recovery cases/template inspection and Story 2.1 email gates remain open.
-  2-3-end-access-on-logout-expiry-and-restart: backlog
+  2-3-end-access-on-logout-expiry-and-restart: review
+  # Session endings verified offline: 239 passed/1 skipped; 28 auth + 11 demo browser scenarios.
+  # User requested commit/session end: review reports need triage/fixes; edge-case review interrupted.
+  # Hosted logout/expiry/restart/outage gates remain unexecuted; build not complete.
   2-4-validate-and-extract-the-active-source: backlog
   2-5-generate-all-learning-parts-from-the-source: backlog
   2-6-evaluate-generated-content-against-known-sources: backlog

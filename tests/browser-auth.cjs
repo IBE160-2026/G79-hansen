@@ -602,6 +602,125 @@ async function main() {
       await page.unroute('**/api/v1/auth/login');
     });
 
+    await check('normal logout clears sibling tabs and keeps another browser on the same account signed in', async () => {
+      const left = await browser.newContext(), right = await browser.newContext();
+      try {
+        const a = await left.newPage(), b = await right.newPage();
+        for (const current of [a, b]) {
+          await current.goto(`${baseURL}/account`); await ready(current);
+          await fill(current, 'login', 'same-account@example.test'); await submit(current, 'login');
+          await current.locator('#account-signed-in').waitFor({state: 'visible'});
+          await current.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+        }
+        const sibling = await left.newPage();
+        await sibling.goto(`${baseURL}/account`);
+        await sibling.locator('#account-signed-in').waitFor({state: 'visible'});
+        await a.locator('#account-signed-in [data-account-logout]').focus();
+        await a.keyboard.press('Enter');
+        await ready(a); await ready(sibling);
+        assert.equal(await sibling.locator('#account-email').textContent(), '');
+        assert.match(await sibling.locator('#account-status').innerText(), /Logg inn/);
+        assert.equal((await (await right.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, true);
+        assert.equal((await (await left.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, false);
+        assert.equal((await left.cookies()).some(cookie => cookie.name === 'sb_session'), false);
+        await fill(a, 'login', 'same-account@example.test'); await submit(a, 'login');
+        await a.locator('#account-signed-in').waitFor({state: 'visible'});
+      } finally { await left.close(); await right.close(); }
+    });
+
+    await check('focused page clears normal and recovery display at the observed deadline without activity', async () => {
+      for (const restricted of [false, true]) {
+        const context = await browser.newContext();
+        try {
+          const current = await context.newPage();
+          if (restricted) await openRecovery(current, 'expiry@example.test');
+          else {
+            await current.goto(`${baseURL}/account`); await ready(current);
+            await fill(current, 'login', 'expiry@example.test'); await submit(current, 'login');
+            await current.locator('#account-signed-in').waitFor({state: 'visible'});
+          }
+          await current.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+          await context.request.post(`${baseURL}/__test/deadline`);
+          const observed = current.waitForResponse(response => response.url().endsWith('/api/v1/auth/status'));
+          await current.evaluate(() => window.dispatchEvent(new Event('focus')));
+          await observed;
+          await ready(current);
+          assert.equal(await current.locator('#account-email').textContent(), '');
+          assert.equal(await current.locator('#account-recovery').isVisible(), false);
+          assert.equal((await (await context.request.get(`${baseURL}/api/v1/auth/status`)).json()).authenticated, false);
+        } finally { await context.close(); }
+      }
+    });
+
+    await check('visible passive checks observe restart and permit a fresh login with preserved old cookies', async () => {
+      const context = await browser.newContext();
+      try {
+        const current = await context.newPage();
+        await current.clock.install();
+        await current.goto(`${baseURL}/account`); await ready(current);
+        await fill(current, 'login', 'restart@example.test'); await submit(current, 'login');
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+        await current.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+        await context.request.post(`${baseURL}/__test/restart`);
+        const checked = current.waitForResponse(response => response.url().endsWith('/api/v1/auth/status'));
+        await current.clock.fastForward(30001);
+        await checked; await ready(current);
+        assert.equal(await current.locator('#account-email').textContent(), '');
+        await fill(current, 'login', 'restart@example.test'); await submit(current, 'login');
+        await current.locator('#account-signed-in').waitFor({state: 'visible'});
+      } finally { await context.close(); }
+    });
+
+    await check('a tab termination signal discards a login reply that ignores cancellation', async () => {
+      const context = await browser.newContext();
+      try {
+        const a = await context.newPage();
+        await a.goto(`${baseURL}/account`); await ready(a);
+        await fill(a, 'login', 'late-tab@example.test'); await submit(a, 'login');
+        await a.locator('#account-signed-in').waitFor({state: 'visible'});
+        await a.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+        const sibling = await context.newPage();
+        await sibling.goto(`${baseURL}/account`);
+        await sibling.locator('#account-signed-in').waitFor({state: 'visible'});
+        await sibling.waitForFunction(() => !document.querySelector('#login-form button').disabled);
+        await sibling.locator('#account-show-forms').click();
+        await sibling.evaluate(() => {
+          const original = window.fetch.bind(window);
+          window.fetch = async (...args) => {
+            const response = await original(...args);
+            if (args[0].endsWith('/login')) {
+              window.__loginReady = true;
+              await new Promise(resolve => { window.__releaseLogin = resolve; });
+            }
+            return response;
+          };
+        });
+        await fill(sibling, 'login', 'late-tab@example.test'); await submit(sibling, 'login');
+        await sibling.waitForFunction(() => window.__loginReady);
+        await a.locator('#account-signed-in [data-account-logout]').click(); await ready(a);
+        await sibling.waitForFunction(() => document.querySelector('#account-status').textContent.includes('avsluttet'));
+        await sibling.evaluate(() => window.__releaseLogin());
+        await sibling.waitForTimeout(150);
+        assert.equal(await sibling.locator('#account-signed-in').isVisible(), false);
+        assert.equal(await sibling.locator('#account-email').textContent(), '');
+        const stored = await sibling.evaluate(() => ({local: {...localStorage}, session: {...sessionStorage}}));
+        assert.deepEqual(stored, {local: {}, session: {}});
+      } finally { await context.close(); }
+    });
+
+    await check('restricted logout is keyboard operable and clears password drafts at narrow reflow', async () => {
+      const {context, current} = await recoveryPage('logout-recovery@example.test');
+      try {
+        await current.setViewportSize({width: 320, height: 800});
+        await current.locator('#recovery-password').fill('UNSUBMITTED_PRIVATE_DRAFT');
+        await current.locator('#account-recovery [data-account-logout]').focus();
+        await current.keyboard.press('Enter'); await ready(current);
+        assert.equal(await current.locator('#recovery-password').inputValue(), '');
+        assert.equal(await current.locator('#account-recovery').isVisible(), false);
+        assert(await current.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      } finally { await context.close(); }
+    });
+
     await check('keyboard focus, narrow screens and 200 percent reflow remain usable', async () => {
       await page.locator('#login-email').focus();
       await page.keyboard.press('Tab');

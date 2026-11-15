@@ -105,6 +105,28 @@ og krypterte dokumenter avvises. Dette er lokal gjennomførbarhetstesting;
 applikasjonsintegrasjon tilhører Story 2.4. Målplattformen må verifiseres før hosting.
 Story 1.1 venter fortsatt på studentens gjennomgang.
 
+## Avslutning av tilgang (Story 2.3)
+
+Story 2.3 adds browser-local **Logg ut** for normal and password-recovery access.
+`POST /api/v1/auth/logout` requires the existing Origin/CSRF protection and an
+empty JSON object. Local sessions, recovery grants and pending attempts end
+atomically; the response deletes the session cookie before best-effort provider
+revocation with explicit `local` scope. Provider failure never restores local
+access or ends a different browser's session, including the same account.
+Revocation admits at most 16 batches without a queue or retry, with one shared
+ten-second cooperative deadline per batch. User JWTs are sent directly to the
+SDK logout endpoint; logout never refreshes tokens or uses a privileged key.
+
+Status observation does not renew the 30-minute idle / 12-hour absolute maxima.
+Normal and restricted status include bounded `expiresInSeconds`; the account
+page clears its display at that deadline and checks status every 30 seconds
+while visible, on focus and on page restoration. Restart requires fresh login.
+Sibling tabs receive a secret-free termination signal; sequence guards discard
+late replies. Opaque HttpOnly cookies remain the only browser credentials.
+No private document endpoints or saved-data durability are introduced here;
+durability belongs to Story 3.2. Hosted logout/expiry/restart checks remain
+separate manual acceptance gates; synthetic tests do not establish them.
+
 ## Medlemmer
 
 - Fredrik Fladmark Hansen

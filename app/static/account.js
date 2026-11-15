@@ -8,6 +8,33 @@
   const retry = document.getElementById('account-retry');
   const recovery = document.getElementById('account-recovery');
   let csrf = null, busy = false, sequence = 0, active = null, formsRequested = false;
+  let deadlineTimer = null, hasAuthority = false;
+  const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('studybuddy-session') : null;
+  const endedMessage = 'Tilgangen er avsluttet. Logg inn på nytt.';
+  function endAccess(message = endedMessage, {broadcast = false} = {}) {
+    ++sequence;
+    active?.abort();
+    clearTimeout(deadlineTimer);
+    hasAuthority = false;
+    confirmation = null;
+    formsRequested = false;
+    clearPasswords();
+    clearDisplay();
+    setBusy(false);
+    forms.hidden = !csrf;
+    error.hidden = true;
+    retry.hidden = !!csrf;
+    status.textContent = message;
+    if (broadcast) channel?.postMessage('ended');
+  }
+  function armLifetime(value) {
+    const seconds = value.expiresInSeconds;
+    if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0 || seconds > 43200) throw new AccountError(unavailable);
+    clearTimeout(deadlineTimer);
+    hasAuthority = true;
+    deadlineTimer = setTimeout(() => endAccess(endedMessage, {broadcast: true}), seconds * 1000);
+  }
+  channel?.addEventListener('message', event => { if (event.data === 'ended') endAccess(); });
   const initial = new URL(location.href);
   const outcomeKind = initial.searchParams.has('recovery') ? 'recovery' : 'confirmation';
   const outcome = initial.searchParams.get(outcomeKind);
@@ -88,6 +115,7 @@
     active?.abort();
     const id = ++sequence;
     const hadRecovery = !recovery.hidden;
+    const hadAuthority = hasAuthority;
     const preserveDraft = background && (!forms.hidden || hadRecovery);
     const focused = preserveDraft ? document.activeElement : null;
     if (!preserveDraft) clearPasswords();
@@ -102,6 +130,8 @@
       const data = await request('status', {}, id);
       if (!data) return;
       if (data.available !== true) {
+        endAccess(unavailable, {broadcast: hadAuthority});
+        csrf = null;
         forms.hidden = true;
         status.textContent = unavailable;
         retry.hidden = false;
@@ -109,6 +139,15 @@
       }
       if (typeof data.csrfToken !== 'string' || !data.csrfToken || typeof data.authenticated !== 'boolean') throw new AccountError(unavailable);
       csrf = data.csrfToken;
+      if (data.authenticated || data.recoveryAvailable === true) armLifetime(data);
+      else {
+        clearTimeout(deadlineTimer);
+        hasAuthority = false;
+        if (hadAuthority) {
+          formsRequested = false;
+          channel?.postMessage('ended');
+        }
+      }
       if (formsRequested) {
         forms.hidden = false;
         status.textContent = data.authenticated ? 'Du er fortsatt logget inn. Du kan logge inn på nytt eller gjenopprette passord.' : 'Velg innlogging eller be om en ny gjenopprettingslenke.';
@@ -118,9 +157,9 @@
         recovery.hidden = false;
         status.textContent = 'Du kan endre passordet. Du er ikke logget inn.';
       } else {
-        if (hadRecovery) clearPasswords();
+        if (hadRecovery || hadAuthority) clearPasswords();
         forms.hidden = false;
-        status.textContent = 'Du er ikke logget inn.';
+        status.textContent = hadAuthority ? endedMessage : 'Du er ikke logget inn.';
       }
       const pendingConfirmation = confirmation;
       confirmation = null;
@@ -129,10 +168,13 @@
       else if (pendingConfirmation === 'success' && !(outcomeKind === 'recovery' ? data.recoveryAvailable : data.authenticated)) fail(linkError);
     } catch (failure) {
       if (id !== sequence) return;
+      endAccess(endedMessage, {broadcast: hadAuthority});
+      csrf = null;
       forms.hidden = true;
       status.textContent = '';
       fail(failure.name === 'AbortError' ? 'Forespørselen tok for lang tid. Prøv igjen.' : (failure instanceof AccountError ? failure.message : unavailable));
       retry.hidden = false;
+      setBusy(false);
     } finally {
       if (id === sequence) {
         setBusy(false);
@@ -192,9 +234,12 @@
     try {
       const data = await request('recovery/password', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrf}, body}, id);
       if (!data) return;
+      clearTimeout(deadlineTimer);
+      hasAuthority = false;
       clearDisplay();
       forms.hidden = false;
       confirmation = null;
+      channel?.postMessage('ended');
       if (data.status !== 'password_updated' || data.authenticated !== false) throw new AccountError(recoveryFailed);
       status.textContent = 'Passordet er endret. Logg inn med det nye passordet.';
       document.getElementById('login-email').focus();
@@ -253,6 +298,7 @@
         if (action === 'login') {
           confirmation = null;
           showIdentity(data);
+          await bootstrap({background: true});
         }
         else {
           if (data.status !== 'check_email') throw new AccountError(unavailable);
@@ -268,12 +314,30 @@
       }
     });
   }
+  for (const button of document.querySelectorAll('[data-account-logout]')) button.addEventListener('click', async () => {
+    if (!csrf) return;
+    const token = csrf;
+    endAccess('Logger ut …');
+    const id = sequence;
+    setBusy(true);
+    try {
+      const data = await request('logout', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': token}, body: '{}'}, id);
+      if (!data) return;
+      if (data.authenticated !== false || data.recoveryAvailable !== false) throw new AccountError(unavailable);
+      endAccess('Du er logget ut. Logg inn igjen når du vil.', {broadcast: true});
+      document.getElementById('login-email').focus();
+    } catch (failure) {
+      if (id !== sequence) return;
+      endAccess();
+      fail('Utlogging kunne ikke bekreftes. Prøv igjen for å kontrollere tilgangen.');
+      retry.hidden = false;
+    } finally {
+      if (id === sequence) setBusy(false);
+    }
+  });
   retry.addEventListener('click', () => bootstrap());
   window.addEventListener('pagehide', () => {
-    ++sequence;
-    active?.abort();
-    clearPasswords();
-    clearDisplay();
+    endAccess();
     csrf = null;
   });
   window.addEventListener('pageshow', event => { if (event.persisted) bootstrap(); });
@@ -283,5 +347,7 @@
     bootstrap();
   });
   window.addEventListener('focus', () => { if (!busy) bootstrap({background: true}); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !busy) bootstrap({background: true}); });
+  setInterval(() => { if (!document.hidden && !busy) bootstrap({background: true}); }, 30000);
   bootstrap();
 })();

@@ -19,7 +19,7 @@ import pytest
 from app.adapters.auth import AuthFailure, BudgetNetworkStream, Identity, OperationBudget, SupabaseAuth
 from app.config import Settings
 from app.main import RedactAuthQuery, create_app
-from app.services.sessions import Pending, Registry
+from app.services.sessions import Pending, Registry, Revocations
 
 ORIGIN = "http://127.0.0.1:8000"
 SETTINGS = Settings(True, ORIGIN, "https://example.supabase.co", "sb_publishable_test", True)
@@ -36,6 +36,12 @@ class FakeAuth:
         self.calls = []
         self.redirects = []
         self.fail = False
+
+    def revoke(self, identity, *, budget):
+        budget.remaining()
+        self.calls.append("revoke")
+        if self.fail:
+            raise AuthFailure()
 
     def identity(self, email=EMAIL):
         return Identity(OWNER if email == EMAIL else OTHER, email, "PRIVATE_ACCESS", "PRIVATE_REFRESH", time.time() + 3600)
@@ -1248,6 +1254,309 @@ def test_failed_recovery_requests_release_pending_slots_and_provider_recovery_al
     assert fake.calls.count("request_recovery") == 5
     fake.fail = False
     assert post(client, "recovery/request", {"email": EMAIL}).status_code == 200
+
     assert len(registry.pending) == 1
     assert callback(client, fake.redirects[-1]).headers["location"] == "/account?recovery=success"
     assert not registry.pending and len(registry.recoveries) == 1
+
+
+@pytest.mark.parametrize("restricted", [False, True])
+def test_logout_ends_all_browser_authority_and_attempts_but_retains_fresh_login(restricted):
+    client, fake, registry = setup()
+    assert post(client, "login").status_code == 200
+    if restricted:
+        recovery_grant(client, fake)
+    assert post(client).status_code == 200
+    old = client.cookies["sb_session"]
+    binding = client.cookies["sb_browser"]
+    protection = headers(client)
+    revision = registry.browsers[binding].authority_revision
+    response = client.post("/api/v1/auth/logout", json={}, headers=protection)
+    assert response.json() == {"authenticated": False, "recoveryAvailable": False}
+    assert 'sb_session=""' in response.headers["set-cookie"]
+    assert "Max-Age=0" in response.headers["set-cookie"]
+    assert "HttpOnly" in response.headers["set-cookie"]
+    assert response.headers["cache-control"] == "no-store"
+    assert not registry.sessions and not registry.recoveries and not registry.pending
+    assert registry.browsers[binding].authority_revision > revision
+    assert client.cookies["sb_browser"] == binding
+    assert fake.calls.count("revoke") == 1
+    client.cookies.set("sb_session", old)
+    assert client.get("/api/v1/auth/status").json()["authenticated"] is False
+    assert client.post("/api/v1/auth/logout", json={}, headers=protection).status_code == 200
+    assert post(client, "login").status_code == 200
+
+
+@pytest.mark.parametrize("case", ["origin", "csrf", "extra", "array", "null", "bytes", "content", "unavailable"])
+def test_logout_protection_empty_json_and_configuration_precede_provider(case):
+    client, fake, registry = setup()
+    post(client, "login")
+    protection = headers(client)
+    session = client.cookies["sb_session"]
+    body = b"{}"
+    protection["Content-Type"] = "application/json"
+    if case == "origin":
+        protection["Origin"] = "https://foreign.test"
+    elif case == "csrf":
+        protection["X-CSRF-Token"] = "wrong"
+    elif case == "content":
+        protection["Content-Type"] = "text/plain"
+    elif case == "unavailable":
+        client.app.state.settings = replace(SETTINGS, auth_enabled=False)
+    else:
+        body = {"extra": b'{"scope":"global"}', "array": b"[]", "null": b"null", "bytes": b" " * 8193}.get(case, body)
+    response = client.post("/api/v1/auth/logout", content=body, headers=protection)
+    assert response.status_code == (403 if case in ("origin", "csrf") else 503 if case == "unavailable" else 422)
+    assert session in registry.sessions
+    assert "revoke" not in fake.calls
+
+
+def test_local_logout_provider_outage_preserves_other_browser_even_for_same_account():
+    client, fake, registry = setup()
+    second = TestClient(client.app, base_url=ORIGIN)
+    installed, revoked = [], []
+    def independent_login(email, password):
+        identity = replace(fake.identity(email), access_token=f"PRIVATE_ACCESS_{len(installed)}",
+                           refresh_token=f"PRIVATE_REFRESH_{len(installed)}")
+        installed.append(identity)
+        return identity
+    def revoke(identity, *, budget):
+        revoked.append(identity.access_token)
+        raise AuthFailure()
+    fake.login, fake.revoke = independent_login, revoke
+    for current in (client, second):
+        assert post(current, "login").status_code == 200
+    second_id = second.cookies["sb_session"]
+    protection = headers(client)
+    fake.fail = True
+    assert client.post("/api/v1/auth/logout", json={}, headers=protection).status_code == 200
+    assert second_id in registry.sessions
+    assert not client.get("/api/v1/auth/status").json()["authenticated"]
+    fake.fail = False
+    assert second.get("/api/v1/auth/status").json()["email"] == EMAIL
+    assert installed[0].owner_id == installed[1].owner_id
+    assert installed[0].access_token != installed[1].access_token
+    assert revoked == [installed[0].access_token]
+    assert registry.sessions[second_id].identity.access_token == installed[1].access_token
+
+
+def test_passive_status_cannot_renew_idle_but_authenticated_work_can():
+    now = [1000.0]
+    registry = Registry(clock=lambda: now[0], idle_seconds=30, absolute_seconds=120)
+    client, fake, _ = setup(registry=registry)
+    post(client, "login")
+    session, browser = client.cookies["sb_session"], client.cookies["sb_browser"]
+    assert client.get("/api/v1/auth/status").json()["expiresInSeconds"] == 30
+    now[0] += 20
+    assert client.get("/api/v1/auth/status").json()["expiresInSeconds"] == 10
+    assert registry.authenticated(session, browser, fake)
+    assert client.get("/api/v1/auth/status").json()["expiresInSeconds"] == 30
+    now[0] += 30
+    assert not client.get("/api/v1/auth/status").json()["authenticated"]
+    assert "expiresInSeconds" not in client.get("/api/v1/auth/status").json()
+
+
+def test_default_maximum_lifetimes_absolute_expiry_and_recovery_snapshot(monkeypatch):
+    for key in ("AUTH_IDLE_SECONDS", "AUTH_ABSOLUTE_SECONDS"):
+        monkeypatch.delenv(key, raising=False)
+    assert Settings.from_env().idle_seconds == Registry().idle_seconds == 1800
+    assert Settings.from_env().absolute_seconds == Registry().absolute_seconds == 43200
+    monkeypatch.setenv("AUTH_IDLE_SECONDS", "1801")
+    monkeypatch.setenv("AUTH_ABSOLUTE_SECONDS", "43201")
+    assert Settings.from_env().idle_seconds == 1800
+    assert Settings.from_env().absolute_seconds == 43200
+    now = [0]
+    registry = Registry(clock=lambda: now[0], idle_seconds=100, absolute_seconds=120)
+    fake = FakeAuth()
+    binding, _ = registry.browser(None)
+    session = registry.rotate(None, binding, fake.identity())
+    for advance in (80, 110):
+        now[0] = advance
+        assert registry.authenticated(session, binding, fake)
+    assert registry.remaining(session, binding) == 10
+    now[0] = 120
+    assert registry.authenticated(session, binding, fake) is None
+    binding, _ = registry.browser(None)
+    grant = registry.rotate(None, binding, fake.identity(), recovery=True)
+    assert registry.remaining(grant, binding) == 600
+
+
+@pytest.mark.parametrize("flow", ["login", "signup", "recovery/request", "signup_callback", "recovery_callback", "validation"])
+def test_logout_fences_inflight_authority_after_provider_await(flow):
+    async def scenario():
+        fake = FakeAuth()
+        app = create_app(SETTINGS, auth_adapter=fake)
+        entered, release = Event(), Event()
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]}
+            binding = client.cookies["sb_browser"]
+            if flow.endswith("callback"):
+                purpose = "signup" if flow == "signup_callback" else "recovery"
+                await client.post("/api/v1/auth/" + ("signup" if purpose == "signup" else "recovery/request"), json=PAYLOAD if purpose == "signup" else {"email": EMAIL}, headers=protection)
+                original = fake.exchange
+                def delayed(*args):
+                    entered.set()
+                    assert release.wait(3)
+                    return original(*args)
+                fake.exchange = delayed
+                url = fake.redirects[-1] + "&code=PRIVATE_CODE"
+                pending = asyncio.create_task(client.get(url, follow_redirects=False))
+            elif flow == "validation":
+                await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)
+                original = fake.validate
+                def delayed(*args):
+                    entered.set()
+                    assert release.wait(3)
+                    return original(*args)
+                fake.validate = delayed
+                pending = asyncio.create_task(client.get("/api/v1/auth/status"))
+            else:
+                method = {"login": "login", "signup": "signup", "recovery/request": "request_recovery"}[flow]
+                original = getattr(fake, method)
+                def delayed(*args):
+                    entered.set()
+                    assert release.wait(3)
+                    return original(*args)
+                setattr(fake, method, delayed)
+                pending = asyncio.create_task(client.post("/api/v1/auth/" + flow, json={"email": EMAIL} if flow == "recovery/request" else PAYLOAD, headers=protection))
+            assert await asyncio.to_thread(entered.wait, 2)
+            assert (await client.post("/api/v1/auth/logout", json={}, headers=protection)).status_code == 200
+            release.set()
+            response = await pending
+            assert "sb_session=" not in response.headers.get("set-cookie", "")
+            registry = app.state.auth_registry
+            assert not registry.sessions and not registry.recoveries and not registry.pending
+            assert binding in registry.browsers
+            fake.login = FakeAuth().login
+            assert (await client.post("/api/v1/auth/login", json=PAYLOAD, headers=protection)).status_code == 200
+    asyncio.run(scenario())
+
+
+def test_exact_sdk_revocation_user_jwt_local_scope_no_session_or_refresh():
+    requests = []
+    def transport(request):
+        requests.append(request)
+        assert request.method == "POST"
+        assert request.url.path == "/auth/v1/logout"
+        assert dict(request.url.params) == {"scope": "local"}
+        assert request.headers["authorization"] == "Bearer PRIVATE_ACCESS"
+        assert request.headers["apikey"] == SETTINGS.supabase_key
+        return httpx.Response(204)
+    adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
+    adapter.revoke(replace(FakeAuth().identity(), expires_at=0), budget=OperationBudget(10, time.monotonic))
+    assert len(requests) == 1
+
+
+def test_revocation_admission_cancellation_and_shared_batch_deadline(monkeypatch):
+    async def scenario():
+        now = [0]
+        manager = Revocations(clock=lambda: now[0])
+        admitted, release = asyncio.Event(), asyncio.Event()
+        entered = [0]
+        async def blocked(action, *args):
+            entered[0] += 1
+            if entered[0] == 16:
+                admitted.set()
+            await release.wait()
+            return action(*args)
+        monkeypatch.setattr("app.services.sessions.run_in_threadpool", blocked)
+        fake = FakeAuth()
+        waiters = [asyncio.create_task(manager.after_response(fake, (fake.identity(),))) for _ in range(16)]
+        await asyncio.wait_for(admitted.wait(), 2)
+        assert manager.active == 16
+        await manager.after_response(fake, (fake.identity(),))
+        assert entered[0] == 16
+        waiters[0].cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await waiters[0]
+        assert manager.active == 16
+        now[0] = 11  # Time spent awaiting worker admission consumes the same budget.
+        release.set()
+        await asyncio.gather(*waiters[1:])
+        await asyncio.gather(*manager.tasks)
+        assert manager.active == 0 and "revoke" not in fake.calls
+        now[0] = 20
+        def revoke(identity, *, budget):
+            fake.calls.append("revoke")
+            now[0] += 6
+            budget.remaining()
+        fake.revoke = revoke
+        await manager.after_response(fake, (fake.identity(),) * 4)
+        assert fake.calls == ["revoke", "revoke"]
+    asyncio.run(scenario())
+
+
+def test_logout_response_is_sent_before_revocation_starts_and_old_cookie_is_denied():
+    async def scenario():
+        client, fake, registry = setup()
+        post(client, "login")
+        protection = headers(client)
+        binding, old = client.cookies["sb_browser"], client.cookies["sb_session"]
+        sent = []
+        def revoke(identity, *, budget):
+            assert any(message["type"] == "http.response.body" and not message.get("more_body") for message in sent)
+            start = next(message for message in sent if message["type"] == "http.response.start")
+            assert any(key == b"set-cookie" and b"Max-Age=0" in value for key, value in start["headers"])
+            assert registry.authenticated(old, binding, fake) is None
+            fake.calls.append("revoke")
+            raise AuthFailure()
+        fake.revoke = revoke
+        body = json.dumps({}).encode()
+        delivered = False
+        async def receive():
+            nonlocal delivered
+            if not delivered:
+                delivered = True
+                return {"type": "http.request", "body": body, "more_body": False}
+            await asyncio.Future()
+        async def send(message):
+            sent.append(message)
+        scope = {"type": "http", "asgi": {"version": "3.0", "spec_version": "2.4"}, "http_version": "1.1", "method": "POST", "scheme": "http", "path": "/api/v1/auth/logout", "raw_path": b"/api/v1/auth/logout", "query_string": b"", "root_path": "", "server": ("127.0.0.1", 8000), "client": ("127.0.0.1", 1), "headers": [(b"host", b"127.0.0.1:8000"), (b"origin", ORIGIN.encode()), (b"x-csrf-token", protection["X-CSRF-Token"].encode()), (b"content-type", b"application/json"), (b"cookie", f"sb_browser={binding}; sb_session={old}".encode())]}
+        await client.app(scope, receive, send)
+        assert fake.calls.count("revoke") == 1
+    asyncio.run(scenario())
+
+
+def test_expiry_during_validation_fences_authentication_that_started_before_deadline():
+    now = [1000]
+    registry = Registry(clock=lambda: now[0], idle_seconds=30)
+    fake = FakeAuth()
+    binding, _ = registry.browser(None)
+    session = registry.rotate(None, binding, fake.identity())
+    revision = registry.retain_browser(binding)
+    state, pending = registry.start_attempt(binding, EMAIL)
+    pending.verifier = "v" * 43
+    pending = registry.consume(state, binding)
+    def validate(identity):
+        now[0] += 31
+        return identity
+    fake.validate = validate
+    assert registry.authenticated(session, binding, fake, touch=False) is None
+    assert registry.browsers[binding].authority_revision > revision
+    for obsolete in (revision, pending.authority_revision):
+        with pytest.raises(AuthFailure):
+            registry.rotate(None, binding, fake.identity(), expected_revision=obsolete)
+
+
+@pytest.mark.parametrize("flow", ["login", "signup", "recovery/request"])
+def test_logout_during_body_stream_prevents_subsequent_provider_work(flow):
+    async def scenario():
+        fake = FakeAuth()
+        app = create_app(SETTINGS, auth_adapter=fake)
+        entered, release = asyncio.Event(), asyncio.Event()
+        async def delayed():
+            entered.set()
+            await release.wait()
+            yield json.dumps({"email": EMAIL} if flow == "recovery/request" else PAYLOAD).encode()
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
+            boot = await client.get("/api/v1/auth/status")
+            protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"], "Content-Type": "application/json"}
+            request = asyncio.create_task(client.post("/api/v1/auth/" + flow, content=delayed(), headers=protection))
+            await asyncio.wait_for(entered.wait(), 2)
+            assert (await client.post("/api/v1/auth/logout", json={}, headers=protection)).status_code == 200
+            release.set()
+            assert (await request).status_code in (401, 503)
+            assert not fake.calls
+            assert not app.state.auth_registry.pending and not app.state.auth_registry.sessions
+    asyncio.run(scenario())

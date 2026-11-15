@@ -10,7 +10,7 @@ from app.api.auth import router as auth_router
 from app.api.demo import router
 from app.adapters.auth import SupabaseAuth
 from app.config import Settings
-from app.services.sessions import Registry
+from app.services.sessions import Registry, Revocations
 
 PUBLIC = Path(__file__).parent / 'static'
 
@@ -35,6 +35,7 @@ def create_app(settings=None, *, auth_adapter=None, registry=None):
     application.state.settings = settings
     application.state.auth_registry = registry if registry is not None else Registry(
         idle_seconds=settings.idle_seconds, absolute_seconds=settings.absolute_seconds)
+    application.state.auth_revocations = Revocations()
     application.state.auth_adapter = auth_adapter if auth_adapter is not None else SupabaseAuth(settings)
     application.include_router(router)
     application.include_router(auth_router)

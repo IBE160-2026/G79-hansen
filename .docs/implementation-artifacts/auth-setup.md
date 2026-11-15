@@ -654,3 +654,63 @@ isolation during a real change and other negative hosted cases remain unexecuted
 Keep Story 2.2 at review and Story 2.1's remaining gates open; do not repeat the
 positive password-change test merely because these negative cases remain open.
 No new automated suite was run for this observation.
+
+### Story 2.3 session termination implementation — 2026-11-15
+
+The local contract now includes protected `POST /api/v1/auth/logout` with an
+empty JSON object. Before any provider work, one registry transition ends every
+session, recovery grant and pending confirmation/recovery attempt belonging to
+the initiating browser. The response deletes `sb_session`, retains the browser
+binding for fresh login, and then attempts provider revocation using the user's
+JWT and explicit `local` scope. It does not install an SDK session, refresh a
+token or use a privileged key. Other browsers remain independent even when they
+use the same account. Unknown or spent session cookies are idempotent.
+
+After-response revocation has 16 active slots, no queue or retries, and one
+shared ten-second cooperative operation deadline per admitted batch, including
+worker-admission time. Saturation or provider failure never restores authority.
+In-flight validation is still coalesced and survives waiter cancellation;
+browser revisions fence installations across logout, expiry and provider denial.
+An admitted password update may still finish remotely; its late response cannot
+restore local authority. Access JWTs may remain valid at the provider until JWT
+expiry, so this application's local registry remains the denial boundary.
+
+Status validation is non-touching: it cannot keep idle authority alive. Normal
+and recovery status provide bounded remaining lifetime in `expiresInSeconds`.
+The account page uses a clearing timer, visible 30-second passive observations,
+focus/pageshow checks, and secret-free BroadcastChannel termination signals.
+Logout, expiry, restart and failed observation clear identity/recovery display;
+sequence guards discard stale replies. No browser credential storage is added.
+
+Offline evidence and hosted gates are recorded separately. The tests use only
+synthetic identities, transport responses and test-only browser fixtures; they
+perform no genuine account, email or password operations. No configuration,
+hosting, billing, Free plan or Paris-region change is part of this work.
+
+Unexecuted hosted Story 2.3 gates: ordinary and restricted logout, the same
+account in two independent browsers, actual idle/absolute expiry, restart with
+preserved cookies/open page, and provider-outage behavior. Existing Story 2.1
+and Story 2.2 open hosted gates remain open. Private document endpoints and
+saved-data durability are not claimed; persistence is Story 3.2.
+
+Executed offline verification for Story 2.3: `uv run --group pdf-experiment
+pytest` completed with **239 passed, 1 skipped** (the optional PDF integration
+skip remains unchanged); `node tests/browser-auth.cjs` completed **28 scenarios**;
+`node tests/browser-demo.cjs` completed **11 scenarios**. Server coverage includes
+strict logout protection/body rejection, normal/restricted authority and pending
+attempt removal, stale body/provider/validation fences, passive idle and absolute
+expiry, same-account browser isolation, response-body/cookie deletion before
+provider revocation, exact SDK user-JWT/local/no-refresh wire behavior, 16-slot
+admission, waiter cancellation, and a shared deadline across admission/batch work.
+Browser coverage includes focused normal/restricted deadline clearing, visible
+passive restart detection, fresh login, sibling-tab logout and an unabortable
+late login reply, restricted keyboard logout, reflow and credential-free storage.
+These checks do not establish genuine hosted behavior.
+
+Session-ending handoff, 2026-11-15: the parent independently repeated all three
+verification commands with the same passing counts (all 177 auth cases passed)
+and checked the matrix and frozen-plan hash. Independent review is incomplete:
+blind review and a verification-gap report require triage/fixes, and edge-case
+review was interrupted when the student requested commit and session end.
+The implementation is saved for continuation, not accepted as a finished build.
+See the Story 2.3 spec's Review Triage Log for the concrete remaining reports.
