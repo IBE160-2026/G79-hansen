@@ -40,3 +40,32 @@ Tre uavhengige reviewlag ble startet sammen etter verifikasjon. To måtte først
 Neste økt: les denne loggen, issues.md, spec og eksisterende BMAD step-04 snapshot. Verifiser B1–B8 individuelt, bruk V1s filed evidens, fullfør edge-review og triage, rett aktuelle funn med samme implementeringsagent om tilgjengelig. Gjenta specens fullverifikasjon etter kodeendringer. Hovedserveren på port 8000 ble ikke startet på nytt etter Python-endringene i denne økten; bekreft prosesseierskap og restart én worker med ignorert .env når review er ferdig. Ikke les rå auth-queryer eller credentials.
 
 Studenten fikk også en kun-lesende oppgaveprompt til en parallell sesjon: kartlegg Story 2.4/PDF-prototype, uten filendringer, Git-operasjoner, serverstart eller Supabase-endringer.
+
+
+## 2026-11-15 kl. 10:07 ? Fredrik
+
+### Oppgave
+Fortsett den eksisterende godkjente BMAD-builden fra steg 4 etter implementeringscommit `5222b95`. Triager B1?B9/V1, fullf?r edge-review, rett bekreftede feil, kj?r full verifikasjon, kontroller oppdatert server/hosted-adferd og commit lokalt. Studenten ba uttrykkelig om ingen ny planlegging/godkjenning, ingen gjentakelse av passordbyttet og ingen automatiske nye e-poster.
+
+### Plan
+- Gjenbruk [godkjent spesifikasjon](../../.docs/implementation-artifacts/spec-2-3-end-access-on-logout-expiry-and-restart.md), tidligere reviewrapporter og rendret steg 4; fullf?r det avbrutte uavhengige edge-laget f?r triage.
+- Rett dokumenterte tilstander innenfor frosset intensjon; gjenta Python-, auth-nettleser- og demoverifikasjon.
+- Bruk eksisterende autoriserte testkontoer uten konto-/e-post-/passordmutasjoner, skill ekte leverand?revidens fra lokal instrumentering, oppdater dokumentasjon/refleksjonsgrunnlag og lagre lokale commits.
+
+### Resultat
+Arbeidskopien var ren ved oppstart; siste overleveringslogg var `7911951c669146768b21371cc6ea30985187747f`. Ny kode-/dokumentcommit er **407ed027e2ca6abc8768191a4e20e5b12e4f0806** (`fix(auth): complete session termination review and verification`), ti filer. Ingen push. Den eksisterende builden ble fortsatt direkte fra lagret steg 4; ingen ny rendering, planrunde eller godkjenning. Godkjent blokkhash er uendret: `0669a8ae87bcd57293b81ccc0cee6567e7795f60388dde9e08aa8946d82fc64e`.
+
+B1?B8 ble verifisert individuelt og rettet; B9 var allerede rettet i overleveringen, og V1 fikk direkte regresjoner. Edge-reviewet returnerte ?tte funn med samme rot?rsaker som B1?B8; alle fikk egne triagerader f?r gruppering. Ingen funn ble utsatt. Den tidligere implementeringsagenten var ikke tilgjengelig, s? hovedagenten rettet selv. En uavhengig oppf?lgingsgjennomlesning av den ferdige patchen fant ingen ytterligere feil; den kj?rte ikke egne tester.
+
+Rettelsene omfatter vedvarende utloggingsintensjon/reell POST-retry, serverkontroll av gamle fanesignaler, visningstimer som trekker fra responstid, uforstyrrede passive recovery-kontroller, separat tr?dlimiter for revokering og bounded opprydding av sene avviste leverand?ridentiteter. En konkret probe reproduserte at gamle logout-headere slettet en ny cookie; generasjonsspesifikke HttpOnly-cookies og sletting av bare innkommende navn l?ser dette. Cookie-rekkef?lge og fremmed nettleserbinding er kontrollert. Sikkerhetsgrensene, local scope/no-refresh, demo og frosset intensjon er bevart.
+
+Hovedagentens siste fulle Python-kj?ring: **243 best?tt, ?n uendret valgfri PDF-plattformskip, ?n eksisterende Starlette-advarsel**, 56,38 sekunder. JUnit bekrefter **181 auth-tilfeller uten feil/skips**. Siste auth-nettleserkj?ring: **33 scenarier best?tt**, inkludert gammel timer mens ny innlogging er blokkert, forsinkede signaler/status/headere og bekreftet restricted logout. Demo: **11 best?tt / 21 genereringskall**. `git diff --check` bestod, og konto ved 200 % ble visuelt kontrollert uten avkuttet innhold. En skjerpet timerfixture feilet f?rst fordi testens eget BroadcastChannel-signal ogs? traff appen i avsenderfanen og revaliderte timeren; testrekkef?lgen ble korrigert og alle 33 bestod. Ingen produksjonskode ble endret etter de siste best?tte Python-/demokj?ringene.
+
+**Hosted:** `uv run --env-file .env node test-results/hosted-logout-browser.cjs` bestod **25/25 unike kontroller** kl. 09:00:27 UTC. Ekte Supabase-validering, lokal revokering og refresh ble brukt med eksisterende autorisert testkonto i to uavhengige nettlesere. Andre nettleser p? samme konto beholdt tilgang og gjennomf?rte ekte refresh; faktisk testserverprosess ble restartet med bevart cookie/?pen side, gammel autoritet ble avvist og ny innlogging fungerte. Restricted grant og korte utl?psmetadata var lokalt instrumentert med ekte leverand?ridentitet; revoke-feil ble injisert ved adaptergrensen. Ingen p?stand om ekte recovery-PKCE/e-post, naturlig 30-minutters/12-timers venting eller en reell Supabase-driftsstans. Resultater og lokale hjelpere ligger ignorert i `test-results/`; [akseptansedokumentet](../../.docs/implementation-artifacts/auth-setup.md#story-23-review-completion--2026-11-15) beskriver eksakte grenser.
+
+Gammel normalserver-worker **35884** ble identifisert via prosjektets virtualenv/uvicorn-kommando f?r stopp. Ny worker **11748** (launcher 34908), ?n prosess med eksisterende ignorert `.env`, kj?rer p? `127.0.0.1:8000`. **10/10 kontroller** bestod mot den: helse, ny UI/JS, personvernheadere, konfigurasjon, ekte testkonto-login, nye cookie-generasjoner, beskyttet logout, lokal avvisning og cookie-sletting. Isolert testserver er stoppet. Omstarten avslutter gamle lokale ?kter; studenten m? logge inn igjen.
+
+Spesifikasjonen er **done**, sprint 2.3 forblir **review**. README, auth-oppsett, triage/sluttevidens og refleksjonsgrunnlag er oppdatert; gammel issue om uferdig review/serverkode er lukket. Ingen studentrefleksjon er diktet opp. Ingen nye e-poster/kontoer, passordmutasjoner, hosted-innstillinger, kostnader eller utrulling ble utf?rt. Free/Paris er uendret.
+
+### ?pne punkter
+- Eldre Story 2.1/2.2-porter for ubrukt lenkes binding/replay/utl?p/overlapp, malinspeksjon og negative recovery-tilfeller best?r. Hosted-begrensningene ovenfor er eksplisitte; ikke gjenta det vellykkede passordbyttet eller send nye e-poster automatisk. Punktene st?r allerede i `issues.md`.
