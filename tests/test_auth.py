@@ -1641,3 +1641,45 @@ def test_revocation_has_no_shared_worker_admission_queue():
             limiter.release()
             limiter.total_tokens = prior
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize('phase', ['before_resolution', 'after_resolution'])
+def test_validation_owner_cancellation_preserves_only_completed_success(monkeypatch, phase):
+    """Deterministic portal-close window after worker/Future completion."""
+    from app.services import sessions
+    from app.services.workspaces import Workspaces
+    async def scenario():
+        registry, fake = Registry(), FakeAuth()
+        browser = registry.browser(None)[0]
+        session_id = registry.rotate(None, browser, fake.identity())
+        session = registry.live_session(session_id)
+        authority = Workspaces(registry)
+        authority.command(session_id, session, 'validation-race-workspace', 0, 1, 'invalidate', {'command': 1})
+        entered, release = asyncio.Event(), asyncio.Event()
+        async def barrier_worker(function, *args):
+            if phase == 'after_resolution':
+                function(*args)
+            entered.set()
+            await release.wait()
+            if phase == 'before_resolution':
+                function(*args)
+        monkeypatch.setattr(sessions, 'run_in_threadpool', barrier_worker)
+        waiter = asyncio.create_task(registry.authenticated_async(session_id, browser, fake, touch=False))
+        await entered.wait()
+        owner = next(iter(registry._validation_tasks))
+        if phase == 'after_resolution':
+            assert (await waiter).owner_id == OWNER
+            assert session.validation is None
+        owner.cancel()
+        await owner
+        if phase == 'before_resolution':
+            with pytest.raises(AuthFailure): await waiter
+            assert session_id not in registry.sessions and session_id not in authority.records
+            assert fake.calls.count('validate') == 0
+        else:
+            assert registry.live_session(session_id) is session
+            assert session_id in authority.records
+            assert fake.calls.count('validate') == 1
+            release.set()
+            assert (await registry.authenticated_async(session_id, browser, fake, touch=False)).owner_id == OWNER
+    asyncio.run(scenario())

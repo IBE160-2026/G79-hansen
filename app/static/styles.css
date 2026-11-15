@@ -65,3 +65,7 @@ main, section, .row > *, #content { min-width: 0; overflow-wrap: anywhere; }
 .workspace-main a { color: #315f91; }
 .canonical-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .workspace-main .source-unit + .source-unit { border-top: 1px solid #cbd5e1; padding-top: 12px; }
+
+.workspace-main #edit-material { margin-top: 16px; }
+.workspace-main #results { margin-top: 16px; }
+.workspace-main #content p { white-space: pre-wrap; }

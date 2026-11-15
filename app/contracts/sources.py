@@ -13,6 +13,8 @@ class ExtractRequest(BaseModel):
     kind: Literal["paste", "text-file", "pdf"]
     settings: Settings
     clientRevision: int = Field(ge=0, le=9_007_199_254_740_991)
+    workspaceId: str = Field(pattern=r"^[A-Za-z0-9_-]{16,80}$")
+    commandSequence: int = Field(ge=1, le=9_007_199_254_740_991)
     text: str | None = None
     contentBase64: str | None = None
 
@@ -35,3 +37,6 @@ class ExtractResponse(Contract):
     unreadable_pages: list[int] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
     client_revision: int
+    workspace_id: str = ""
+    command_sequence: int = 0
+    source_proof: str = Field(default="", max_length=8192)

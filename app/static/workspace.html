@@ -13,8 +13,8 @@
   <header>
     <p><a href="/">Studiedemo</a> · <a href="/account">Konto og innlogging</a></p>
     <h1>Eget materiale</h1>
-    <p class="muted">Kontroller teksten og se hvor den kommer fra.</p>
-    <p class="source">Materialet behandles midlertidig og lagres ikke. Generering av læringsmateriale kommer senere. Denne siden lager ingen sammendrag, øvingsoppgaver eller AI-svar.</p>
+    <p class="muted">Fra kildetekst til oversikt og øving med kontrollerbare referanser.</p>
+    <p class="source">Materialet og svarene beholdes bare i denne siden til du avslutter økten. Bruk bare materiale du har lov til å dele, uten sensitive opplysninger. Generering sender tekst til OpenAI globalt. Ingen treningsdeling eller promptlagring er aktivert. Sikkerhetslogger kan normalt beholdes i opptil 30 dager, med unntak. Kontroller svarene mot kilden.</p>
   </header>
   <p id="source-status" role="status" aria-live="polite">Kontrollerer innlogging …</p>
   <p id="source-sign-in" hidden><a href="/account">Logg inn for å bruke eget materiale</a></p>
@@ -23,6 +23,8 @@
     <button id="source-retry" type="button" hidden>Prøv igjen</button>
     <button id="source-logout" type="button" hidden>Logg ut</button>
   </div>
+  <button id="edit-material" type="button" aria-controls="material-body" aria-expanded="true" hidden>Vis/rediger</button>
+  <div id="material-body">
   <form id="source-form" class="panel material-panel" hidden>
     <fieldset id="source-controls" disabled>
       <legend>Materiale og innstillinger</legend>
@@ -50,7 +52,8 @@
       </div>
       <p class="source">Innstillingene beholdes til du endrer dem eller starter på nytt. Fag gir kontekst; kildeteksten er fakta.</p>
       <div class="row actions">
-        <button id="check-source" class="primary" type="submit">Kontroller materiale</button>
+        <button id="generate" class="primary" type="submit">Lag læringsmateriale</button>
+        <button id="check-source" type="button">Kontroller materiale</button>
         <button id="reset-source" type="button">Ny økt</button>
       </div>
     </fieldset>
@@ -60,6 +63,17 @@
     <p id="source-count"></p>
     <div id="source-coverage"></div>
     <div id="source-units"></div>
+  </section>
+  </div>
+  <section class="panel" id="results" aria-label="Læringsmateriale" aria-busy="false" hidden>
+    <div id="generation-warnings"></div>
+    <nav class="tabs" role="tablist" aria-label="Læringsdeler">
+      <button id="tab-summary" role="tab" aria-selected="true" aria-controls="content" data-tab="summary" type="button">Sammendrag</button>
+      <button id="tab-concepts" role="tab" aria-selected="false" aria-controls="content" data-tab="concepts" tabindex="-1" type="button">Begreper</button>
+      <button id="tab-flashcards" role="tab" aria-selected="false" aria-controls="content" data-tab="flashcards" tabindex="-1" type="button">Flashcards</button>
+      <button id="tab-quiz" role="tab" aria-selected="false" aria-controls="content" data-tab="quiz" tabindex="-1" type="button">Quiz</button>
+    </nav>
+    <div id="content" role="tabpanel" aria-labelledby="tab-summary" tabindex="0"></div>
   </section>
   <noscript><p>JavaScript må være aktivert for å bruke eget materiale.</p></noscript>
 </main>

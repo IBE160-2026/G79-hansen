@@ -328,6 +328,194 @@ async function main() {
       assert.equal(requests, 1); page.off('request', listener);
       assert.match(await page.locator('#source-count').innerText(), /30000 tegn/);
     });
+    const modelState = async () => (await first.request.get(`${base}/__test/model-state`)).json();
+    async function generatePrivate() {
+      await page.locator('#generate').click();
+      await page.locator('#results').waitFor({state: 'visible'});
+      await page.waitForFunction(() => !document.querySelector('#generate').disabled);
+    }
+    await check('one primary action extracts and generates once, collapses controls and renders safe sections', async () => {
+      await enter(page, 'Synthetic source for generation.\n\nSecond source paragraph.');
+      const before = (await modelState()).calls;
+      await page.locator('#generate').evaluate(button => { button.click(); button.click(); });
+      await page.locator('#results').waitFor({state: 'visible'});
+      assert.equal((await modelState()).calls, before + 1);
+      assert.equal(await page.locator('#material-body').isVisible(), false);
+      assert.equal(await page.locator('#edit-material').isVisible(), true);
+      assert.equal(await page.locator('#tab-summary').getAttribute('aria-selected'), 'true');
+      assert.match(await page.locator('#content').innerText(), /Synthetic summary <img/);
+      assert.equal(await page.locator('#content img').count(), 0);
+      assert.equal(await page.evaluate(() => window.compromised), undefined);
+      await page.locator('#edit-material').click();
+      assert.equal(await page.locator('#results').isVisible(), true);
+      assert.match(await page.locator('#source-text').inputValue(), /Synthetic source/);
+    });
+    await check('practice positions and reveals are independent, accessible and make no model requests', async () => {
+      const before = (await modelState()).calls;
+      await page.locator('#tab-flashcards').focus(); await page.keyboard.press('Enter');
+      assert.equal(await page.locator('#answer').isVisible(), false);
+      await page.locator('#reveal').click(); assert.equal(await page.locator('#answer').isVisible(), true);
+      assert.match(await page.locator('#answer').innerText(), /Avsnitt 1/);
+      await page.locator('#next').click(); assert.equal(await page.locator('#answer').isVisible(), false);
+      await page.locator('#tab-quiz').click(); await page.locator('#reveal').click();
+      await page.locator('#tab-flashcards').click(); assert.match(await page.locator('#content').innerText(), /Kort 2 av 2/);
+      await page.locator('#previous').click(); assert.equal(await page.locator('#answer').isVisible(), true);
+      await page.locator('#tab-quiz').focus(); await page.keyboard.press('Home');
+      assert.equal(await page.locator('#tab-summary').getAttribute('aria-selected'), 'true');
+      assert.equal((await modelState()).calls, before);
+    });
+    await check('generation failure retains selected file and settings; retry and regeneration reset reveals', async () => {
+      await page.locator('#source-kind').selectOption('text-file');
+      await page.locator('#source-file').setInputFiles({name: 'PRIVATE_FILENAME.txt', mimeType: 'text/plain', buffer: Buffer.from('Synthetic source file')});
+      await page.locator('#source-language').selectOption('en'); await page.locator('#source-detail').selectOption('detailed');
+      await page.locator('#source-subject').fill('retained generation settings');
+      await first.request.post(`${base}/__test/model-failure`);
+      await page.locator('#generate').click(); await page.locator('#source-error').waitFor({state: 'visible'});
+      assert.equal(await page.locator('#results').isVisible(), false);
+      assert.equal(await page.locator('#material-body').isVisible(), true);
+      assert.equal(await page.locator('#source-file').evaluate(input => input.files.length), 1);
+      assert.equal(await page.locator('#source-language').inputValue(), 'en');
+      assert.equal(await page.locator('#source-detail').inputValue(), 'detailed');
+      assert.equal(await page.locator('#source-subject').inputValue(), 'retained generation settings');
+      await page.locator('#source-retry').click(); await page.locator('#results').waitFor({state: 'visible'});
+      assert.deepEqual((await modelState()).settings, {language: 'en', detail: 'detailed'});
+      await page.locator('#tab-flashcards').click(); assert.equal(await page.locator('#answer').isVisible(), false);
+      await page.locator('#reveal').click(); await page.locator('#edit-material').click(); await generatePrivate();
+      await page.locator('#tab-flashcards').click(); assert.equal(await page.locator('#answer').isVisible(), false);
+    });
+    await check('insufficient sections keep tabs and explanations without invented practice navigation', async () => {
+      await page.locator('#edit-material').click(); await first.request.post(`${base}/__test/model-insufficient`);
+      await generatePrivate();
+      for (const name of ['summary', 'concepts', 'flashcards', 'quiz']) {
+        await page.locator(`#tab-${name}`).click();
+        assert.match(await page.locator('#content').innerText(), /not contain enough evidence/);
+        assert.equal(await page.locator('#reveal').count(), 0); assert.equal(await page.locator('#next').count(), 0);
+      }
+      await page.locator('#edit-material').click();
+    });
+    await check('failed invalidation blocks generation until an explicit retry acknowledges edits', async () => {
+      const before = (await modelState()).calls;
+      await page.route('**/api/v1/workspaces/invalidate', route => route.abort());
+      await page.locator('#source-subject').fill('changed subject'); await page.locator('#generate').click();
+      await page.locator('#source-error').waitFor({state: 'visible'});
+      assert.equal((await modelState()).calls, before);
+      assert.equal(await page.locator('#results').isVisible(), false);
+      await page.unroute('**/api/v1/workspaces/invalidate');
+      await page.locator('#source-retry').click(); await page.locator('#results').waitFor({state: 'visible'});
+      assert.equal((await modelState()).calls, before + 1);
+    });
+    await check('subject Enter generates once; partial insufficiency and prose languages survive reversible disclosure', async () => {
+      if (await page.locator('#material-body').isHidden()) await page.locator('#edit-material').click();
+      const pdf = Buffer.from(await (await first.request.get(`${base}/__test/source-pdf`)).body());
+      await page.locator('#source-kind').selectOption('pdf');
+      await page.locator('#source-file').setInputFiles({name: 'locale-synthetic.pdf', mimeType: 'application/pdf', buffer: pdf});
+      await page.locator('#source-language').selectOption('en');
+      await page.locator('#source-subject').fill('Synthetic language and insufficiency check');
+      await page.route('**/api/v1/generation', async route => {
+        const response = await route.fetch(), body = await response.json();
+        body.bundle.warnings.push('A generated English warning.');
+        for (const name of ['summary', 'concepts', 'flashcards', 'quiz']) body.bundle.insufficiency[name] = 'Some source evidence is unavailable.';
+        await route.fulfill({response, json: body});
+      }, {times: 1});
+      const before = (await modelState()).calls;
+      await page.locator('#source-subject').focus(); await page.keyboard.press('Enter');
+      await page.locator('#results').waitFor({state: 'visible'});
+      assert.equal((await modelState()).calls, before + 1);
+      assert.deepEqual(await page.locator('#generation-warnings p').evaluateAll(nodes => nodes.map(node => node.lang)), ['nb', 'nb', 'en']);
+      for (const name of ['summary', 'concepts', 'flashcards', 'quiz']) {
+        await page.locator(`#tab-${name}`).click();
+        assert.equal(await page.locator('#content .section-insufficiency').getAttribute('lang'), 'en');
+        assert.equal(await page.locator('#content h2').getAttribute('lang'), 'nb');
+        assert.match(await page.locator('#content').innerText(), /Some source evidence is unavailable/);
+        if (name === 'summary') assert.equal(await page.locator('#content > p[lang="en"]').count(), 2);
+        else assert.equal(await page.locator('#content h3').getAttribute('lang'), 'en');
+        if (name === 'flashcards' || name === 'quiz') {
+          await page.locator('#reveal').click();
+          assert.equal(await page.locator('#answer p:not(.reference)').getAttribute('lang'), 'en');
+          assert.equal(await page.locator('#reveal').getAttribute('lang'), 'nb');
+          assert.equal(await page.locator('#answer strong').getAttribute('lang'), 'nb');
+        }
+        assert.equal(await page.locator('#content .reference').first().getAttribute('lang'), 'nb');
+      }
+      await page.locator('#next').click();
+      assert.equal(await page.locator('#source-status span[lang="en"]').count(), 1);
+      await page.locator('#previous').click();
+      const content = await page.locator('#content').innerText();
+      await page.locator('#edit-material').click();
+      assert.equal(await page.locator('#edit-material').getAttribute('aria-expanded'), 'true');
+      assert.equal(await page.locator('#edit-material').isVisible(), true);
+      await page.locator('#edit-material').click();
+      assert.equal(await page.locator('#edit-material').getAttribute('aria-expanded'), 'false');
+      assert.equal(await page.locator('#material-body').isVisible(), false);
+      assert.equal(await page.locator('#content').innerText(), content);
+      assert.equal(await page.locator('#answer').isVisible(), true);
+      assert.equal((await modelState()).calls, before + 1);
+    });
+    await check('late uncancellable generation replies cannot revive edited, reset, ended or rotated sessions', async () => {
+      for (const action of ['edit', 'reset', 'pagehide', 'rotate', 'logout']) {
+        if (await page.locator('#edit-material').isVisible()) await page.locator('#edit-material').click();
+        await enter(page, 'Synthetic source before late completion');
+        await page.evaluate(() => {
+          if (window.originalGenerationFetch) return;
+          window.originalGenerationFetch = window.fetch.bind(window);
+          window.fetch = (url, options) => {
+            if (url === '/api/v1/generation') { const {signal, ...rest} = options; return window.originalGenerationFetch(url, rest); }
+            return window.originalGenerationFetch(url, options);
+          };
+        });
+        let release, intercepted;
+        const held = new Promise(resolve => { release = resolve; }), arrived = new Promise(resolve => { intercepted = resolve; });
+        await page.route('**/api/v1/generation', async route => {
+          const response = await route.fetch(); intercepted(); await held; try { await route.fulfill({response}); } catch {}
+        }, {times: 1});
+        await page.locator('#generate').click(); await arrived;
+        if (action === 'edit') await page.locator('#source-text').fill('new draft');
+        else if (action === 'reset') await page.locator('#reset-source').click();
+        else if (action === 'pagehide') await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide')));
+        else if (action === 'rotate') { await login(first); await observe(page); }
+        else await page.locator('#source-logout').click();
+        release(); await pause(150);
+        assert.equal(await page.locator('#results').isVisible(), false);
+        if (action === 'pagehide') { await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', {persisted: true}))); await ready(page); }
+        if (action === 'rotate') await ready(page);
+      }
+      await login(first); await page.reload(); await ready(page);
+    });
+    await check('browser generation deadline fences an uncancellable reply and keeps the draft', async () => {
+      await enter(page, 'Synthetic deadline source');
+      await page.evaluate(() => {
+        const original = window.fetch.bind(window);
+        window.fetch = (url, options) => {
+          if (url === '/api/v1/generation') { const {signal, ...rest} = options; return original(url, rest); }
+          return original(url, options);
+        };
+      });
+      let release, intercepted;
+      const held = new Promise(resolve => { release = resolve; }), arrived = new Promise(resolve => { intercepted = resolve; });
+      await page.route('**/api/v1/generation', async route => {
+        const response = await route.fetch(); intercepted(); await held; try { await route.fulfill({response}); } catch {}
+      }, {times: 1});
+      await page.clock.install(); await page.locator('#generate').click(); await arrived;
+      // Passive session checks stay valid; the generation wait expires at 70s.
+      await page.clock.fastForward(70001);
+      await page.locator('#source-error').waitFor({state: 'visible'});
+      assert.equal(await page.locator('#source-text').inputValue(), 'Synthetic deadline source');
+      assert.equal(await page.locator('#generate').isEnabled(), true);
+      release(); await pause(150); assert.equal(await page.locator('#results').isVisible(), false);
+      await page.clock.resume();
+    });
+    await check('generated content reflows at 320px and 200% with keyboard flow intact', async () => {
+      await generatePrivate();
+      for (const width of [320, 640]) {
+        await page.setViewportSize({width, height: 900});
+        await page.evaluate(zoom => { document.documentElement.style.zoom = String(zoom); }, width === 640 ? 2 : 1);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
+        await page.locator('#tab-summary').focus(); await page.keyboard.press('End');
+        assert.equal(await page.locator('#tab-quiz').getAttribute('aria-selected'), 'true');
+        await page.screenshot({path: path.join(root, 'test-results', `generation-${width}.png`), fullPage: true});
+      }
+      await page.evaluate(() => { document.documentElement.style.zoom = ''; }); await page.setViewportSize({width: 1280, height: 1000});
+    });
     await check('private material stays outside browser storage, logs and demo requests', async () => {
       assert.equal(await page.evaluate(() => JSON.stringify({...localStorage, ...sessionStorage})), '{}');
       const demo = await first.newPage(), requests = [];

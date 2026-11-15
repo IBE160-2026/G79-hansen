@@ -90,6 +90,8 @@ def updates():
 @app.post("/__test/restart")
 def restart():
     app.state.auth_registry = Registry()
+    from app.services.workspaces import Workspaces
+    app.state.workspaces = Workspaces(app.state.auth_registry)
     return {"ok": True}
 
 

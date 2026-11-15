@@ -20,14 +20,14 @@ uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 3. Bruk Forrige/Neste. Kort og quiz beholder hver sin posisjon og hvilke svar du har vist når du bytter fane.
 4. Vis/rediger åpner materialet uten å endre fremdriften. Ny økt tømmer arbeidsflaten; velg eksempelet på nytt for å starte igjen.
 
-## API og avgrensning
+## API og avgrensning for demoen
 
 - `GET /health` returnerer `{"status":"ok","mode":"demo"}`.
 - `GET /api/v1/demo/fixture` gir den synlige kilden og de faste innstillingene.
 - `POST /api/v1/demo/generate` tar nøyaktig `{"schemaVersion":"1.0","fixtureId":"memory-basics-v1"}` og returnerer alle fire deler samlet. Hver del har stabile element- og kilde-ID-er; hver generering får en ny `generationId`.
 - [API-dokumentasjon](http://127.0.0.1:8000/docs) viser kontraktene. Ukjent eksempel, versjon, egne kildefelt, innstillinger og andre ekstra felt gir forståelig HTTP 422 uten behandling eller lagring.
 
-Studiedemoen bruker faste syntetiske eksempeldata på norsk med kort sammendrag. Ingen AI-modell behandler tekst. Egen tekst, tekstfil/PDF, språk-/detaljvalg, Lagre, Mine dokumenter og varig fremdrift er senere arbeid. Den aktive demotilstanden finnes bare i minnet på den åpne siden og forsvinner ved omlasting. Feil gir eksplisitt prøv-igjen; demoen bytter aldri til et falskt vellykket svar.
+Studiedemoen bruker faste syntetiske eksempeldata på norsk med kort sammendrag. Ingen AI-modell behandler demoteksten. Egen tekst, tekstfil/PDF og språk-/detaljvalg er tilgjengelig i det private arbeidsområdet `/workspace`, med separat aktivert modellkonfigurasjon. Lagre, Mine dokumenter og varig fremdrift er senere arbeid. Den aktive demotilstanden finnes bare i minnet på den åpne siden og forsvinner ved omlasting. Feil gir eksplisitt prøv-igjen; demoen bytter aldri til et falskt vellykket svar.
 
 Demoen trenger ingen konfigurasjon og gjør ingen Supabase-kall. `/account` tilbyr norsk registrering og innlogging når Supabase er uttrykkelig aktivert og riktig konfigurert; ellers viser siden at innlogging er utilgjengelig. Bare eksplisitte offentlige UI-filer serveres; repositoryfiler og dokumentasjon er ikke statisk tilgjengelige. Den historiske UX-prototypen ligger uendret under `.docs/planning-artifacts/ux-designs/`.
 
@@ -39,7 +39,7 @@ Serveren leser `AUTH_ENABLED=true`, `APP_ORIGIN`, `SUPABASE_URL` og `SUPABASE_PU
 
 Den lokale ignorerte `.env` kan lastes eksplisitt med `uv run --env-file .env uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1`. Åpne deretter `http://127.0.0.1:8000/account`. Dette aktiverer den konfigurerte innloggingen; vanlig demooppstart laster fortsatt ingen `.env`.
 
-Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i begrenset serverminne; nettleseren får tilfeldige HttpOnly-cookies. Bekreftelsen må åpnes innen ti minutter i nettleseren/profilen der registreringen startet. Økten utløper etter 30 minutter uten aktivitet, senest etter 12 timer, og ved serverrestart. Standarddemoen forblir tilgjengelig uten konto. Lokal utlogging og midlertidig kildekontroll er implementert; KI-generering, varig lagring og utrulling kommer senere.
+Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i begrenset serverminne; nettleseren får tilfeldige HttpOnly-cookies. Bekreftelsen må åpnes innen ti minutter i nettleseren/profilen der registreringen startet. Økten utløper etter 30 minutter uten aktivitet, senest etter 12 timer, og ved serverrestart. Standarddemoen forblir tilgjengelig uten konto. Lokal utlogging, midlertidig kildekontroll og KI-generering av alle fire læringsdeler er implementert; varig lagring og utrulling kommer senere.
 
 **Glemt passord (Story 2.2)** sender en generell kvittering og bruker en egen PKCE-lenke som må åpnes i samme nettleser/profil innen ti minutter. Lenken gir bare tilgang til skjemaet for nytt passord; den logger deg ikke inn. Et innsendt endringsforsøk bruker opp denne tilgangen før leverandørkallet. Etterpå må du logge inn på vanlig måte. Ved tidsavbrudd kan passordet allerede være endret: prøv innlogging eller be om en ny lenke. Innlogging og gjenoppretting deler maksimalt 1 000 lokale økter; registrering og gjenoppretting deler maksimalt 1 000 ventende forsøk og fire per nettleser. Reell e-post og passordendring krever uttrykkelig testerautorisasjon og er ikke utført av implementasjonstestene. Se [oppsettet](.docs/implementation-artifacts/auth-setup.md) for den ekstra redirect-oppføringen og åpne akseptansepunkter.
 
@@ -144,10 +144,78 @@ avviser hele kilden. PDF krever den kontrollerte Windows-isolasjonen.
 
 Materialet behandles midlertidig. Endret kilde/innstilling forkaster gammel
 forhåndsvisning, og utlogging/utløp/ny innlogging tømmer privat innhold.
-KI-generering og lagring kommer senere. Den faste demoen på `/` beholdes.
+KI-generering er tilgjengelig som beskrevet nedenfor; lagring kommer senere. Den faste demoen på `/` beholdes.
 Kjør `node tests/browser-sources.cjs` for kildeflyten, i tillegg til de øvrige
 testene. Se [API, testkommandoer og akseptansegrenser](.docs/implementation-artifacts/source-acceptance.md).
 
 ## Medlemmer
 
 - Fredrik Fladmark Hansen
+
+## Private learning generation (Story 2.5)
+
+`/workspace` now has **Lag læringsmateriale**.
+The action checks the current source when necessary, then requests summary,
+concepts, flashcards and quiz together. The optional source preview remains
+available. Results and selected files exist only in page memory; no Save,
+library or document database has been added. Editing material/settings, reset,
+session changes and page exit clear the private result. Technical errors retain
+the draft/file/settings and offer explicit retry. Practice navigation and reveal
+controls do not call the model.
+
+The fixed demo remains credential-free. Private generation is disabled by
+default and has no demo fallback. Enable only after the approved model/data/cost
+setup by putting `MODEL_ENABLED=true`, `OPENAI_API_KEY` and `MODEL_BUDGET_PATH`
+in the server process environment (see `.env.example`). The application does not
+automatically read `.env`. Use only nonsensitive material you are permitted to
+send to OpenAI globally. Requests use `gpt-6-luna`, Standard, reasoning `none`,
+`store:false` and explicit cache mode without breakpoints. No training opt-in
+is enabled; ordinary provider abuse retention is normally up to 30 days, with
+exceptions. This is separate from the application's transient storage boundary.
+
+Initialize the content-free local USD 5 lifetime budget ledger **once**, after
+approval; never reset or delete an existing ledger to restore allowance:
+
+```powershell
+uv run python -m scripts.model_budget init .model-budget.json
+uv run python -m scripts.model_budget status .model-budget.json
+```
+
+Each dispatch durably reserves USD 0.05 before any network write. Missing,
+corrupt, locked, blocked or exhausted ledgers refuse dispatch. Uncertain calls
+keep their reservation across restart. This ledger covers this app only, not
+other clients using the credential, provider prices, tax or purchases. No
+purchase, account, funding or hosted setting is automated.
+
+Unexpected reported usage durably creates a content-free `.blocked` sidecar,
+even when another instance owns the ledger lock. Preserve that marker and the
+ledger; neither may be removed or reset to restore allowance. All four approved
+automated live smoke calls have been executed; their allowance is exhausted.
+See the acceptance record for the unchanged historical measurements. Review
+corrections use synthetic transports only.
+
+Generation admits one request per session and two globally without a queue or
+retry. Its 60-second server deadline includes body/preflight/validation;
+extraction is a separately bounded phase. The browser waits at most 70 seconds
+after extraction. Provider request/response envelopes are capped at 256 KiB,
+output at 8,000 tokens and the private generation protocol at 2 MiB. Unsolicited
+compressed provider responses are rejected before decompression. A cancelled
+browser wait cannot guarantee the provider stopped billing.
+
+Signed source proofs bind the exact accepted source/settings/coverage/file
+hash. Signed generation receipts bind canonical source/settings/bundle hashes
+to the current owner, a non-authorizing session binding and ordered workspace
+command. Source text, generated content, receipts, credentials and source hashes
+are never persisted in the budget ledger. Workspace authority stores metadata
+only (at most eight workspaces per session), uses the auth-then-workspace mutex
+order and is removed when access ends. `Workspaces.validate_save(...)` exposes
+only a future Save admission context manager: signature validity alone cannot
+authorize a superseded result, and a future write must remain inside that mutex.
+
+Run `uv run --group pdf-experiment pytest`, `node tests/browser-sources.cjs`,
+`node tests/browser-auth.cjs`, `node tests/browser-demo.cjs` and `git diff --check`.
+The opt-in `scripts.generation_smoke` runner makes at most four automated
+synthetic calls over the same ledger's lifetime, including failed calls; it
+never initializes the ledger, retries or prints source/output/credentials.
+See [the generation acceptance record](.docs/implementation-artifacts/generation-acceptance.md)
+for executed checks and the separate Story 2.6 quality/hosting gates.

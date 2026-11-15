@@ -17,6 +17,9 @@ class Settings:
     allow_loopback_http: bool = False
     idle_seconds: int = 1800
     absolute_seconds: int = 43200
+    model_enabled: bool = False
+    openai_api_key: str = field(default="", repr=False)
+    model_budget_path: str = ""
 
     @classmethod
     def from_env(cls):
@@ -34,6 +37,9 @@ class Settings:
             allow_loopback_http=os.environ.get("AUTH_ALLOW_LOOPBACK_HTTP") == "true",
             idle_seconds=positive("AUTH_IDLE_SECONDS", 1800),
             absolute_seconds=positive("AUTH_ABSOLUTE_SECONDS", 43200),
+            model_enabled=os.environ.get("MODEL_ENABLED") == "true",
+            openai_api_key=os.environ.get("OPENAI_API_KEY", ""),
+            model_budget_path=os.environ.get("MODEL_BUDGET_PATH", ""),
         )
 
     @property
@@ -71,3 +77,7 @@ class Settings:
     @property
     def secure_cookies(self):
         return self.app_origin.startswith("https://")
+
+    @property
+    def model_available(self):
+        return bool(self.model_enabled and self.openai_api_key and self.model_budget_path)

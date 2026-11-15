@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 15-11-2026 11:36
+last_updated: 15-11-2026 17:37
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -55,7 +55,12 @@ development_status:
   # Source implementation/review complete: 306 passed/1 unchanged platform skip; 181 auth and 63 source cases.
   # Browser: 19 source, 33 auth, 11 demo. Known rendered PDF/API comparison and 8 unsigned server checks passed.
   # Windows-only containment; representative course PDFs, final hosting and older email/link gates remain separate.
-  2-5-generate-all-learning-parts-from-the-source: backlog
+  2-5-generate-all-learning-parts-from-the-source: review
+  # Plan/model/budget/data/bounds approved; local key/model metadata access verified, billing reported ready.
+  # Implementation/review complete: 422 passed/1 unchanged skip; 183 auth, 63 source, 114 generation.
+  # Final browsers: 28 source/generation, 33 auth, 11 demo; restarted normal server passed 10 unsigned checks.
+  # Four authorized synthetic live calls passed before review patches; no further automated inference.
+  # USD 0.20 reserved of USD 5; ledger persists. Content quality evaluation remains Story 2.6.
   2-6-evaluate-generated-content-against-known-sources: backlog
   epic-2-retrospective: optional
 

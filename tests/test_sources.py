@@ -3,6 +3,7 @@
 import asyncio
 import base64
 import json
+from itertools import count
 import sys
 from threading import Event
 import time
@@ -26,9 +27,12 @@ def login(client):
     return {"Origin": ORIGIN, "X-CSRF-Token": state["csrfToken"], "X-Session-View": state["sessionViewId"]}
 
 
+commands = count(1)
+
+
 def body(text="First\r\n\r\nSecond 😀", **changes):
     return {"schemaVersion": "1.0", "kind": "paste", "settings": {"language": "nb", "detail": "short", "subject": ""},
-            "clientRevision": 7, "text": text, **changes}
+            "clientRevision": 7, "workspaceId": "source-tests-workspace", "commandSequence": next(commands), "text": text, **changes}
 
 
 def upload(content, kind="text-file", **changes):
@@ -39,7 +43,8 @@ def upload(content, kind="text-file", **changes):
 
 
 def send(client, protection, payload=None, **kwargs):
-    return client.post("/api/v1/sources/extract", headers=protection, json=payload if payload is not None else body(), **kwargs)
+    payload = {**payload, "commandSequence": next(commands)} if payload is not None else body()
+    return client.post("/api/v1/sources/extract", headers=protection, json=payload, **kwargs)
 
 
 def test_canonical_paragraphs_settings_fresh_identity_and_no_retention():

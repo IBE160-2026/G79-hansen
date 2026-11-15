@@ -1,10 +1,25 @@
-# Story 2.5 model decision — proposal, not approval
+# Story 2.5 model decision and implementation status
+
+**Current status, 15 November 2026:** the plan is approved, API readiness is
+resolved and private generation is implemented, reviewed and verified offline.
+The four approved synthetic live smoke calls have been executed; no further
+automated inference is authorized by that allowance. The existing local ledger
+must retain its counters/reservations. See [generation acceptance](generation-acceptance.md)
+for actual measurements and the separate quality/platform gates.
+
+## Historical proposal and approval record
+
+The original comparison, initial missing-key observations and approval/readiness
+updates below describe their respective points in the planning timeline. They
+are preserved as decision evidence, not current setup instructions.
 
 Checked on 15 November 2026. No inference request, key validation, account creation, purchase or hosted change was performed. The recommendation below is an engineering inference from official specifications, not a measured Study Buddy quality result.
 
 **Approval update, 15 November:** The student accepted the plan and recommendations, then clarified “Trenger hjelp med oppsett”. Model, cost, data and bounds choices are now approved as recorded in the spec. API readiness remains outstanding; no new plan approval is required for this unchanged scope. The original comparison below is preserved as decision evidence.
 
-## Repository and integration evidence
+**Readiness resolved, 15 November 12:14:** The student reports billing ready; the saved local key authorized GET `/v1/models/gpt-6-luna`, HTTP 200 and exact expected ID. No inference, secret output or billing mutation occurred. Local presence and model metadata access are verified; billing/credit availability remains student-reported until bounded live checks. Official Luna prices and explicit cache-mode behavior were rechecked unchanged. Continue the approved implementation; no repeat approval.
+
+## Historical repository and integration evidence before implementation
 
 The clean starting revision is `5737bbf45902f3621fc90ecb8ab62e09eecbf100`, following Story 2.4 code revision `c5b207ff8523c9b62668043f2ea69466e9e39ac7`. Cached Epic 2 context is newer than all planning artifacts. Source extraction is implemented; model adapters, workspace authority and save receipts are absent. `httpx` 0.28.1 is already locked transitively; declare it directly when implementing the HTTP adapter. No provider SDK needs to be introduced.
 
@@ -58,6 +73,11 @@ The proposed 256 KiB serialized provider-request bound plus a conservative 4,096
 
 An app ledger controls this app's dispatches, not another client's use of the same key/project or provider price changes. Use an appropriately isolated existing API credential; never claim a dashboard alert is a hard cap. The application refuses activation without a preinitialized budget ledger and agreed configuration. Missing/corrupt/exhausted state fails closed. No dashboard or funding changes are part of this proposal.
 
-## Approval and remaining prerequisite
+## Current approved configuration
 
-The [implementation spec](spec-2-5-generate-all-learning-parts-from-the-source.md#readiness-gate) records approved decisions and the remaining API prerequisite. Follow the [setup guide](model-setup-2-5.md). A credential must be provided through local ignored configuration, never chat. Until API readiness is established, keep the spec draft and Story 2.5 backlog. Prior auth/PDF approvals remain separate.
+The [implementation spec](spec-2-5-generate-all-learning-parts-from-the-source.md#readiness-gate)
+records the resolved readiness gate and existing approval. The
+[setup guide](model-setup-2-5.md) describes loading the existing ignored local
+configuration and preserving the initialized ledger. No new approval, account,
+funding or hosted change is implied. Prior auth/PDF approvals and historical test
+evidence remain separate. General content fidelity evaluation belongs to Story 2.6.

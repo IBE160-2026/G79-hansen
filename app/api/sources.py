@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import hashlib
 from threading import RLock
 from uuid import uuid4
 
@@ -16,6 +17,8 @@ from app.adapters.pdf import extract_pdf
 from app.api.auth import BROWSER_COOKIE, context, current_session, protected
 from app.contracts.sources import ExtractRequest
 from app.services.extraction import ExtractionFailure, extract_pdf_result, extract_text, prepare
+from app.services.workspaces import WorkspaceFailure
+from app.services.extraction import decode_file, canonical_text
 
 router = APIRouter(prefix="/api/v1/sources")
 MAX_WIRE_BYTES = 14 * 1024 * 1024
@@ -152,6 +155,12 @@ async def process(request, session_id, session, admission):
     try:
         submitted = await collect(request)
         registry.live_session(session_id, session)
+        canonical_text(submitted.settings.subject)
+        if submitted.kind == 'paste':
+            canonical_text(submitted.text)
+        workspaces = request.app.state.workspaces
+        workspaces.command(session_id, session, submitted.workspaceId, submitted.clientRevision,
+                           submitted.commandSequence, 'extract', submitted)
         content = await to_thread.run_sync(prepare, submitted, limiter=admission.parse_limiter)
         registry.live_session(session_id, session)
         if submitted.kind == "pdf":
@@ -160,6 +169,9 @@ async def process(request, session_id, session, admission):
             result = extract_text(submitted, content)
         # Construct/serialize first, then atomically check and touch with no await
         # before returning. Logout, replacement and expiry always defeat old work.
+        file_hash = (hashlib.sha256(decode_file(submitted.contentBase64)).hexdigest()
+                     if submitted.kind != 'paste' else None)
+        result = workspaces.accept(session_id, session, submitted, result, file_hash)
         response = JSONResponse(result.model_dump(mode="json", by_alias=True))
         registry.live_session(session_id, session, touch=True)
         return response
@@ -167,6 +179,9 @@ async def process(request, session_id, session, admission):
         return error("session_ended")
     except ExtractionFailure as exc:
         return error(exc.code)
+    except WorkspaceFailure as exc:
+        from app.api.private import error as workspace_error
+        return workspace_error(exc.code)
     except Exception:
         # Parser/transport details and private strings never become diagnostics.
         return error("extraction_failed")

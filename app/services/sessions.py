@@ -61,6 +61,12 @@ class Registry:
         self.browsers, self.pending, self.sessions, self.recoveries = {}, {}, {}, {}
         self.lock = RLock()
         self._validation_tasks = set()
+        self.end_listeners = []
+
+    def _ended(self, session_id):
+        # Called under the auth lock; listeners must never acquire auth in reverse.
+        for listener in self.end_listeners:
+            listener(session_id)
 
     def _expired(self, session, now):
         return (now - session.touched >= self.idle_seconds or
@@ -138,6 +144,7 @@ class Registry:
                     if value.browser_id == browser_id:
                         identities[value.identity.access_token] = value.identity
                         del table[key]
+                        self._ended(key)
             for key, value in list(self.pending.items()):
                 if value.browser_id == browser_id:
                     del self.pending[key]
@@ -210,6 +217,7 @@ class Registry:
             if replacing:
                 self.sessions.pop(old_id, None)
                 self.recoveries.pop(old_id, None)
+                self._ended(old_id)
             session_id = token_urlsafe(32)
             now = self.clock()
             if recovery:
@@ -320,7 +328,13 @@ class Registry:
             await run_in_threadpool(self._finish_validation, session_id, session, future, adapter)
         except BaseException:
             with self.lock:
-                if self.sessions.get(session_id) is session:
+                # A completed worker may resolve the shared future before this
+                # coroutine resumes from its thread-pool await. Portal shutdown
+                # in that window must not revoke a successful validation. An
+                # unfinished/failed validation still loses all local authority.
+                completed = (future.done() and not future.cancelled() and
+                             future.exception() is None and future.result() is not None)
+                if self.sessions.get(session_id) is session and not completed:
                     self.terminate(session.browser_id)
                 if session.validation is future:
                     session.validation = None
