@@ -72,7 +72,7 @@ Logout intent remains pending after transport failure: private display stays cle
 
 ## Review Triage Log
 
-Resumed at step 4 on 2026-11-15 under the student's explicit instruction to finish fixes without replanning or another approval. The saved blind/verification reports were retained; the interrupted independent edge layer completed against the baseline diff before triage. Its eight reports reproduce B1?B8, with no additional root cause. The old implementation agent is unavailable in this resumed session; the parent applies corrections. All verified cases are resolved within the approved intent and frozen block; the explicit continuation instruction takes precedence over a workflow loopback/re-approval.
+Resumed at step 4 on 2026-11-15 under the student's explicit instruction to finish fixes without replanning or another approval. The saved blind/verification reports were retained; the interrupted independent edge layer completed against the baseline diff before triage. Its eight reports reproduce B1–B8, with no additional root cause. The old implementation agent is unavailable in this resumed session; the parent applies corrections. All verified cases are resolved within the approved intent and frozen block; the explicit continuation instruction takes precedence over a workflow loopback/re-approval.
 
 | ID | Verdict | Route | Verified evidence / required correction |
 | --- | --- | --- | --- |
@@ -95,7 +95,7 @@ Resumed at step 4 on 2026-11-15 under the student's explicit instruction to fini
 | E7 | medium | patch (B7) | Independently traced passive panel/control interruption; same verified outcome/correction as B7. |
 | E8 | medium | patch (B8) | Independently traced premature browser assertion; same verified outcome/correction as B8. |
 
-Grouping: E1?E8 join their matching B rows only. V1 remains a separate verification correction. No findings deferred. Fix/verification completion is recorded below after actual execution.
+Grouping: E1–E8 join their matching B rows only. V1 remains a separate verification correction. No findings deferred. Fix/verification completion is recorded below after actual execution.
 
 ## Design Notes
 
@@ -128,7 +128,7 @@ At the initial checkpoint, task/matrix verification passed and independent revie
 
 ### Review completion and final parent verification ? 2026-11-15
 
-All B1?B8/E1?E8 corrections and V1 are complete; B9 was already resolved.
+All B1–B8/E1–E8 corrections and V1 are complete; B9 was already resolved.
 The independent edge reviewer inspected the final patch and found no further
 concrete defect (read-only, no separate test rerun). No review finding was
 deferred. The parent inspected the application patch, fixture/test changes,

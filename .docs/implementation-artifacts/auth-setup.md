@@ -716,11 +716,11 @@ The implementation is saved for continuation, not accepted as a finished build.
 See the Story 2.3 spec's Review Triage Log for the concrete remaining reports.
 
 
-## Story 2.3 review completion ? 2026-11-15
+## Story 2.3 review completion — 2026-11-15
 
 The interrupted build resumed at step 4 without a new planning/approval round.
-B1?B8 and V1 were corrected; B9 was already resolved by the session-ending
-handoff. The completed independent edge layer reproduced B1?B8 and reported no
+B1–B8 and V1 were corrected; B9 was already resolved by the session-ending
+handoff. The completed independent edge layer reproduced B1–B8 and reported no
 additional root cause. Its final read-only inspection of the corrections found
 no remaining defect. No review finding was deferred. The frozen approved block
 is unchanged; implementation spec is done and the sprint story remains review.
