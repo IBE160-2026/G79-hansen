@@ -36,6 +36,7 @@ class Session:
     browser_id: str
     created: float
     touched: float
+    view_id: str = field(default_factory=lambda: token_urlsafe(24))
     validation: Future | None = field(default=None, repr=False)
 
 
@@ -157,6 +158,21 @@ class Registry:
             if grant and grant.browser_id == browser_id:
                 return max(0, grant.expires - self.clock())
             return None
+
+    def live_session(self, session_id, expected=None, *, touch=False):
+        """Atomic fence for transient private work; view IDs never authorize access."""
+        with self.lock:
+            self._prune()
+            session = self.sessions.get(session_id)
+            if session is None or (expected is not None and session is not expected):
+                raise AuthFailure("invalid_credentials")
+            if touch:
+                session.touched = self.clock()
+            return session
+
+    @staticmethod
+    def session_view_matches(session, supplied):
+        return opaque_equal(session.view_id, supplied)
 
     def select_session(self, candidates, browser_id):
         """Cookie ordering never decides authority; only a live browser-bound entry does."""

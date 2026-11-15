@@ -145,14 +145,18 @@ async def status(request: Request):
         return error("request_rejected")
     try:
         browser_id, browser = registry.browser(request.cookies.get(BROWSER_COOKIE))
-        identity = await registry.authenticated_async(current_session(request), browser_id, adapter, touch=False)
+        session_id = current_session(request)
+        identity = await registry.authenticated_async(session_id, browser_id, adapter, touch=False)
         display = {"available": True, "authenticated": identity is not None, "csrfToken": browser.csrf,
-                   "recoveryAvailable": registry.recovery_available(current_session(request), browser_id)}
-        remaining = registry.remaining(current_session(request), browser_id)
+                   "recoveryAvailable": registry.recovery_available(session_id, browser_id)}
+        remaining = registry.remaining(session_id, browser_id)
         if remaining is not None:
             display["expiresInSeconds"] = min(43200, remaining)
         if identity and remaining is not None:
             display["email"] = identity.email
+            # Non-authorizing generation marker: a same-account relogin must
+            # still retire drafts created under the previous session.
+            display["sessionViewId"] = registry.live_session(session_id).view_id
         elif identity:
             display["authenticated"] = False
         response = JSONResponse(display)

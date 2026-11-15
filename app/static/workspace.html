@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Eget materiale – AI Study Buddy</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/workspace.js" defer></script>
+</head>
+<body>
+<main class="workspace-main">
+  <header>
+    <p><a href="/">Studiedemo</a> · <a href="/account">Konto og innlogging</a></p>
+    <h1>Eget materiale</h1>
+    <p class="muted">Kontroller teksten og se hvor den kommer fra.</p>
+    <p class="source">Materialet behandles midlertidig og lagres ikke. Generering av læringsmateriale kommer senere. Denne siden lager ingen sammendrag, øvingsoppgaver eller AI-svar.</p>
+  </header>
+  <p id="source-status" role="status" aria-live="polite">Kontrollerer innlogging …</p>
+  <p id="source-sign-in" hidden><a href="/account">Logg inn for å bruke eget materiale</a></p>
+  <div id="source-error" class="state-notice error" role="alert" tabindex="-1" hidden></div>
+  <div class="row actions">
+    <button id="source-retry" type="button" hidden>Prøv igjen</button>
+    <button id="source-logout" type="button" hidden>Logg ut</button>
+  </div>
+  <form id="source-form" class="panel material-panel" hidden>
+    <fieldset id="source-controls" disabled>
+      <legend>Materiale og innstillinger</legend>
+      <label for="source-kind">Velg én kilde</label>
+      <select id="source-kind" aria-describedby="source-limits">
+        <option value="paste">Lim inn tekst</option>
+        <option value="text-file">Tekstfil (UTF-8)</option>
+        <option value="pdf">PDF med tekst</option>
+      </select>
+      <p id="source-limits" class="source">Høyst 30 000 tegn, 10 MiB per fil og 40 fysiske PDF-sider. Hele kilden avvises hvis en grense overskrides.</p>
+      <div id="source-paste-area">
+        <label for="source-text">Tekst</label>
+        <textarea id="source-text" rows="8" spellcheck="false" autocomplete="off" aria-describedby="source-text-help"></textarea>
+        <p id="source-text-help" class="source">Skill avsnitt med en blank linje.</p>
+      </div>
+      <div id="source-file-area" hidden>
+        <label for="source-file">Velg fil</label>
+        <input id="source-file" type="file" accept=".txt,text/plain">
+        <p class="source">PDF: Bare tekst hentes ut. Bilder, tabeller og figurer tolkes ikke. Ingen OCR eller passord for krypterte PDF-er.</p>
+      </div>
+      <div class="row settings">
+        <div><label for="source-subject">Fag/emnekode (valgfritt)</label><input id="source-subject" type="text" maxlength="200" autocomplete="off"></div>
+        <div><label for="source-language">Språk</label><select id="source-language"><option value="nb">Norsk</option><option value="en">English</option></select></div>
+        <div><label for="source-detail">Sammendrag</label><select id="source-detail"><option value="short">Kort</option><option value="detailed">Detaljert</option></select></div>
+      </div>
+      <p class="source">Innstillingene beholdes til du endrer dem eller starter på nytt. Fag gir kontekst; kildeteksten er fakta.</p>
+      <div class="row actions">
+        <button id="check-source" class="primary" type="submit">Kontroller materiale</button>
+        <button id="reset-source" type="button">Ny økt</button>
+      </div>
+    </fieldset>
+  </form>
+  <section id="source-preview" class="panel" aria-labelledby="source-preview-heading" hidden>
+    <h2 id="source-preview-heading" tabindex="-1">Kontrollert materiale</h2>
+    <p id="source-count"></p>
+    <div id="source-coverage"></div>
+    <div id="source-units"></div>
+  </section>
+  <noscript><p>JavaScript må være aktivert for å bruke eget materiale.</p></noscript>
+</main>
+</body>
+</html>

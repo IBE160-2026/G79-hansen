@@ -176,7 +176,7 @@ PRD-en ble åpnet igjen som utkast, FR-8 ble endret og FR-10–FR-12 lagt til. B
 
 «Ny økt» og «Slett dokument» har nå ulike betydninger: førstnevnte tømmer aktiv arbeidsflate, mens sistnevnte fjerner lagret materiale. Automatisk eller eksplisitt lagring og teknisk lagringsløsning gjenstår. CV-spesifikk behandling er ikke lagt til som eget bruksområde.
 
-**Egen refleksjon:** Hvorfor ble lagring viktig for deg etter prototypenå Hvordan påvirker endringen gjennomførbarhet, testing og din forståelse av tilgangskontroll?
+**Egen refleksjon:** Hvorfor ble lagring viktig for deg etter prototypen? Hvordan påvirker endringen gjennomførbarhet, testing og din forståelse av tilgangskontroll?
 
 ### 10.11.2026 – Teknologistakk valgt
 
@@ -450,6 +450,20 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 **Kontroll og KI-feil:** Spesifikasjonen ble selvkontrollert og forkortet fra 1733 til 1586 tokens målt med o200k-tokenisering. Ingen appkode, ny funksjonstest, serverstart, konto/e-post/passordmutasjon eller hosted-endring ble utført. Under lesing ble norske tegn oppdaget erstattet med spørsmålstegn i dokumentasjonen KI lagret ved forrige sluttføring; årsaken var tekst via PowerShells stdin-koding. Tegnene ble rettet uten endring av fakta, og nye norske tekster skrives direkte som UTF-8. Utdaterte sprintkommentarer/README ble også korrigert; Story 2.3 forblir review med done spec og sine presise hosted-begrensninger. Studentens egen refleksjon er ikke skrevet av KI.
 
 **Status:** Story 2.4 er draft, sprintnøkkelen forblir backlog. Planen legges frem ved BMAD steg 2 CHECKPOINT 1 før implementering; tidligere testresultater er historiske og de eldre e-post-/lenkeportene forblir åpne.
+
+## 15.11.2026 – Eget kildemateriale implementert og kontrollert
+
+**Studentens styring:** Studenten godkjente den konkrete Story 2.4-planen med «godkjenn og fortsett». Specen ble lest fra disk på nytt, låst og satt under arbeid; opprinnelig baseline ble beholdt. Implementeringsagenten traff senere en bruksgrense etter å ha skrevet produksjonskode/UI og tester. Studenten svarte «fortsett», og hovedagenten fullførte selv uten ny planrunde eller godkjenning.
+
+**Implementert:** Innlogget arbeidsflate for innlimt tekst, UTF-8-fil eller tekstbasert PDF med forhåndsvisning, studieinnstillinger og faktiske avsnitt/fysiske sider. Kildebytte/nullstilling og øktavslutning forkaster gammelt arbeid. `sessionViewId` er et ikke-autoriserende kjennetegn som avviser bruk av gamle utkast etter ny innlogging, også for samme konto. Materialet blir ikke lagret, og KI-generering følger Story 2.5. Den eksisterende demoen og konto-/recovery-flyten består.
+
+**Uavhengig review og KI-feil:** Tre lag ga elleve blindfunn, to overlappende kanttilfellefunn og to dokumenterte testgap. Alle fikk egen dom før gruppering. Bekreftede rettelser gjelder minnepress fra vilkårlige JSON-objektgrafer, overlappende statuskontroller, sene autoritetssvar, begrenset utloggingsretry og bevart retry ved siderestaurering. Et 60 011-byte forsøk med 20 000 tomme objekter allokerte 1 513 276 byte før retting; nå avvises formen før objektene bygges, og parsing/klargjøring kjører i egne begrensede tråder. Testgapene gjaldt nøyaktig PDF-tekst gjennom API/UI og arbeidsflatens egen utlogging. Gamle dokumentasjonsformuleringer og et spørsmålstegn feilaktig endret under tegnopprydding ble korrigert uten å endre studentrefleksjoner. Et generelt forslag om ekstra shutdown-hook ble avvist fordi ingen lekkasje/unnsluppet prosess ble dokumentert, mens probe/deadline/opprydding allerede begrenser arbeidet. Ingen reviewfunn ble utsatt. Oppfølgingsgjennomlesningen fant ingen nye feil og kjørte ikke egne tester.
+
+**Faktisk sluttkontroll:** Hovedagenten kjørte låst avhengighetssynk og full verifikasjon etter rettelsene: **306 beståtte Python-tester, én uendret valgfri PDF-plattformskip og én eksisterende Starlette-advarsel**, 77,74 sekunder. Alle **181 auth- og 63 kildetilfeller** bestod, inkludert ni faktiske isolerte PDF-integrasjonstilfeller. Ekte nettlesere med syntetisk identitetsadapter bestod **19 kilde-, 33 auth- og 11 demoscenarier**, 21 genereringskall i demo. 320 px/200 %-bilder ble inspisert uten overflyt. Begge godkjente specblokker er uendret; Story 2.4-hash er `bba17495533b217d96a9c382c43a59714338a307aec8b0df249d2ec10b7d6914`.
+
+**Visuell kildekontroll og begrensning:** En selvforfattet PDF med ordinær synlig tekst på side 1 og 3 og blank side 2 ble gjengitt med Poppler og kontrollert visuelt side for side. API-et returnerte nøyaktig samme tekst, riktige fysiske plasseringer og blank side 2; worker/admission ble ryddet. Poppler ble brukt portabelt under ignorerte testfiler og ReportLab som midlertidig uv-verktøy, uten maskininstallasjon eller nye appavhengigheter utover den godkjente pypdf-pinnen. Dette er syntetisk/render-evidens på Windows, ikke godkjenning av vilkårlige pensum-PDF-er, OCR/leserekkefølge eller fremtidig hosting.
+
+**Lokal drift og videre arbeid:** Prosesseierskap for gammel worker 11748 ble kontrollert før utskifting med worker 45744, én prosess med eksisterende ignorert `.env`. Åtte uinnloggede oppstarts-/sikkerhetskontroller bestod; ingen ekte konto-/e-post-/passordhandling ble kjørt i denne storyen. Studenten må logge inn igjen etter omstarten. Spesifikasjonen er done, sprint 2.4 er review, og [akseptansedokumentet](../.docs/implementation-artifacts/source-acceptance.md) skiller utførte kontroller fra åpne portene for representative PDF-er, målplattform og tidligere e-postlenker/maler. Ingen modellkall, lagring, hosted-innstilling, kostnad eller utrulling er utført. Studentens egen refleksjon er ikke skrevet av KI.
 
 ## Mal for neste hendelse
 

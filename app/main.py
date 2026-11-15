@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from app.api.auth import router as auth_router
 from app.api.demo import router
+from app.api.sources import Admission, router as sources_router
 from app.adapters.auth import SupabaseAuth
 from app.config import Settings
 from app.services.sessions import Registry, Revocations
@@ -37,13 +38,15 @@ def create_app(settings=None, *, auth_adapter=None, registry=None):
         idle_seconds=settings.idle_seconds, absolute_seconds=settings.absolute_seconds)
     application.state.auth_revocations = Revocations()
     application.state.auth_adapter = auth_adapter if auth_adapter is not None else SupabaseAuth(settings)
+    application.state.source_admission = Admission()
     application.include_router(router)
     application.include_router(auth_router)
+    application.include_router(sources_router)
 
     @application.middleware('http')
     async def private_headers(request: Request, call_next):
         response = await call_next(request)
-        if request.url.path == '/account' or request.url.path.startswith('/api/v1/auth'):
+        if request.url.path in ('/account', '/workspace') or request.url.path.startswith(('/api/v1/auth', '/api/v1/sources')):
             response.headers['Cache-Control'] = 'no-store'
             response.headers['Pragma'] = 'no-cache'
             response.headers['Referrer-Policy'] = 'no-referrer'
@@ -71,6 +74,14 @@ def create_app(settings=None, *, auth_adapter=None, registry=None):
     @application.get('/account', include_in_schema=False)
     def account():
         return FileResponse(PUBLIC / 'account.html', media_type='text/html')
+
+    @application.get('/workspace', include_in_schema=False)
+    def workspace():
+        return FileResponse(PUBLIC / 'workspace.html', media_type='text/html')
+
+    @application.get('/assets/workspace.js', include_in_schema=False)
+    def workspace_javascript():
+        return FileResponse(PUBLIC / 'workspace.js', media_type='text/javascript')
 
     @application.get('/assets/styles.css', include_in_schema=False)
     def stylesheet():

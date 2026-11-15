@@ -39,7 +39,7 @@ Serveren leser `AUTH_ENABLED=true`, `APP_ORIGIN`, `SUPABASE_URL` og `SUPABASE_PU
 
 Den lokale ignorerte `.env` kan lastes eksplisitt med `uv run --env-file .env uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1`. Åpne deretter `http://127.0.0.1:8000/account`. Dette aktiverer den konfigurerte innloggingen; vanlig demooppstart laster fortsatt ingen `.env`.
 
-Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i begrenset serverminne; nettleseren får tilfeldige HttpOnly-cookies. Bekreftelsen må åpnes innen ti minutter i nettleseren/profilen der registreringen startet. Økten utløper etter 30 minutter uten aktivitet, senest etter 12 timer, og ved serverrestart. Standarddemoen forblir tilgjengelig uten konto. Lokal utlogging er implementert i 2.3; private dokumenter, AI, lagring og utrulling inngår ikke her.
+Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i begrenset serverminne; nettleseren får tilfeldige HttpOnly-cookies. Bekreftelsen må åpnes innen ti minutter i nettleseren/profilen der registreringen startet. Økten utløper etter 30 minutter uten aktivitet, senest etter 12 timer, og ved serverrestart. Standarddemoen forblir tilgjengelig uten konto. Lokal utlogging og midlertidig kildekontroll er implementert; KI-generering, varig lagring og utrulling kommer senere.
 
 **Glemt passord (Story 2.2)** sender en generell kvittering og bruker en egen PKCE-lenke som må åpnes i samme nettleser/profil innen ti minutter. Lenken gir bare tilgang til skjemaet for nytt passord; den logger deg ikke inn. Et innsendt endringsforsøk bruker opp denne tilgangen før leverandørkallet. Etterpå må du logge inn på vanlig måte. Ved tidsavbrudd kan passordet allerede være endret: prøv innlogging eller be om en ny lenke. Innlogging og gjenoppretting deler maksimalt 1 000 lokale økter; registrering og gjenoppretting deler maksimalt 1 000 ventende forsøk og fire per nettleser. Reell e-post og passordendring krever uttrykkelig testerautorisasjon og er ikke utført av implementasjonstestene. Se [oppsettet](.docs/implementation-artifacts/auth-setup.md) for den ekstra redirect-oppføringen og åpne akseptansepunkter.
 
@@ -133,6 +133,20 @@ A separate real-Supabase run passed 25 checks of logout, same-account isolation,
 refresh and restart; restricted grants/deadline metadata and revoke failure were
 instrumented locally. See [precise acceptance limits](.docs/implementation-artifacts/auth-setup.md#story-23-review-completion--2026-11-15).
 Remaining email/recovery-link acceptance is kept separate.
+
+## Eget materiale (Story 2.4)
+
+Åpne `/workspace` etter vanlig innlogging for å kontrollere innlimt tekst,
+UTF-8-tekstfil eller tekstbasert PDF. Forhåndsvisningen viser avsnitt eller
+opprinnelige fysiske sider og forklarer delvis PDF-dekning. Grensene er
+30 000 Unicode-kodepunkter, 40 PDF-sider og 10 MiB per fil; overskridelse
+avviser hele kilden. PDF krever den kontrollerte Windows-isolasjonen.
+
+Materialet behandles midlertidig. Endret kilde/innstilling forkaster gammel
+forhåndsvisning, og utlogging/utløp/ny innlogging tømmer privat innhold.
+KI-generering og lagring kommer senere. Den faste demoen på `/` beholdes.
+Kjør `node tests/browser-sources.cjs` for kildeflyten, i tillegg til de øvrige
+testene. Se [API, testkommandoer og akseptansegrenser](.docs/implementation-artifacts/source-acceptance.md).
 
 ## Medlemmer
 
