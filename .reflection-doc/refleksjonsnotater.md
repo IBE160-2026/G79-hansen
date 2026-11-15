@@ -485,6 +485,8 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Status og avgrensning:** Planvalg er registrert i godkjenningsblokken, men spec/sprint står draft/backlog til API-tilgang er etablert. Ingen appimplementering, nøkkelvalidering mot leverandør, inferens, konto-/prosjektoppretting, kjøp, hosted-endring eller serverrestart er utført. Tidligere testbevis er historiske og uendret. Studentens egne refleksjoner er ikke skrevet av KI.
 
+**Kontroll kl. 12:11:** Studenten rapporterte «nøkkelen er lagret og fakturering er klar». KI kontrollerte lokal konfigurasjon uten å vise verdier: riktig prosjektrot har én ignorert `.env`, med ett fortsatt tomt OPENAI_API_KEY-felt og ingen tilsvarende prosessvariabel. En ny kontroll etter ventetid viste samme resultat. Derfor ble ingen HTTP-forespørsel til OpenAI sendt, og faktisk modelltilgang er fortsatt ukontrollert. Dette er ikke en leverandøravvisning eller bevis på feil nøkkel/fakturering. Studenten ble bedt om å oppgi bare eventuell annen filsti eller lagre feltet i riktig fil. Godkjenningen beholdes; ingen ny finansiering eller plangodkjenning etterspørres.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
