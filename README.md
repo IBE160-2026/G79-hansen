@@ -219,3 +219,59 @@ synthetic calls over the same ledger's lifetime, including failed calls; it
 never initializes the ledger, retries or prints source/output/credentials.
 See [the generation acceptance record](.docs/implementation-artifacts/generation-acceptance.md)
 for executed checks and the separate Story 2.6 quality/hosting gates.
+
+## Controlled content evaluation (Story 2.6)
+
+The [registered corpus and semantic rubric](.docs/implementation-artifacts/content-evaluation.md)
+define three original synthetic documents and two negative cases. The runner
+accepts only cases A–E. Default preflight uses production extraction and request
+validation offline; it never reads model configuration or budget/grant files:
+
+```powershell
+uv run --group pdf-experiment python -m scripts.content_evaluation
+uv run --group pdf-experiment pytest tests/test_content_evaluation.py tests/test_generation.py -q
+uv run --group pdf-experiment python -m scripts.content_evaluation --register
+```
+
+Registration exclusively creates a fingerprinted directory beneath
+`.docs/implementation-artifacts/content-evaluation-evidence/`, containing fixed
+source units, settings, fifteen concept/location expectations, code/prompt hashes,
+exact visible PDF lines and a readable ordinary-font `source-c.pdf`. Render and
+inspect all five physical pages and compare those lines before inference; pages
+2 and 4 must be blank. Commit/fingerprint this registration before any live case.
+A changed implementation requires a new matching registration, while the frozen
+corpus fingerprint remains separately traceable.
+
+After the recorded approval, initialize the separate eight-attempt grant **once**.
+This exclusively creates the fixed ignored `.model-budget-evaluation-2-6.json`;
+it cannot reset an existing file. The existing global USD 5 ledger must already
+exist. A live run additionally requires the same process model configuration as
+generation; use the existing approved configuration, with no credentials in
+command arguments. Execute one explicitly selected case per invocation:
+
+```powershell
+uv run python -m scripts.content_evaluation --initialize-grant
+uv run --group pdf-experiment python -m scripts.content_evaluation --live --case A
+uv run --group pdf-experiment python -m scripts.content_evaluation --live --case A --phase recheck
+```
+
+The final command is only for an approved, needed recheck. There are eight total
+attempts across restarts, including failed or uncertain attempts. Each consumes
+the evaluation grant durably before reserving USD 0.05 in the existing global
+ledger. No reservation is refunded, no retry is automatic, and a concurrent
+runner fails immediately. The original four-smoke counter stays unchanged and
+cannot be reused. Each attempt writes a new synthetic evidence file; numeric
+errors omit provider messages and raw envelopes. Error codes are 1 configuration,
+2 grant/lock, 3 global reservation, 4 provider/usage, 5 output structure/reference
+identity, 6 evidence persistence, 7 registration, 8 case selection, 9 deadline,
+and 10 other safe stop.
+
+Structural validation establishes reference identity only. Audit every returned
+item for factual support and substantive reference correctness; score each
+registered concept semantically, retaining unsupported claims, wrong references
+and omissions separately. Preserve initial failures and link fixes, regressions
+and rechecks. A shared instruction change needs final evidence for all five
+cases. Exhausted allowance or unresolved failures leave acceptance incomplete.
+Passing this controlled corpus establishes its observed synthetic results only;
+arbitrary course documents, complex PDF reading order/OCR, deployed isolation,
+screen-reader assessment and earlier real-email gates remain separate.

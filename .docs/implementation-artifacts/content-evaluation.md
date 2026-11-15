@@ -1,10 +1,11 @@
 # Story 2.6: registered content evaluation
 
-**Status, 15 November 2026: planning only. No Story 2.6 generation or quality result exists yet.**
+**Status, 15 November 2026: plan and eight-attempt allowance approved; implementation in progress. No Story 2.6 generation or quality result exists yet.**
 
 This is the proposed test corpus and rubric, written before generation. The
 student asked to start the concrete quality plan with approximately 30% of the
-Codex usage window remaining. This does not authorize new paid API calls. Sources
+Codex usage window remaining. After the separate eight-call explanation, the
+student replied “ok greit”, approving the plan and bounded new evaluation allowance. Sources
 below are original synthetic material, contain no personal data and may be
 retained as test fixtures/evidence. No student needs to locate or upload a file.
 
@@ -151,9 +152,9 @@ for an observed failure. A shared prompt change requires all five final cases
 on that prompt version; the eight-attempt allowance may be insufficient. If so,
 stop and report incomplete acceptance rather than quietly increasing the cap.
 
-## Proposed new allowance: approval required
+## Approved new evaluation allowance
 
-Recommend at most **eight additional attempts**: five initial cases plus three
+Approved at most **eight additional attempts**: five initial cases plus three
 reserved rechecks, one explicitly selected case at a time, no automatic retries.
 All attempts, including failed/uncertain ones, consume both the evaluation grant
 and an existing global USD 0.05 reservation. Add a fixed-path, content-free,
@@ -189,4 +190,4 @@ Passing this controlled synthetic corpus establishes only its observed results.
 It does not prove quality for arbitrary course material, complex PDFs, reading
 order, OCR, deployed isolation/concurrency, screen readers or older email gates.
 Preserve those separate issues and all earlier approvals/evidence. Story 2.6
-remains backlog and its spec draft until the plan/new allowance decision.
+is in progress; completion requires executed results and review.

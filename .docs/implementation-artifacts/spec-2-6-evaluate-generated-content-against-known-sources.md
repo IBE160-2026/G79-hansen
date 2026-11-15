@@ -2,7 +2,7 @@
 title: Evaluate generated content against known sources
 type: feature
 created: 2026-11-15
-status: draft
+status: in-progress
 route: dispatch
 story_key: 2-6-evaluate-generated-content-against-known-sources
 baseline_commit: dec0683dca9888aa04fcb0635d6e10421c7d71e6
@@ -10,13 +10,15 @@ review_loop_iteration: 0
 context: [.docs/implementation-artifacts/epic-2-context.md, .docs/implementation-artifacts/content-evaluation.md]
 ---
 
-<frozen-after-approval reason="human-owned intent; approval and new live allowance are pending">
+<frozen-after-approval reason="student approved plan and eight additional evaluation attempts on 2026-11-15">
 
 ## Intent
 
 **Problem:** Story 2.5 proves bounded generation and reference identity, but not factual support or coverage of important source concepts.
 
 **Approach:** Pre-register three distinct self-authored sources and five concepts/locations each, generate through the production extraction/model/resolution components, and assess actual content against those sources. Separately test misleading subject context and insufficient evidence. Correct observed defects and recheck within an explicitly approved allowance.
+
+**Approved decision (2026-11-15):** After explanation of five initial cases and up to three rechecks, the student replied “ok greit”. Approve this plan and at most eight additional automated evaluation attempts, each reserving USD 0.05, at most USD 0.40 additional within the existing USD 5 ceiling. Preserve the exhausted four-smoke allowance and existing provider/model/data/bounds decisions. No purchases or hosted changes.
 
 ## Boundaries & Constraints
 
@@ -36,10 +38,6 @@ context: [.docs/implementation-artifacts/epic-2-context.md, .docs/implementation
 | Recheck | Given an observed defect, when a minimal fix is made | Add synthetic regression, preserve before/after evidence, rerun affected cases within allowance; unresolved failures remain explicit |
 
 </frozen-after-approval>
-
-## Open Questions
-
-1. Approve the concrete plan and new live allowance: recommended **up to eight additional evaluation attempts**, five initial cases plus at most three explicit rechecks, reserving at most **USD 0.40 additional within the existing USD 5 ceiling**; or approve offline preparation only, leaving live quality acceptance pending. This permission is separate from Story 2.5's exhausted four smoke checks. Existing provider/model/data/bounds approvals remain unchanged.
 
 ## Code Map
 
@@ -65,6 +63,8 @@ context: [.docs/implementation-artifacts/epic-2-context.md, .docs/implementation
 - Given exhausted allowance, technical failure or an unresolved defect, when reporting status, then preserve evidence and mark acceptance incomplete instead of inventing a pass or silently increasing costs.
 
 ## Implementation Notes
+
+Parent owns real model execution and semantic assessment after independent offline verification. The implementation agent must not read `.env`, initialize/read/write actual budget or grant files, or perform live/provider requests; it implements the runner and exercises temporary ledgers/injected transports only. It returns with live evidence/report tasks explicitly pending for the parent. Commit/fingerprint the registered corpus before the first live attempt. This is a continuation of the existing rendered build, not a new planning run.
 
 ## Spec Change Log
 

@@ -1,0 +1,2 @@
+# Preserve PDF xref byte offsets and registered fixture hashes on Windows.
+*.pdf binary
