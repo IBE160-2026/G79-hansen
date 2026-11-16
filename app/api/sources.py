@@ -159,7 +159,7 @@ async def process(request, session_id, session, admission):
         if submitted.kind == 'paste':
             canonical_text(submitted.text)
         workspaces = request.app.state.workspaces
-        workspaces.command(session_id, session, submitted.workspaceId, submitted.clientRevision,
+        await workspaces.ordered_command(session_id, session, submitted.workspaceId, submitted.clientRevision,
                            submitted.commandSequence, 'extract', submitted)
         content = await to_thread.run_sync(prepare, submitted, limiter=admission.parse_limiter)
         registry.live_session(session_id, session)

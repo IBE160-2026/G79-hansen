@@ -16,6 +16,177 @@
   let csrf = null, view = null, revision = 0, sequence = 0, authSequence = 0;
   let active = null, authActive = null, lifetime = null, busy = false, logoutPending = false;
   let observation = null, logoutBusy = false, logoutController = null, logoutSequence = 0;
+  let saveAttempt = null, savedTarget = null, saveBusy = false, saveEpoch = 0;
+  let saveUncertain = false, discoveryEpoch = 0;
+  const saveMessages = {
+    save_unavailable: 'Lagring er ikke konfigurert. Materialet er beholdt.',
+    save_pending: 'Lagringen er ikke bekreftet. Prøv samme lagring igjen.',
+    save_conflict: 'Dokumentet er endret. Hent lagret versjon eller lagre som nytt.',
+    save_expired: 'Lagringen er utløpt. Bare opprydding er tilgjengelig.',
+    save_mismatch: 'Materialet eller filen samsvarer ikke med lagringen.',
+    file_required: 'Velg samme originalfil for å fortsette.',
+    save_capacity: 'En lagring pågår. Vent litt og prøv igjen.',
+    invalid_proof: 'Lag læringsmaterialet på nytt før en ny lagring.',
+    stale_workspace: 'Materialet er endret. Lag læringsmaterialet på nytt.',
+    invalid_input: 'Kontroller tittelen og materialet før du prøver igjen.',
+  };
+  function saveControls() {
+    $('save-document').disabled = saveBusy || busy || !bundle || !receipt || savedTarget?.generationId === bundle?.generationId;
+    $('save-title').disabled = saveBusy || !!saveAttempt || !bundle || savedTarget?.generationId === bundle?.generationId;
+    for (const id of ['save-again', 'save-reload', 'save-new']) $(id).disabled = saveBusy;
+  }
+  async function documentRequest(path, body, submittedView, stillCurrent = () => true) {
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 70000);
+    try {
+      const response = await fetch('/api/v1/documents/' + path, {method: 'POST', credentials: 'same-origin', cache: 'no-store',
+        signal: controller.signal, headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrf, 'X-Session-View': submittedView}, body: JSON.stringify(body)});
+      const data = await response.json();
+      if (view !== submittedView || !stillCurrent()) return null;
+      if (response.status === 401) { endAccess(); return null; }
+      if (!response.ok) { const failure = new Error(saveMessages[data.code] || saveMessages.save_pending); failure.code = data.code; failure.saveDisabled = data.saveDisabled === true; throw failure; }
+      return data;
+    } finally { clearTimeout(timer); }
+  }
+  async function discoverSaves(cursor = null, pageEpoch = null) {
+    const submittedView = view;
+    if (!submittedView) return;
+    const epoch = cursor ? pageEpoch : ++discoveryEpoch;
+    const current = () => view === submittedView && epoch === discoveryEpoch;
+    if (!current()) return;
+    try {
+      const data = await documentRequest('pending', {schemaVersion: '1.0', cursor}, submittedView, current);
+      if (!data || !current() || !Array.isArray(data.operations)) return;
+      if (!cursor) { $('save-recovery-items').replaceChildren(); $('save-recovery').hidden = data.operations.length === 0; }
+      for (const operation of data.operations) {
+        const row = element('div', undefined, 'recovery-operation');
+        row.dataset.operationId = operation.operationId;
+        const expired = operation.cleanupOnly === true || operation.recoveryState === 'cleanup_only';
+        const ready = operation.status === 'ready' && !expired;
+        row.append(element('p', ready ? 'Lagret privat.' : expired ? 'Avsluttet lagring venter på opprydding.' : 'Lagring venter på bekreftelse.'));
+        if (!expired && !ready && typeof operation.title === 'string') row.append(element('p', operation.title));
+        for (const [key, label] of (ready || expired ? [['admittedAt', 'Startet']] : [['admittedAt', 'Startet'], ['expiresAt', 'Kan gjenopptas til']])) {
+          const date = new Date(operation[key]);
+          if (!Number.isNaN(date.getTime())) row.append(element('p', label + ': ' + date.toLocaleString('nb-NO')));
+        }
+        if (ready) { $('save-recovery-items').append(row); continue; }
+        const resupply = element('input'); resupply.type = 'file'; resupply.accept = '.txt,.pdf,text/plain,application/pdf';
+        resupply.id = 'recover-' + operation.operationId;
+        if (operation.requiresFile && !expired) { const label = element('label', 'Samme originalfil'); label.htmlFor = resupply.id; row.append(label, resupply); }
+        const action = element('button', expired ? 'Rydd opp' : 'Fortsett lagring'); action.type = 'button';
+        action.onclick = async () => {
+          if (!current()) return;
+          action.disabled = true;
+          try {
+            const body = {schemaVersion: '1.0', operationId: operation.operationId};
+            if (!expired) { body.digest = operation.digest; if (resupply.files[0]) body.contentBase64 = await encodeFile(resupply.files[0]); }
+            const result = await documentRequest(expired ? 'cleanup' : 'retry', body, submittedView, current);
+            if (!current() || !result) return;
+            row.replaceChildren(element('p', result.status === 'ready' ? 'Lagret privat.' : result.status === 'cleanup_complete' ? 'Opprydding er fullført.' : 'Opprydding venter på bekreftelse.'));
+            if (result.status === 'cleanup_pending') row.append(action);
+          } catch (failure) {
+            if (!current()) return;
+            if (failure.code === 'save_expired' || failure.code === 'save_conflict') await discoverSaves();
+            else row.append(element('p', failure.message || saveMessages.save_pending));
+          }
+          finally { if (current()) action.disabled = false; }
+        };
+        row.append(action); $('save-recovery-items').append(row);
+      }
+      if (data.nextCursor) {
+        const more = element('button', 'Vis flere lagringer'); more.type = 'button';
+        more.onclick = () => { if (current()) { more.remove(); discoverSaves(data.nextCursor, epoch); } };
+        $('save-recovery-items').append(more);
+      }
+    } catch (failure) {
+      if (!current()) return;
+      if (failure.saveDisabled) {
+        if (!cursor) { $('save-recovery-items').replaceChildren(); $('save-recovery').hidden = true; }
+        return;
+      }
+      $('save-recovery').hidden = false;
+      const notice = element('div', undefined, 'recovery-operation');
+      notice.append(element('p', 'Tidligere lagringer kunne ikke hentes.'));
+      const again = element('button', 'Prøv igjen'); again.type = 'button';
+      again.onclick = () => { if (current()) { notice.remove(); discoverSaves(); } };
+      notice.append(again);
+      if (!cursor) $('save-recovery-items').replaceChildren();
+      $('save-recovery-items').append(notice);
+    }
+  }
+  async function encodeFile(selected) {
+    if (selected.size > 10 * 1024 * 1024) throw new Error(messages.byte_limit);
+    const bytes = new Uint8Array(await selected.arrayBuffer()); let binary = '';
+    for (let offset = 0; offset < bytes.length; offset += 32768) binary += String.fromCharCode(...bytes.subarray(offset, offset + 32768));
+    return btoa(binary);
+  }
+  async function saveDocument(asNew = false) {
+    if (saveBusy || !view || !bundle || !receipt) return;
+    if (savedTarget?.generationId === bundle.generationId && !asNew) return;
+    const submittedView = view, submittedRevision = revision, generation = bundle.generationId, epoch = saveEpoch;
+    let firstDispatch = false;
+    saveBusy = true; $('save-status').textContent = 'Lagrer privat …'; saveControls();
+    try {
+      if (!saveAttempt || asNew) {
+        const title = $('save-title').value;
+        const effectiveTitle = title || bundle.source.title;
+        if ([...effectiveTitle].length > 160) throw new Error('Tittelen kan ha høyst 160 tegn.');
+        // Match Python Unicode whitespace and reject controls/lone surrogates;
+        // astral characters count as one Unicode code point.
+        if (!/[^\u0009-\u000d\u001c-\u0020\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/u.test(effectiveTitle) ||
+            [...effectiveTitle].some(char => char.codePointAt(0) < 32 || (char.codePointAt(0) >= 0xd800 && char.codePointAt(0) <= 0xdfff)))
+          throw new Error('Tittelen må inneholde tekst uten kontrolltegn.');
+        const frozen = {schemaVersion: '1.0', operationId: crypto.randomUUID(), documentId: asNew || !savedTarget ? crypto.randomUUID() : savedTarget.documentId,
+          expectedRevision: asNew || !savedTarget ? null : savedTarget.revision, title: title || null,
+          acceptance: accepted, bundle, receipt, positions: {flashcardId: bundle.flashcards[positions.flashcards]?.id || null, quizId: bundle.quiz[positions.quiz]?.id || null}};
+        if (accepted.kind !== 'paste') {
+          if (!file.files[0]) throw new Error(saveMessages.file_required);
+          frozen.contentBase64 = await encodeFile(file.files[0]);
+        }
+        if (view !== submittedView || revision !== submittedRevision || epoch !== saveEpoch) return;
+        saveAttempt = frozen; saveUncertain = false;
+      }
+      firstDispatch = !saveUncertain; saveUncertain = true;
+      const result = await documentRequest('save', saveAttempt, submittedView);
+      if (!result || view !== submittedView || revision !== submittedRevision || bundle?.generationId !== generation || epoch !== saveEpoch) return;
+      if (result.status !== 'ready') throw new Error(saveMessages.save_pending);
+      savedTarget = {documentId: result.documentId, revision: result.revision, generationId: result.generationId};
+      saveAttempt = null; $('save-status').textContent = 'Lagret privat. Øvingen beholdes ved denne lagringen.';
+      for (const id of ['save-again', 'save-reload', 'save-new']) $(id).hidden = true;
+      discoverSaves();
+    } catch (failure) {
+      if (view !== submittedView || epoch !== saveEpoch) return;
+      $('save-status').textContent = failure.message || saveMessages.save_pending;
+      if (failure.code === 'invalid_input' && firstDispatch) { saveAttempt = null; saveUncertain = false; }
+      $('save-again').hidden = !saveAttempt;
+      $('save-reload').hidden = failure.code !== 'save_conflict' || !savedTarget;
+      $('save-new').hidden = failure.code !== 'save_conflict';
+    } finally {
+      saveBusy = false; saveControls();
+    }
+  }
+  $('save-document').onclick = () => saveDocument();
+  $('save-again').onclick = () => saveDocument();
+  $('save-new').onclick = () => saveDocument(true);
+  $('save-reload').onclick = async () => {
+    if (!savedTarget || saveBusy) return;
+    const submittedView = view, epoch = saveEpoch;
+    saveBusy = true; saveControls();
+    try {
+      const data = await documentRequest('reload', {schemaVersion: '1.0', documentId: savedTarget.documentId}, submittedView);
+      if (!data || view !== submittedView || epoch !== saveEpoch) return;
+      invalidate(); bundle = data.bundle; receipt = null;
+      kind.value = data.acceptance.kind; file.value = '';
+      text.value = kind.value === 'paste' ? data.acceptance.source.units.map(unit => unit.text).join('\n\n') : '';
+      language.value = bundle.settings.language; detail.value = bundle.settings.detail; subject.value = bundle.settings.subject;
+      showMethod(); render({...data.acceptance, clientRevision: revision}); accepted = null;
+      savedTarget = {documentId: data.documentId, revision: data.revision, generationId: data.generationId};
+      $('save-title').value = data.title; saveAttempt = null;
+      for (const [section, key] of [['flashcards', 'flashcardId'], ['quiz', 'quizId']]) positions[section] = Math.max(0, bundle[section].findIndex(item => item.id === data.positions[key]));
+      renderLearning(); $('results').hidden = false; materialOpen(false);
+      $('save-status').textContent = 'Lagret versjon er hentet. Svarene er skjult.';
+    } catch (failure) { if (view === submittedView && epoch === saveEpoch) $('save-status').textContent = failure.message; }
+    finally { saveBusy = false; saveControls(); }
+  };
   const messages = {
     invalid_input: 'Velg én kilde og kontroller materialet før du prøver igjen.',
     invalid_text: 'Teksten må være gyldig UTF-8 uten binære kontrolltegn.',
@@ -49,6 +220,7 @@
     $('source-retry').disabled = value;
     $('results').setAttribute('aria-busy', String(value));
     form.setAttribute('aria-busy', String(value));
+    saveControls();
   }
   function clearPreview() {
     preview.hidden = true;
@@ -63,6 +235,8 @@
     $('edit-material').setAttribute('aria-expanded', String(open));
   }
   function clearResults() {
+    ++saveEpoch; saveAttempt = null; saveUncertain = false; $('save-status').textContent = '';
+    for (const id of ['save-again', 'save-reload', 'save-new']) $(id).hidden = true;
     bundle = null; receipt = null; activeTab = 'summary';
     positions = {flashcards: 0, quiz: 0}; revealed = {flashcards: new Set(), quiz: new Set()};
     $('results').hidden = true; $('content').replaceChildren(); $('generation-warnings').replaceChildren();
@@ -110,6 +284,7 @@
     file.accept = kind.value === 'pdf' ? '.pdf,application/pdf' : '.txt,text/plain';
   }
   function clearDraft() {
+    savedTarget = null; $('save-title').value = '';
     invalidate();
     text.value = ''; file.value = ''; subject.value = '';
     kind.value = 'paste'; language.value = 'nb'; detail.value = 'short';
@@ -126,6 +301,8 @@
     clearTimeout(lifetime);
     clearDraft();
     csrf = null; view = null; pendingInvalidation = null;
+    ++discoveryEpoch;
+    $('save-recovery-items').replaceChildren(); $('save-recovery').hidden = true;
     materialOpen(true); $('edit-material').hidden = true;
     controls.disabled = true; form.hidden = true; logout.hidden = true;
     signIn.hidden = false;
@@ -179,6 +356,7 @@
       clearTimeout(lifetime); lifetime = setTimeout(() => endAccess(), seconds * 1000);
       controls.disabled = false; form.hidden = false; logout.hidden = false; signIn.hidden = true;
       if (initial || changed) status.textContent = changed ? 'Ny innlogging. Velg materialet på nytt.' : 'Du er logget inn. Velg materialet du vil kontrollere.';
+      if (initial || changed) discoverSaves();
       return true;
     } catch {
       if (id === authSequence) {

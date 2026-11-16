@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 15-11-2026 22:17
+last_updated: 16-11-2026 08:00
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -68,8 +68,8 @@ development_status:
   # Original four-smoke count intact; evaluation 5/8, global USD 0.45 of USD 5 reserved; no app/prompt/host changes.
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-save-a-consistent-private-snapshot: backlog
+  epic-3: in-progress
+  3-1-save-a-consistent-private-snapshot: review
   3-2-open-your-private-document-library: backlog
   3-3-synchronize-practice-progress-across-devices: backlog
   3-4-delete-saved-material-completely: backlog

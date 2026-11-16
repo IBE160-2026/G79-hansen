@@ -10,6 +10,14 @@ from app.api.auth import BROWSER_COOKIE, context, current_session, protected
 from app.api.sources import unique_object
 
 MESSAGES = {
+    'save_unavailable': 'Lagring er ikke konfigurert. Materialet er beholdt.',
+    'save_pending': 'Lagringen er ikke bekreftet. Behold materialet og prøv samme lagring igjen.',
+    'save_capacity': 'En lagring pågår. Vent litt og prøv igjen.',
+    'save_mismatch': 'Lagringen samsvarer ikke med det opprinnelige materialet. Materialet er beholdt.',
+    'save_conflict': 'Dokumentet er endret. Hent lagret versjon eller lagre som nytt.',
+    'save_expired': 'Lagringen er utløpt. Bare opprydding er tilgjengelig.',
+    'save_unknown': 'Denne lagringen finnes ikke for kontoen.',
+    'file_required': 'Velg den samme originalfilen for å fortsette lagringen.',
     'session_ended': 'Tilgangen er avsluttet. Logg inn på nytt.',
     'request_rejected': 'Forespørselen ble avvist. Last siden på nytt og prøv igjen.',
     'generation_failed': 'Læringsmaterialet kunne ikke lages. Behold materialet og prøv igjen.',
@@ -28,14 +36,19 @@ MESSAGES = {
 }
 
 
-def error(code):
+def error(code, *, save_disabled=False):
     if code not in MESSAGES:
         code = 'generation_failed'
     status = {'session_ended': 401, 'request_rejected': 403, 'generation_capacity': 429,
               'workspace_capacity': 429, 'generation_timeout': 504, 'model_unavailable': 503,
               'budget_unavailable': 503, 'generation_failed': 503, 'body_timeout': 408,
-              'wire_limit': 413, 'stale_workspace': 409, 'command_replayed': 409}.get(code, 422)
-    return JSONResponse({'code': code, 'message': MESSAGES[code], 'requestId': str(uuid4())}, status_code=status)
+              'wire_limit': 413, 'stale_workspace': 409, 'command_replayed': 409,
+              'save_unavailable': 503, 'save_pending': 503, 'save_capacity': 429,
+              'save_conflict': 409, 'save_mismatch': 409, 'save_expired': 410, 'save_unknown': 404}.get(code, 422)
+    payload = {'code': code, 'message': MESSAGES[code], 'requestId': str(uuid4())}
+    if save_disabled and code == 'save_unavailable':
+        payload['saveDisabled'] = True
+    return JSONResponse(payload, status_code=status)
 
 
 async def authenticate(request):
@@ -53,7 +66,7 @@ async def authenticate(request):
     return session_id, session
 
 
-def decode(raw, contract, member_limit=50_100):
+def decode(raw, contract, member_limit=50_100, structure_limit=10_100):
     quoted = escaped = False
     depth = members = structures = 0
     for char in raw:
@@ -64,7 +77,7 @@ def decode(raw, contract, member_limit=50_100):
         elif char == 34: quoted = True
         elif char in (91, 123):
             depth += 1; structures += 1
-            if depth > 8 or structures > 10_100:
+            if depth > 8 or structures > structure_limit:
                 raise ModelFailure('invalid_input')
         elif char in (93, 125): depth -= 1
         elif char == 58:
@@ -78,7 +91,7 @@ def decode(raw, contract, member_limit=50_100):
         raise ModelFailure('invalid_input') from None
 
 
-async def collect(request, contract, *, limit=2 * 1024 * 1024, member_limit=50_100):
+async def collect(request, contract, *, limit=2 * 1024 * 1024, member_limit=50_100, structure_limit=10_100):
     if request.headers.get('content-type', '').split(';')[0].strip() != 'application/json':
         raise ModelFailure('invalid_input')
     lengths = request.headers.getlist('content-length')
@@ -97,4 +110,4 @@ async def collect(request, contract, *, limit=2 * 1024 * 1024, member_limit=50_1
         raise ModelFailure('body_timeout') from None
     except ClientDisconnect:
         raise ModelFailure('invalid_input') from None
-    return decode(raw, contract, member_limit)
+    return decode(raw, contract, member_limit, structure_limit)

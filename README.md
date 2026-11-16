@@ -27,7 +27,7 @@ uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 - `POST /api/v1/demo/generate` tar nøyaktig `{"schemaVersion":"1.0","fixtureId":"memory-basics-v1"}` og returnerer alle fire deler samlet. Hver del har stabile element- og kilde-ID-er; hver generering får en ny `generationId`.
 - [API-dokumentasjon](http://127.0.0.1:8000/docs) viser kontraktene. Ukjent eksempel, versjon, egne kildefelt, innstillinger og andre ekstra felt gir forståelig HTTP 422 uten behandling eller lagring.
 
-Studiedemoen bruker faste syntetiske eksempeldata på norsk med kort sammendrag. Ingen AI-modell behandler demoteksten. Egen tekst, tekstfil/PDF og språk-/detaljvalg er tilgjengelig i det private arbeidsområdet `/workspace`, med separat aktivert modellkonfigurasjon. Lagre, Mine dokumenter og varig fremdrift er senere arbeid. Den aktive demotilstanden finnes bare i minnet på den åpne siden og forsvinner ved omlasting. Feil gir eksplisitt prøv-igjen; demoen bytter aldri til et falskt vellykket svar.
+Studiedemoen bruker faste syntetiske eksempeldata på norsk med kort sammendrag. Ingen AI-modell behandler demoteksten. Egen tekst, tekstfil/PDF og språk-/detaljvalg er tilgjengelig i det private arbeidsområdet `/workspace`, med separat aktivert modellkonfigurasjon. Eksplisitt privat Lagre er implementert med separat konfigurasjon og er deaktivert som standard; Mine dokumenter og løpende fremdriftssynkronisering er senere arbeid. Den aktive demotilstanden finnes bare i minnet på den åpne siden og forsvinner ved omlasting. Feil gir eksplisitt prøv-igjen; demoen bytter aldri til et falskt vellykket svar.
 
 Demoen trenger ingen konfigurasjon og gjør ingen Supabase-kall. `/account` tilbyr norsk registrering og innlogging når Supabase er uttrykkelig aktivert og riktig konfigurert; ellers viser siden at innlogging er utilgjengelig. Bare eksplisitte offentlige UI-filer serveres; repositoryfiler og dokumentasjon er ikke statisk tilgjengelige. Den historiske UX-prototypen ligger uendret under `.docs/planning-artifacts/ux-designs/`.
 
@@ -39,7 +39,7 @@ Serveren leser `AUTH_ENABLED=true`, `APP_ORIGIN`, `SUPABASE_URL` og `SUPABASE_PU
 
 Den lokale ignorerte `.env` kan lastes eksplisitt med `uv run --env-file .env uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1`. Åpne deretter `http://127.0.0.1:8000/account`. Dette aktiverer den konfigurerte innloggingen; vanlig demooppstart laster fortsatt ingen `.env`.
 
-Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i begrenset serverminne; nettleseren får tilfeldige HttpOnly-cookies. Bekreftelsen må åpnes innen ti minutter i nettleseren/profilen der registreringen startet. Økten utløper etter 30 minutter uten aktivitet, senest etter 12 timer, og ved serverrestart. Standarddemoen forblir tilgjengelig uten konto. Lokal utlogging, midlertidig kildekontroll og KI-generering av alle fire læringsdeler er implementert; varig lagring og utrulling kommer senere.
+Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i begrenset serverminne; nettleseren får tilfeldige HttpOnly-cookies. Bekreftelsen må åpnes innen ti minutter i nettleseren/profilen der registreringen startet. Økten utløper etter 30 minutter uten aktivitet, senest etter 12 timer, og ved serverrestart. Standarddemoen forblir tilgjengelig uten konto. Lokal utlogging, midlertidig kildekontroll og KI-generering av alle fire læringsdeler er implementert; eksplisitt privat lagring er implementert i Story 3.1 med separat aktivering. Utrulling krever egen godkjenning.
 
 **Glemt passord (Story 2.2)** sender en generell kvittering og bruker en egen PKCE-lenke som må åpnes i samme nettleser/profil innen ti minutter. Lenken gir bare tilgang til skjemaet for nytt passord; den logger deg ikke inn. Et innsendt endringsforsøk bruker opp denne tilgangen før leverandørkallet. Etterpå må du logge inn på vanlig måte. Ved tidsavbrudd kan passordet allerede være endret: prøv innlogging eller be om en ny lenke. Innlogging og gjenoppretting deler maksimalt 1 000 lokale økter; registrering og gjenoppretting deler maksimalt 1 000 ventende forsøk og fire per nettleser. Reell e-post og passordendring krever uttrykkelig testerautorisasjon og er ikke utført av implementasjonstestene. Se [oppsettet](.docs/implementation-artifacts/auth-setup.md) for den ekstra redirect-oppføringen og åpne akseptansepunkter.
 
@@ -126,8 +126,8 @@ old tab timers cannot end a newer login. Lifetime timing includes response delay
 and passive observations preserve forms/focus. Failed logout retains its intent
 and retries the protected POST. Each opaque HttpOnly session cookie has its own
 generation name, so delayed logout headers cannot delete a newer login cookie.
-No private document endpoints or saved-data durability are introduced here;
-durability belongs to Story 3.2. Review corrections pass 243 Python tests (one
+Story 2.3 introduced no document persistence; explicit Save is added in Story 3.1 below.
+Review corrections passed 243 Python tests (one
 unchanged optional PDF skip), 33 auth-browser scenarios and 11 demo scenarios.
 A separate real-Supabase run passed 25 checks of logout, same-account isolation,
 refresh and restart; restricted grants/deadline metadata and revoke failure were
@@ -144,7 +144,7 @@ avviser hele kilden. PDF krever den kontrollerte Windows-isolasjonen.
 
 Materialet behandles midlertidig. Endret kilde/innstilling forkaster gammel
 forhåndsvisning, og utlogging/utløp/ny innlogging tømmer privat innhold.
-KI-generering er tilgjengelig som beskrevet nedenfor; lagring kommer senere. Den faste demoen på `/` beholdes.
+KI-generering er tilgjengelig som beskrevet nedenfor; eksplisitt privat lagring krever oppsettet for Story 3.1. Den faste demoen på `/` beholdes.
 Kjør `node tests/browser-sources.cjs` for kildeflyten, i tillegg til de øvrige
 testene. Se [API, testkommandoer og akseptansegrenser](.docs/implementation-artifacts/source-acceptance.md).
 
@@ -157,8 +157,9 @@ testene. Se [API, testkommandoer og akseptansegrenser](.docs/implementation-arti
 `/workspace` now has **Lag læringsmateriale**.
 The action checks the current source when necessary, then requests summary,
 concepts, flashcards and quiz together. The optional source preview remains
-available. Results and selected files exist only in page memory; no Save,
-library or document database has been added. Editing material/settings, reset,
+available. Unsaved results and selected files exist only in page memory.
+Explicit private Save is implemented in Story 3.1 below and disabled by default;
+the full library remains Story 3.2. Editing material/settings, reset,
 session changes and page exit clear the private result. Technical errors retain
 the draft/file/settings and offer explicit retry. Practice navigation and reveal
 controls do not call the model.
@@ -208,9 +209,9 @@ to the current owner, a non-authorizing session binding and ordered workspace
 command. Source text, generated content, receipts, credentials and source hashes
 are never persisted in the budget ledger. Workspace authority stores metadata
 only (at most eight workspaces per session), uses the auth-then-workspace mutex
-order and is removed when access ends. `Workspaces.validate_save(...)` exposes
-only a future Save admission context manager: signature validity alone cannot
-authorize a superseded result, and a future write must remain inside that mutex.
+order and is removed when access ends. Signature validity alone cannot authorize
+a superseded result. Story 3.1 coordinates admission with invalidation using an
+owned asynchronous workspace gate; no authentication/global lock spans network IO.
 
 Run `uv run --group pdf-experiment pytest`, `node tests/browser-sources.cjs`,
 `node tests/browser-auth.cjs`, `node tests/browser-demo.cjs` and `git diff --check`.
@@ -293,3 +294,55 @@ cases. Exhausted allowance or unresolved failures leave acceptance incomplete.
 Passing this controlled corpus establishes its observed synthetic results only;
 arbitrary course documents, complex PDF reading order/OCR, deployed isolation,
 screen-reader assessment and earlier real-email gates remain separate.
+
+## Explicit private Save (Story 3.1)
+
+After generating material, **Lagre** saves the validated source, settings, four
+learning sections, optional original file and the independent current flashcard
+and quiz positions. The optional title accepts 160 Unicode code points. Save
+makes no model call. Navigating practice does not save again; progress sync is
+Story 3.3. Edits keep the saved document as the explicit replacement target;
+**Ny økt** detaches that target without deleting data. Revision conflicts offer
+**Hent lagret versjon** or **Lagre som nytt** and preserve the unsaved draft.
+
+Save is disabled by default. It requires the migration, private bucket policies,
+an administrator-installed verifier hash, `SAVE_ENABLED=true`, and the ignored
+server capability file named by `SAVE_BACKEND_KEY_PATH`. The application never
+loads `.env` automatically and uses user JWTs, never a service key, for ordinary
+document/Storage work. The migration and exact hosted approval boundary are in
+[the Save acceptance record](.docs/implementation-artifacts/save-acceptance.md).
+No hosted migration/configuration is authorized by local implementation approval.
+
+After approval, `uv run python -m scripts.save_backend_key` exclusively creates
+the ignored `.save-backend-key` file with restricted permissions. It refuses an
+existing/unignored destination and prints only `keyId` and the SHA-256 verifier.
+Install only that verifier in `studybuddy.backend_verifiers` as administration.
+Never put the raw capability in SQL, arguments, browser code or logs. Key rotation
+changes current backend authorization without changing admitted operation IDs.
+
+An immutable operation is durably admitted before any upload. Exact retries
+return the recorded outcome before checking an old receipt/revision. A pending
+panel after fresh login identifies pending same-owner operations by title and
+admission/expiry times. Exact recovery lasts seven days using the stored snapshot
+and matching original bytes when needed. Confirmed completed outcomes remain
+discoverable for seven days after completion, including a lost successful reply.
+At expiry, upload/commit is rejected exactly. A minute-by-minute administrator
+database job erases overdue staging/title independently of owner login; physical
+staging purge follows the next successful bounded maintenance batch. Scheduler
+failure or backlog delays erasure and fails retention acceptance. Operators must
+check `cron.job`, `cron.job_run_details` and
+`studybuddy.expiry_maintenance_health`; see the acceptance record for health SQL.
+`uv run python -m scripts.save_cleanup` asks for a fresh user JWT using a hidden
+prompt, validates that identity, expires owner staging and retries registered
+cleanup; it does not use or create accounts. Registered uncertain writes stay
+discoverable. Object-free terminal operations report `cleanup_complete` and leave
+content-free tombstones; registered file cleanup remains pending without physical
+provider quiescence evidence. Ready Save and cleanup status are separate. Database
+erasure does not establish removal from backups or physical blob storage; those
+remain separate real-file acceptance gates.
+
+Run `uv run pytest`, `node tests/browser-documents.cjs` and the three existing
+browser suites. Injected-port tests exercise application lifecycle/failures;
+`supabase/tests/save_protocol.test.sql` and the isolated local provider runner
+exercise actual transactions/RLS/Storage. Their exact executed evidence and
+remaining hosted/real-file/provider retention gates belong in the acceptance record.

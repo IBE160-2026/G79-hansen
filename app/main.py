@@ -18,6 +18,10 @@ from app.services.generation import GenerationAdmission
 from app.adapters.model import OpenAIModel
 from app.api.generation import router as generation_router
 from app.api.workspaces import router as workspaces_router
+from app.api.documents import router as documents_router
+from app.adapters.documents import SupabaseDocuments
+from app.adapters.storage import SupabaseStorage
+from app.services.documents import Documents, SaveAdmission
 
 PUBLIC = Path(__file__).parent / 'static'
 
@@ -37,7 +41,7 @@ logging.getLogger('uvicorn.access').addFilter(RedactAuthQuery())
 
 
 def create_app(settings=None, *, auth_adapter=None, registry=None, model_adapter=None,
-               workspaces=None, model_budget=None):
+               workspaces=None, model_budget=None, documents_repository=None, storage_adapter=None):
     settings = settings if settings is not None else Settings.from_env()
     application = FastAPI(title='Study Buddy', version='0.1.0', redirect_slashes=False)
     application.state.settings = settings
@@ -51,16 +55,22 @@ def create_app(settings=None, *, auth_adapter=None, registry=None, model_adapter
     application.state.model_adapter = model_adapter if model_adapter is not None else OpenAIModel(settings)
     application.state.model_injected = model_adapter is not None
     application.state.model_budget = model_budget if model_budget is not None else ModelBudget(settings.model_budget_path)
+    application.state.save_admission = SaveAdmission()
+    application.state.documents_injected = documents_repository is not None
+    application.state.documents = Documents(documents_repository if documents_repository is not None else SupabaseDocuments(settings),
+        storage_adapter if storage_adapter is not None else SupabaseStorage(settings),
+        application.state.workspaces, application.state.save_admission)
     application.include_router(router)
     application.include_router(auth_router)
     application.include_router(sources_router)
     application.include_router(workspaces_router)
     application.include_router(generation_router)
+    application.include_router(documents_router)
 
     @application.middleware('http')
     async def private_headers(request: Request, call_next):
         response = await call_next(request)
-        if request.url.path in ('/account', '/workspace') or request.url.path.startswith(('/api/v1/auth', '/api/v1/sources', '/api/v1/generation', '/api/v1/workspaces')):
+        if request.url.path in ('/account', '/workspace') or request.url.path.startswith(('/api/v1/auth', '/api/v1/sources', '/api/v1/generation', '/api/v1/workspaces', '/api/v1/documents')):
             response.headers['Cache-Control'] = 'no-store'
             response.headers['Pragma'] = 'no-cache'
             response.headers['Referrer-Policy'] = 'no-referrer'
@@ -69,7 +79,7 @@ def create_app(settings=None, *, auth_adapter=None, registry=None, model_adapter
 
     @application.exception_handler(RequestValidationError)
     async def invalid_request(request: Request, exc: RequestValidationError):
-        if request.url.path.startswith(('/api/v1/auth', '/api/v1/sources', '/api/v1/generation', '/api/v1/workspaces')):
+        if request.url.path.startswith(('/api/v1/auth', '/api/v1/sources', '/api/v1/generation', '/api/v1/workspaces', '/api/v1/documents')):
             return JSONResponse(status_code=422, content={'code': 'invalid_request',
                 'message': 'Forespørselen ble avvist.', 'requestId': str(uuid4())})
         return JSONResponse(status_code=422, content={'code': 'unsupported_demo_input',

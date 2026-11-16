@@ -14,7 +14,7 @@ async def invalidate(request: Request):
     try:
         session_id, session = await authenticate(request)
         submitted = await collect(request, WorkspaceCommand, limit=1024, member_limit=4)
-        request.app.state.workspaces.command(session_id, session, submitted.workspace_id,
+        await request.app.state.workspaces.ordered_command(session_id, session, submitted.workspace_id,
             submitted.client_revision, submitted.command_sequence, 'invalidate', submitted)
         return {'schemaVersion': '1.0', 'clientRevision': submitted.client_revision,
                 'commandSequence': submitted.command_sequence}

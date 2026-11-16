@@ -60,10 +60,11 @@ async def generate(application, session_id, session, submitted, *, deadline=None
 
     current_wait()
     registry, workspaces = application.state.auth_registry, application.state.workspaces
-    with registry.lock, workspaces.lock:
-        workspaces.verify_source(session_id, session, submitted)
-        workspaces.command(session_id, session, submitted.workspace_id, submitted.client_revision,
-                           submitted.command_sequence, 'generate', submitted)
+    async with workspaces.gate(session_id, session, submitted.workspace_id):
+        with registry.lock, workspaces.lock:
+            workspaces.verify_source(session_id, session, submitted)
+            workspaces.command(session_id, session, submitted.workspace_id, submitted.client_revision,
+                               submitted.command_sequence, 'generate', submitted)
     if not application.state.settings.model_available and not application.state.model_injected:
         raise ModelFailure('model_unavailable')
     body = request_bytes(submitted.acceptance)

@@ -14,7 +14,7 @@
     <p><a href="/">Studiedemo</a> · <a href="/account">Konto og innlogging</a></p>
     <h1>Eget materiale</h1>
     <p class="muted">Fra kildetekst til oversikt og øving med kontrollerbare referanser.</p>
-    <p class="source">Materialet og svarene beholdes bare i denne siden til du avslutter økten. Bruk bare materiale du har lov til å dele, uten sensitive opplysninger. Generering sender tekst til OpenAI globalt. Ingen treningsdeling eller promptlagring er aktivert. Sikkerhetslogger kan normalt beholdes i opptil 30 dager, med unntak. Kontroller svarene mot kilden.</p>
+    <p class="source">Materialet er midlertidig til du velger Lagre. Lagre beholder kilden, eventuell originalfil og læringsmaterialet privat på kontoen. Bruk bare materiale du har lov til å dele, uten sensitive opplysninger. Generering sender tekst til OpenAI globalt. Ingen treningsdeling eller promptlagring er aktivert. Sikkerhetslogger kan normalt beholdes i opptil 30 dager, med unntak. Kontroller svarene mot kilden.</p>
   </header>
   <p id="source-status" role="status" aria-live="polite">Kontrollerer innlogging …</p>
   <p id="source-sign-in" hidden><a href="/account">Logg inn for å bruke eget materiale</a></p>
@@ -24,6 +24,11 @@
     <button id="source-logout" type="button" hidden>Logg ut</button>
   </div>
   <button id="edit-material" type="button" aria-controls="material-body" aria-expanded="true" hidden>Vis/rediger</button>
+  <section id="save-recovery" class="panel" aria-labelledby="save-recovery-heading" hidden>
+    <h2 id="save-recovery-heading">Uferdige lagringer</h2>
+    <p class="source">Fortsett den samme lagringen innen sju dager. Velg samme originalfil når den trengs.</p>
+    <div id="save-recovery-items"></div>
+  </section>
   <div id="material-body">
   <form id="source-form" class="panel material-panel" hidden>
     <fieldset id="source-controls" disabled>
@@ -66,6 +71,17 @@
   </section>
   </div>
   <section class="panel" id="results" aria-label="Læringsmateriale" aria-busy="false" hidden>
+    <div class="save-controls">
+      <label for="save-title">Tittel (valgfritt, høyst 160 tegn)</label>
+      <input id="save-title" type="text" autocomplete="off" aria-describedby="save-status">
+      <div class="row actions">
+        <button id="save-document" type="button">Lagre</button>
+        <button id="save-again" type="button" hidden>Prøv samme lagring igjen</button>
+        <button id="save-reload" type="button" hidden>Hent lagret versjon</button>
+        <button id="save-new" type="button" hidden>Lagre som nytt</button>
+      </div>
+      <p id="save-status" role="status" aria-live="polite"></p>
+    </div>
     <div id="generation-warnings"></div>
     <nav class="tabs" role="tablist" aria-label="Læringsdeler">
       <button id="tab-summary" role="tab" aria-selected="true" aria-controls="content" data-tab="summary" type="button">Sammendrag</button>

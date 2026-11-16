@@ -7,6 +7,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from threading import RLock
 from uuid import uuid4
+import asyncio
+from contextlib import asynccontextmanager
 
 from app.services.receipts import Proofs, acceptance_projection, digest
 
@@ -27,6 +29,7 @@ class Workspace:
     file_hash: str | None = None
     receipt_id: str | None = None
     bundle_hash: str | None = None
+    admission_gate: object = None
 
 
 class Workspaces:
@@ -58,6 +61,29 @@ class Workspaces:
                         raise WorkspaceFailure('workspace_capacity')
                     table[workspace_id] = Workspace()
                 yield table[workspace_id]
+
+    def gate(self, session_id, session, workspace_id):
+        with self.locked(session_id, session, workspace_id, create=True) as record:
+            if record.admission_gate is None:
+                record.admission_gate = asyncio.Lock()
+            return record.admission_gate
+
+    async def ordered_command(self, session_id, session, workspace_id, *args):
+        async with self.gate(session_id, session, workspace_id):
+            return self.command(session_id, session, workspace_id, *args)
+
+    @asynccontextmanager
+    async def admit_save(self, session_id, session, token, acceptance, bundle):
+        """Own one workspace gate, with no registry/auth lock around remote IO.
+
+        Logout detaches the record immediately. The live check immediately before
+        yield authorizes only this already-dispatched explicit admission.
+        """
+        async with self.gate(session_id, session, acceptance.workspace_id):
+            with self.validate_save(session_id, session, token, acceptance, bundle) as claims:
+                pass
+            self.registry.live_session(session_id, session)
+            yield claims
 
     def command(self, session_id, session, workspace_id, revision, sequence, operation, payload):
         if hasattr(payload, 'model_dump'):
@@ -132,11 +158,7 @@ class Workspaces:
             return self.proofs.sign('generation', claims)
 
     def validate_save(self, session_id, session, token, acceptance, bundle):
-        """Future Save admission only. Call a future durable write inside this mutex.
-
-        Returns a context manager so callers cannot introduce a check/write race.
-        No content is retained and no Save endpoint is implemented in this story.
-        """
+        """Synchronous authority check. Durable callers use admit_save's owned gate."""
         return self._save_admission(session_id, session, token, acceptance, bundle)
 
     @contextmanager
@@ -153,4 +175,4 @@ class Workspaces:
                 claims.get('acceptanceHash') != record.acceptance_hash or claims.get('fileHash') != record.file_hash or
                 claims.get('generationId') != bundle.generation_id):
                 raise WorkspaceFailure('invalid_proof')
-            yield claims
+        yield claims

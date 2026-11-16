@@ -537,7 +537,7 @@ def test_global_two_request_limit_and_separate_invalidation_path(tmp_path):
     assert len(model.calls) == 2 and client.app.state.model_budget.read()['attempts'] == 2
 
 
-def test_save_admission_mutex_serializes_invalidation_and_new_receipt(tmp_path):
+def test_save_validation_never_retains_global_or_auth_locks_across_yield(tmp_path):
     client, headers, _ = setup(tmp_path)
     accepted = extract(client, headers)
     result = generate(client, headers, accepted).json()
@@ -555,7 +555,7 @@ def test_save_admission_mutex_serializes_invalidation_and_new_receipt(tmp_path):
     with ThreadPoolExecutor(2) as executor:
         saving = executor.submit(save); revoking = executor.submit(revoke)
         assert entered.wait(3)
-        assert not invalidated.wait(.03)
+        assert invalidated.wait(1)
         release.set(); saving.result(); revoking.result()
     with pytest.raises(WorkspaceFailure):
         with save_admission(client, accepted, result): pass

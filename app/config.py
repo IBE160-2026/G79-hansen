@@ -6,6 +6,8 @@ import os
 from dataclasses import dataclass, field
 from ipaddress import ip_address
 from urllib.parse import urlsplit
+from pathlib import Path
+import re
 
 
 @dataclass(frozen=True)
@@ -20,6 +22,8 @@ class Settings:
     model_enabled: bool = False
     openai_api_key: str = field(default="", repr=False)
     model_budget_path: str = ""
+    save_enabled: bool = False
+    save_backend_key_path: str = ""
 
     @classmethod
     def from_env(cls):
@@ -40,6 +44,8 @@ class Settings:
             model_enabled=os.environ.get("MODEL_ENABLED") == "true",
             openai_api_key=os.environ.get("OPENAI_API_KEY", ""),
             model_budget_path=os.environ.get("MODEL_BUDGET_PATH", ""),
+            save_enabled=os.environ.get("SAVE_ENABLED") == "true",
+            save_backend_key_path=os.environ.get("SAVE_BACKEND_KEY_PATH", ""),
         )
 
     @property
@@ -81,3 +87,18 @@ class Settings:
     @property
     def model_available(self):
         return bool(self.model_enabled and self.openai_api_key and self.model_budget_path)
+
+    def save_backend_key(self):
+        from app.adapters.documents import DocumentFailure
+        try:
+            if not self.save_enabled or not self.available:
+                raise ValueError()
+            path = Path(self.save_backend_key_path)
+            if path.stat().st_size != 64:
+                raise ValueError()
+            value = path.read_text(encoding='ascii')
+            if not re.fullmatch('[0-9a-f]{64}', value):
+                raise ValueError()
+            return value
+        except (ValueError, OSError, UnicodeError):
+            raise DocumentFailure('save_unavailable') from None

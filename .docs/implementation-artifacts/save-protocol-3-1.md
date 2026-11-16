@@ -1,7 +1,8 @@
 # Story 3.1: private Save protocol and implementation plan
 
-**Status: proposed, 15 November 2026. No Save implementation, schema change,
-bucket, new credential or storage acceptance has been created.**
+**Planning snapshot, approved 15 November 2026. The baseline observations below
+describe the pre-implementation state. Current executed evidence and the separate
+hosted approval package are in [Save acceptance](save-acceptance.md).**
 
 ## Observed baseline
 

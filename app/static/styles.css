@@ -69,3 +69,7 @@ main, section, .row > *, #content { min-width: 0; overflow-wrap: anywhere; }
 .workspace-main #edit-material { margin-top: 16px; }
 .workspace-main #results { margin-top: 16px; }
 .workspace-main #content p { white-space: pre-wrap; }
+.save-controls { border-bottom: 1px solid #d4dde8; padding-bottom: 1rem; margin-bottom: 1rem; }
+.save-controls input { max-width: 100%; width: 32rem; box-sizing: border-box; }
+.recovery-operation { border-top: 1px solid #d4dde8; padding: 1rem 0; overflow-wrap: anywhere; }
+.recovery-operation input { display: block; max-width: 100%; margin-bottom: .75rem; }
