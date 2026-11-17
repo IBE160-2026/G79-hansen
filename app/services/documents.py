@@ -35,6 +35,19 @@ class Documents:
     async def rpc(self, identity, action, payload, deadline):
         return await self.io(self.repository.call, identity, action, payload, deadline)
 
+    async def download(self, identity, submitted, deadline):
+        payload = submitted.model_dump(mode='json', by_alias=True)
+        try:
+            descriptor = await self.rpc(identity, 'file', payload, deadline)
+            content = await self.io(self.storage.download, identity, descriptor, deadline)
+            # Never return a blob whose current ready generation changed while
+            # S3 was being read. Session authority is checked by the API as well.
+            if await self.rpc(identity, 'file', payload, deadline) != descriptor:
+                raise DocumentFailure('file_unavailable')
+            return content, descriptor
+        except DocumentFailure as failure:
+            raise DocumentFailure('document_unknown' if failure.code in {'save_unknown', 'document_unknown'} else 'file_unavailable') from None
+
     @staticmethod
     def file(encoded):
         if encoded is None:

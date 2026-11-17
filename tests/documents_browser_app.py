@@ -53,3 +53,14 @@ def terminal(operation_id: str, status: str):
     operation=next(value for value in repository.operations.values() if value['operationId']==operation_id)
     operation.update(status=status,snapshot=None,cleanupNeeded=bool(operation.get('objectKey')))
     return {'ok': True}
+
+
+@app.post('/__test/library-fixtures')
+def library_fixtures():
+    from copy import deepcopy
+    from uuid import uuid4
+    (owner, _), saved = next(iter(repository.documents.items()))
+    for index in range(53):
+        document_id = str(uuid4())
+        repository.documents[owner, document_id] = deepcopy(saved) | {'documentId':document_id,'title':f'Ekstra dokument {index}'}
+    return {'ok':True}

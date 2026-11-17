@@ -48,7 +48,8 @@ class SupabaseDocuments:
                         raise DocumentFailure()
                     if value.get('error'):
                         raise DocumentFailure(value['error'] if value['error'] in {
-                            'save_conflict', 'save_mismatch', 'save_expired', 'save_unknown', 'file_required'} else 'save_pending')
+                            'save_conflict', 'save_mismatch', 'save_expired', 'save_unknown', 'file_required',
+                            'document_unknown', 'file_unavailable'} else 'save_pending')
                     return value
         except DocumentFailure:
             raise

@@ -185,6 +185,11 @@ def run():
             loaded = call(one, 'reload', {'documentId': op['documentId']})
             check('consistent source bundle progress', loaded['acceptance'] == p['snapshot']['acceptance'] and
                 loaded['bundle'] == p['snapshot']['bundle'] and loaded['positions'] == p['snapshot']['positions'])
+            listing = call(one, 'library', {})
+            listed = next(item for item in listing['items'] if item['documentId']==op['documentId'])
+            check('library owner metadata only',set(listed)=={'documentId','title','updatedAt','revision','positions','hasOriginalFile'} and
+                listed['title']==loaded['title'] and not listed['hasOriginalFile'])
+            check('library foreign owner sees no entries',call(two,'library',{})['items']==[])
             replacements = [operation(one, target=op['documentId'], revision=1) for _ in range(2)]
             a, b = replacements[0][0], replacements[1][0]
             check('replacement advances once', call(one, 'commit', a)['revision'] == 2)
@@ -201,6 +206,9 @@ def run():
                 extra={'Content-Type':'text/plain'}).status_code not in (200, 201))
             call(one, 'attempt', p)
             storage.upload(one, op, content, time.monotonic() + 20)
+            check('pending excluded from library',not any(item['documentId']==op['documentId'] for item in call(one,'library',{})['items']))
+            pending_descriptor=request(one,'POST','/rest/v1/rpc/sb_save_file_v1',json={'payload':{'documentId':op['documentId']}})
+            check('pending file descriptor denied',pending_descriptor.json().get('error')=='document_unknown')
             check('pending download denied', request(one, 'GET', authpath).status_code != 200)
             check('pending signed URL denied', request(one, 'POST', '/storage/v1/object/sign/studybuddy-sources/' + op['objectKey'],
                 json={'expiresIn':60}).status_code != 200)
@@ -218,6 +226,20 @@ def run():
             unrelated,_=operation(one)
             check('unrelated file uncertainty cannot taint object-free Save',call(one,'commit',unrelated)['cleanupStatus']=='complete')
             check('ready exact object readable', s3_read(one,op['objectKey']).content == content)
+            descriptor = call(one,'file',{'documentId':op['documentId']})
+            check('fresh bounded S3 attachment reads exact original',storage.download(one,descriptor,time.monotonic()+20)==content)
+            check('ready library reports original file',next(item for item in call(one,'library',{})['items'] if item['documentId']==op['documentId'])['hasOriginalFile'])
+            foreign_descriptor=request(two,'POST','/rest/v1/rpc/sb_save_file_v1',json={'payload':{'documentId':op['documentId']}})
+            check('foreign file descriptor denied',foreign_descriptor.json().get('error')=='document_unknown')
+            sql("update studybuddy.documents set lifecycle='deleting' where document_id='"+op['documentId']+"';")
+            check('deleting blocks previously read S3 object',s3_read(one,op['objectKey']).status_code!=200)
+            check('deleting excluded from library',not any(item['documentId']==op['documentId'] for item in call(one,'library',{})['items']))
+            deleted_descriptor=request(one,'POST','/rest/v1/rpc/sb_save_file_v1',json={'payload':{'documentId':op['documentId']}})
+            check('deleting file descriptor denied',deleted_descriptor.json().get('error')=='document_unknown')
+            sql("update studybuddy.documents set lifecycle='ready' where document_id='"+op['documentId']+"';")
+            sql("update studybuddy.backend_verifiers set active=false where key_id='"+key_id+"';")
+            check('revoked backend gate blocks previously read S3 object',s3_read(one,op['objectKey']).status_code!=200)
+            sql("update studybuddy.backend_verifiers set active=true where key_id='"+key_id+"';")
             check('ready requires backend gate after successful read', s3_read(one,op['objectKey'],gate=False).status_code != 200)
             check('ready foreign object denied', s3_read(two,op['objectKey']).status_code != 200)
             check('REST ready read denied even with gate and verify marker',request(one,'GET',authpath,extra={'x-studybuddy-operation':'verify'}).status_code!=200)

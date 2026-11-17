@@ -18,7 +18,12 @@
   let observation = null, logoutBusy = false, logoutController = null, logoutSequence = 0;
   let saveAttempt = null, savedTarget = null, saveBusy = false, saveEpoch = 0;
   let saveUncertain = false, discoveryEpoch = 0;
+  let libraryOpen = false, libraryEpoch = 0, libraryCursor = null, libraryBusy = false, draftDirty = false;
+  let replacement = null;
   const saveMessages = {
+    library_unavailable: 'Dokumentene kunne ikke hentes. Materialet er beholdt. Prøv igjen.',
+    document_unknown: 'Dokumentet er ikke tilgjengelig for kontoen. Materialet er beholdt.',
+    file_unavailable: 'Originalfilen kunne ikke hentes eller kontrolleres. Prøv igjen.',
     save_unavailable: 'Lagring er ikke konfigurert. Materialet er beholdt.',
     save_pending: 'Lagringen er ikke bekreftet. Prøv samme lagring igjen.',
     save_conflict: 'Dokumentet er endret. Hent lagret versjon eller lagre som nytt.',
@@ -31,9 +36,9 @@
     invalid_input: 'Kontroller tittelen og materialet før du prøver igjen.',
   };
   function saveControls() {
-    $('save-document').disabled = saveBusy || busy || !bundle || !receipt || savedTarget?.generationId === bundle?.generationId;
-    $('save-title').disabled = saveBusy || !!saveAttempt || !bundle || savedTarget?.generationId === bundle?.generationId;
-    for (const id of ['save-again', 'save-reload', 'save-new']) $(id).disabled = saveBusy;
+    $('save-document').disabled = saveBusy || libraryBusy || busy || !bundle || !receipt || savedTarget?.generationId === bundle?.generationId;
+    $('save-title').disabled = saveBusy || libraryBusy || !!saveAttempt || !bundle || savedTarget?.generationId === bundle?.generationId;
+    for (const id of ['save-again', 'save-reload', 'save-new']) $(id).disabled = saveBusy || libraryBusy;
   }
   async function documentRequest(path, body, submittedView, stillCurrent = () => true) {
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 70000);
@@ -120,7 +125,7 @@
     return btoa(binary);
   }
   async function saveDocument(asNew = false) {
-    if (saveBusy || !view || !bundle || !receipt) return;
+    if (saveBusy || libraryBusy || !view || !bundle || !receipt) return;
     if (savedTarget?.generationId === bundle.generationId && !asNew) return;
     const submittedView = view, submittedRevision = revision, generation = bundle.generationId, epoch = saveEpoch;
     let firstDispatch = false;
@@ -151,6 +156,7 @@
       if (result.status !== 'ready') throw new Error(saveMessages.save_pending);
       savedTarget = {documentId: result.documentId, revision: result.revision, generationId: result.generationId};
       saveAttempt = null; $('save-status').textContent = 'Lagret privat. Øvingen beholdes ved denne lagringen.';
+      draftDirty = false;
       for (const id of ['save-again', 'save-reload', 'save-new']) $(id).hidden = true;
       discoverSaves();
     } catch (failure) {
@@ -167,26 +173,140 @@
   $('save-document').onclick = () => saveDocument();
   $('save-again').onclick = () => saveDocument();
   $('save-new').onclick = () => saveDocument(true);
-  $('save-reload').onclick = async () => {
-    if (!savedTarget || saveBusy) return;
-    const submittedView = view, epoch = saveEpoch;
-    saveBusy = true; saveControls();
+  $('save-reload').onclick = () => { if (savedTarget && !saveBusy) requestOpen(savedTarget.documentId, $('save-reload')); };
+  function cancelReplacement() {
+    const trigger = replacement?.trigger;
+    replacement = null; $('document-replace').hidden = true;
+    if (trigger?.isConnected) trigger.focus();
+  }
+  function leaveLibrary(focus = true) {
+    ++libraryEpoch; libraryOpen = false; libraryBusy = false; libraryCursor = null;
+    cancelReplacement(); $('library').hidden = true; $('workspace-active').hidden = false;
+    $('library-items').replaceChildren(); $('library-status').textContent = '';
+    saveControls();
+    if (focus && view) $('document-library').focus();
+  }
+  async function listDocuments(cursor = null) {
+    const submittedView = view, epoch = ++libraryEpoch;
+    if (!submittedView || !libraryOpen) return;
+    const current = () => libraryOpen && view === submittedView && epoch === libraryEpoch;
+    libraryBusy = true; $('library').setAttribute('aria-busy', 'true');
+    $('library-status').textContent = 'Henter dokumenter …';
+    $('library-more').hidden = true; $('library-retry').hidden = true;
     try {
-      const data = await documentRequest('reload', {schemaVersion: '1.0', documentId: savedTarget.documentId}, submittedView);
-      if (!data || view !== submittedView || epoch !== saveEpoch) return;
+      const data = await documentRequest('library', {schemaVersion: '1.0', ...(cursor ? {cursor} : {})}, submittedView, current);
+      if (!data || !current()) return;
+      if (!Array.isArray(data.items) || data.items.length > 50) throw new Error(saveMessages.library_unavailable);
+      if (!cursor) $('library-items').replaceChildren();
+      for (const item of data.items) {
+        const row = element('article', undefined, 'library-document');
+        row.append(element('h3', item.title));
+        const date = new Date(item.updatedAt);
+        row.append(element('p', `Lagret: ${Number.isNaN(date.getTime()) ? 'ukjent dato' : date.toLocaleString('nb-NO')}`, 'source'));
+        const progress = [];
+        for (const [key, label] of [['flashcard', 'Kort'], ['quiz', 'Spørsmål']]) {
+          const position = item.positions[key];
+          progress.push(position ? `${label} ${position.ordinal} av ${position.total}` : `${label}: ingen`);
+        }
+        row.append(element('p', progress.join(' · '), 'source'));
+        const actions = element('div', undefined, 'row actions'), open = element('button', 'Åpne');
+        open.type = 'button'; open.onclick = () => requestOpen(item.documentId, open);
+        actions.append(open);
+        if (item.hasOriginalFile) {
+          const download = element('button', 'Last ned originalfil'); download.type = 'button';
+          download.onclick = () => downloadDocument(item.documentId, download); actions.append(download);
+        }
+        row.append(actions); $('library-items').append(row);
+      }
+      libraryCursor = data.nextCursor || null;
+      $('library-more').hidden = !libraryCursor;
+      $('library-status').textContent = $('library-items').children.length ? 'Dokumentene er klare.' : 'Du har ingen lagrede dokumenter. Velg Lagre etter at du har laget læringsmateriale. Tilbake beholder materialet ditt.';
+    } catch (failure) {
+      if (!current()) return;
+      $('library-status').textContent = failure.message || saveMessages.library_unavailable;
+      $('library-retry').hidden = false;
+      // Retry the failed page, keeping earlier pages and the active draft.
+      libraryCursor = cursor;
+    } finally {
+      if (current()) { libraryBusy = false; $('library').setAttribute('aria-busy', 'false'); }
+    }
+  }
+  $('document-library').onclick = () => {
+    if (!view || busy || saveBusy) return;
+    libraryOpen = true; $('workspace-active').hidden = true; $('library').hidden = false;
+    $('library-heading').focus(); listDocuments();
+  };
+  $('library-back').onclick = () => leaveLibrary();
+  $('library-retry').onclick = () => { if (!libraryBusy) listDocuments(libraryCursor); };
+  $('library-more').onclick = () => { if (!libraryBusy && libraryCursor) listDocuments(libraryCursor); };
+  function requestOpen(documentId, trigger) {
+    if (!view || libraryBusy || saveBusy || busy) return;
+    if (draftDirty || saveAttempt || (bundle && savedTarget?.generationId !== bundle.generationId)) {
+      replacement = {documentId, trigger}; $('document-replace').hidden = false; $('document-replace-heading').focus();
+    } else openDocument(documentId);
+  }
+  $('document-replace-cancel').onclick = cancelReplacement;
+  $('document-replace-confirm').onclick = () => {
+    const candidate = replacement; replacement = null; $('document-replace').hidden = true;
+    if (candidate) openDocument(candidate.documentId);
+  };
+  async function openDocument(documentId) {
+    const submittedView = view, epoch = ++libraryEpoch, submittedRevision = revision, submittedSequence = sequence, inLibrary = libraryOpen;
+    const current = () => view === submittedView && epoch === libraryEpoch && revision === submittedRevision && sequence === submittedSequence && libraryOpen === inLibrary;
+    const notice = inLibrary ? $('library-status') : $('save-status');
+    libraryBusy = true; notice.textContent = 'Åpner lagret dokument …'; saveControls();
+    try {
+      const data = await documentRequest('reload', {schemaVersion: '1.0', documentId}, submittedView, current);
+      if (!data || !current()) return;
+      if (data.status !== 'ready' || data.documentId !== documentId || data.acceptance?.schemaVersion !== '1.0' ||
+          !Number.isSafeInteger(data.revision) || data.revision < 1 || data.generationId !== data.bundle?.generationId ||
+          !['paste', 'text-file', 'pdf'].includes(data.acceptance.kind) ||
+          !Number.isInteger(data.acceptance.characterCount) || data.acceptance.characterCount < 1 || data.acceptance.characterCount > 30000 ||
+          !Array.isArray(data.acceptance.source?.units) || !data.acceptance.source.units.length ||
+          data.acceptance.source.units.some(unit => !['paragraph', 'page'].includes(unit.kind) || !Number.isInteger(unit.location) || unit.location < 1 || typeof unit.text !== 'string') ||
+          !Array.isArray(data.acceptance.warnings) || data.acceptance.warnings.some(warning => typeof warning !== 'string') ||
+          !Array.isArray(data.acceptance.unreadablePages) || !validateBundle(data.bundle, data.acceptance) ||
+          !data.positions || typeof data.title !== 'string') throw new Error(saveMessages.library_unavailable);
+      for (const [section, key] of [['flashcards', 'flashcardId'], ['quiz', 'quizId']]) {
+        if (data.bundle[section].length ? !data.bundle[section].some(item => item.id === data.positions[key]) : data.positions[key] !== null)
+          throw new Error(saveMessages.library_unavailable);
+      }
+      // Only a complete, current response may replace the active draft.
       invalidate(); bundle = data.bundle; receipt = null;
       kind.value = data.acceptance.kind; file.value = '';
       text.value = kind.value === 'paste' ? data.acceptance.source.units.map(unit => unit.text).join('\n\n') : '';
       language.value = bundle.settings.language; detail.value = bundle.settings.detail; subject.value = bundle.settings.subject;
       showMethod(); render({...data.acceptance, clientRevision: revision}); accepted = null;
       savedTarget = {documentId: data.documentId, revision: data.revision, generationId: data.generationId};
-      $('save-title').value = data.title; saveAttempt = null;
+      $('save-title').value = data.title; saveAttempt = null; draftDirty = false;
       for (const [section, key] of [['flashcards', 'flashcardId'], ['quiz', 'quizId']]) positions[section] = Math.max(0, bundle[section].findIndex(item => item.id === data.positions[key]));
-      renderLearning(); $('results').hidden = false; materialOpen(false);
-      $('save-status').textContent = 'Lagret versjon er hentet. Svarene er skjult.';
-    } catch (failure) { if (view === submittedView && epoch === saveEpoch) $('save-status').textContent = failure.message; }
-    finally { saveBusy = false; saveControls(); }
-  };
+      $('generation-warnings').replaceChildren(...bundle.warnings.map(warning => generated('p', warning, 'state-notice')));
+      renderLearning(); $('results').hidden = false; leaveLibrary(false); materialOpen(false);
+      $('save-status').textContent = 'Lagret versjon er hentet. Svarene er skjult.'; $('tab-summary').focus(); saveControls();
+    } catch (failure) { if (current()) notice.textContent = failure.message || saveMessages.library_unavailable; }
+    finally { if (epoch === libraryEpoch) libraryBusy = false; saveControls(); }
+  }
+  async function downloadDocument(documentId, button) {
+    const submittedView = view, epoch = libraryEpoch, submittedRevision = revision;
+    const current = () => libraryOpen && view === submittedView && epoch === libraryEpoch && revision === submittedRevision;
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 70000);
+    button.disabled = true; $('library-status').textContent = 'Henter og kontrollerer originalfilen …';
+    try {
+      const response = await fetch('/api/v1/documents/file', {method: 'POST', credentials: 'same-origin', cache: 'no-store', signal: controller.signal,
+        headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrf, 'X-Session-View': submittedView}, body: JSON.stringify({schemaVersion: '1.0', documentId})});
+      if (!current()) return;
+      if (response.status === 401) { endAccess(); return; }
+      if (!response.ok) throw new Error(saveMessages.file_unavailable);
+      const blob = await response.blob();
+      if (!current()) return;
+      if (blob.size > 10 * 1024 * 1024 || !['text/plain', 'application/pdf'].includes(blob.type.split(';')[0])) throw new Error();
+      const url = URL.createObjectURL(blob), link = document.createElement('a');
+      link.href = url; link.download = blob.type.startsWith('application/pdf') ? 'original.pdf' : 'original.txt';
+      document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      $('library-status').textContent = 'Originalfilen er lastet ned. Nedlastede filer blir på enheten etter utlogging.';
+    } catch { if (current()) $('library-status').textContent = saveMessages.file_unavailable; }
+    finally { clearTimeout(timer); if (current()) button.disabled = false; }
+  }
   const messages = {
     invalid_input: 'Velg én kilde og kontroller materialet før du prøver igjen.',
     invalid_text: 'Teksten må være gyldig UTF-8 uten binære kontrolltegn.',
@@ -221,6 +341,7 @@
     $('results').setAttribute('aria-busy', String(value));
     form.setAttribute('aria-busy', String(value));
     saveControls();
+    $('document-library').disabled = value;
   }
   function clearPreview() {
     preview.hidden = true;
@@ -265,6 +386,7 @@
     try { await invalidating; } finally { invalidating = null; }
   }
   function invalidate() {
+    ++libraryEpoch; libraryBusy = false; cancelReplacement(); draftDirty = true;
     ++revision; ++sequence;
     active?.abort(); active = null;
     accepted = null; clearResults(); materialOpen(true); clearPreview();
@@ -289,6 +411,7 @@
     text.value = ''; file.value = ''; subject.value = '';
     kind.value = 'paste'; language.value = 'nb'; detail.value = 'short';
     showMethod();
+    draftDirty = false;
   }
   function endAccess(message = ended) {
     if (view && csrf) {
@@ -302,6 +425,7 @@
     clearDraft();
     csrf = null; view = null; pendingInvalidation = null;
     ++discoveryEpoch;
+    leaveLibrary(false); $('document-library').hidden = true;
     $('save-recovery-items').replaceChildren(); $('save-recovery').hidden = true;
     materialOpen(true); $('edit-material').hidden = true;
     controls.disabled = true; form.hidden = true; logout.hidden = true;
@@ -350,11 +474,12 @@
       const seconds = data.expiresInSeconds - (performance.now() - started) / 1000;
       if (seconds <= 0) { endAccess(); return false; }
       const changed = view && view !== data.sessionViewId;
-      if (changed) clearDraft();
+      if (changed) { clearDraft(); leaveLibrary(false); }
       const initial = view === null;
       csrf = data.csrfToken; view = data.sessionViewId;
       clearTimeout(lifetime); lifetime = setTimeout(() => endAccess(), seconds * 1000);
       controls.disabled = false; form.hidden = false; logout.hidden = false; signIn.hidden = true;
+      $('document-library').hidden = false;
       if (initial || changed) status.textContent = changed ? 'Ny innlogging. Velg materialet på nytt.' : 'Du er logget inn. Velg materialet du vil kontrollere.';
       if (initial || changed) discoverSaves();
       return true;
@@ -475,12 +600,13 @@ function renderLearning() {
   content.append(element("p", `${activeTab === "flashcards" ? "Kort" : "Spørsmål"} ${index + 1} av ${items.length}`, "label"), generated("h3", item.question), reveal, answer, navigation);
 }
 
-function validateBundle(result) {
-  if (!result || result.schemaVersion !== "1.0" || !result.generationId || result.source?.id !== accepted.source.id ||
-      JSON.stringify(result.source) !== JSON.stringify(accepted.source) ||
-      JSON.stringify(result.settings) !== JSON.stringify(accepted.settings) || !result.insufficiency || !Array.isArray(result.warnings) ||
+function validateBundle(result, source = accepted) {
+  if (!source?.source || !Array.isArray(source.source.units)) return false;
+  if (!result || result.schemaVersion !== "1.0" || !result.generationId || result.source?.id !== source.source.id ||
+      JSON.stringify(result.source) !== JSON.stringify(source.source) ||
+      JSON.stringify(result.settings) !== JSON.stringify(source.settings) || !result.insufficiency || !Array.isArray(result.warnings) ||
       result.warnings.some(warning => typeof warning !== 'string')) return false;
-  const units = new Map(accepted.source.units.map(unit => [unit.id, unit]));
+  const units = new Map(source.source.units.map(unit => [unit.id, unit]));
   const ids = new Set();
   return Object.keys(names).every(section => Array.isArray(result[section]) &&
     (result[section].length > 0 || (typeof result.insufficiency[section] === "string" && result.insufficiency[section].trim().length > 0)) &&
@@ -494,6 +620,7 @@ function validateBundle(result) {
       });
     }));
 }
+
 
 
   const tabs = Array.from(document.querySelectorAll('[data-tab]'));

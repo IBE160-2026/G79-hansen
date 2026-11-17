@@ -60,10 +60,24 @@ class MemoryRepository:
                     'outcome':value.get('outcome') if value['status']=='ready' else None}
                     for (own, _), value in self.operations.items() if own == owner and
                     (value['status']=='pending' or (value['status']=='ready' and value['completed']+604800>self.clock()) or value.get('cleanupNeeded'))]}
-            if action == 'reload':
+            if action == 'library':
+                rows = sorted((value for (own, document_id), value in self.documents.items() if own == owner and
+                    value.get('status') == 'ready' and (not payload.get('cursor') or document_id > payload['cursor'])), key=lambda value: value['documentId'])[:51]
+                def position(value, section, key):
+                    items = value['bundle'][section]
+                    return {'ordinal':next((i+1 for i,item in enumerate(items) if item['id']==value['positions'][key]),None),'total':len(items)} if items else None
+                return {'schemaVersion':'1.0','items':[{'documentId':value['documentId'],'title':value['title'],
+                    'revision':value['revision'],'updatedAt':value['updatedAt'],'hasOriginalFile':bool(value.get('objectKey')),
+                    'positions':{'flashcard':position(value,'flashcards','flashcardId'),'quiz':position(value,'quiz','quizId')}} for value in rows[:50]],
+                    'nextCursor':rows[49]['documentId'] if len(rows)>50 else None}
+            if action in {'reload', 'file'}:
                 saved = self.documents.get((owner, payload['documentId']))
-                if not saved: raise DocumentFailure('save_unknown')
-                return deepcopy(saved)
+                if not saved or saved.get('status') != 'ready': raise DocumentFailure('document_unknown')
+                if action == 'file':
+                    if not saved.get('objectKey'): raise DocumentFailure('document_unknown')
+                    return {key:saved[key] for key in ('documentId','generationId','revision','title','objectKey','fileHash','fileSize')} | {
+                        'mediaType':'application/pdf' if saved['acceptance']['kind']=='pdf' else 'text/plain'}
+                return deepcopy({key:saved[key] for key in ('schemaVersion','status','documentId','generationId','revision','title','acceptance','bundle','positions')})
             if action == 'admit':
                 if operation:
                     return {'operation': deepcopy(operation)}
@@ -108,7 +122,8 @@ class MemoryRepository:
                 for (own,_),value in self.operations.items():
                     if own==owner and value['documentId']==frozen['documentId'] and value['status']=='ready' and value.get('objectKey'):
                         value['cleanupNeeded']=True
-                self.documents[document_key] = {**deepcopy(frozen), 'status': 'ready', 'revision': revision,'objectKey':operation['objectKey']}
+                self.documents[document_key] = {**deepcopy(frozen), 'status': 'ready', 'revision': revision,'objectKey':operation['objectKey'],
+                    'updatedAt':datetime.fromtimestamp(self.clock(),timezone.utc).isoformat()}
                 outcome = {'schemaVersion': '1.0', 'status': 'ready', 'operationId': payload['operationId'],
                     'documentId': frozen['documentId'], 'generationId': frozen['generationId'], 'digest': operation['digest'],
                     'revision': revision, 'cleanupStatus': 'pending' if operation['objectKey'] else 'complete'}
@@ -142,6 +157,10 @@ class MemoryStorage:
         if content is None: raise DocumentFailure('file_required')
         if len(content) != operation['snapshot']['fileSize'] or hashlib.sha256(content).hexdigest() != operation['snapshot']['fileHash']:
             raise DocumentFailure('save_mismatch')
+
+    def download(self, identity, descriptor, deadline):
+        self.verify(identity, {'objectKey':descriptor['objectKey'],'snapshot':descriptor}, deadline)
+        return self.objects[descriptor['objectKey']]
 
     def delete(self, identity, key, deadline):
         self.deletes.append(key)

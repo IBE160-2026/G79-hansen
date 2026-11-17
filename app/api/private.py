@@ -10,6 +10,9 @@ from app.api.auth import BROWSER_COOKIE, context, current_session, protected
 from app.api.sources import unique_object
 
 MESSAGES = {
+    'library_unavailable': 'Dokumentene kunne ikke hentes. Materialet er beholdt. Prøv igjen.',
+    'document_unknown': 'Dokumentet er ikke tilgjengelig for kontoen. Materialet er beholdt.',
+    'file_unavailable': 'Originalfilen kunne ikke hentes eller kontrolleres. Prøv igjen.',
     'save_unavailable': 'Lagring er ikke konfigurert. Materialet er beholdt.',
     'save_pending': 'Lagringen er ikke bekreftet. Behold materialet og prøv samme lagring igjen.',
     'save_capacity': 'En lagring pågår. Vent litt og prøv igjen.',
@@ -44,7 +47,8 @@ def error(code, *, save_disabled=False):
               'budget_unavailable': 503, 'generation_failed': 503, 'body_timeout': 408,
               'wire_limit': 413, 'stale_workspace': 409, 'command_replayed': 409,
               'save_unavailable': 503, 'save_pending': 503, 'save_capacity': 429,
-              'save_conflict': 409, 'save_mismatch': 409, 'save_expired': 410, 'save_unknown': 404}.get(code, 422)
+              'save_conflict': 409, 'save_mismatch': 409, 'save_expired': 410, 'save_unknown': 404,
+              'library_unavailable': 503, 'document_unknown': 404, 'file_unavailable': 503}.get(code, 422)
     payload = {'code': code, 'message': MESSAGES[code], 'requestId': str(uuid4())}
     if save_disabled and code == 'save_unavailable':
         payload['saveDisabled'] = True

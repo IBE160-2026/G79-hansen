@@ -24,6 +24,12 @@ class SupabaseStorage(SupabaseDocuments):
             raise DocumentFailure('save_pending') from None
 
     def verify(self, identity, operation, deadline):
+        self.read(identity, {**operation.get('snapshot', {}), 'objectKey': operation['objectKey']}, deadline, verification=True)
+
+    def download(self, identity, descriptor, deadline):
+        return self.read(identity, descriptor, deadline)
+
+    def read(self, identity, descriptor, deadline, *, verification=False):
         try:
             # Authenticated REST downloads cache by JWT, without our gate or
             # lifecycle marker. S3 session-token reads re-evaluate RLS per call.
@@ -33,24 +39,30 @@ class SupabaseStorage(SupabaseDocuments):
             if not region or not key_id or not anon_key:
                 raise DocumentFailure('save_unavailable')
             url = (self.settings.supabase_url + '/storage/v1/s3/' + BUCKET + '/'
-                   + quote(operation['objectKey'], safe='/'))
-            signed = AWSRequest(method='GET', url=url, headers={
-                'x-studybuddy-backend': self.settings.save_backend_key(),
-                'x-studybuddy-operation': 'verify',
-            })
+                   + quote(descriptor['objectKey'], safe='/'))
+            headers = {'x-studybuddy-backend': self.settings.save_backend_key()}
+            if verification:
+                headers['x-studybuddy-operation'] = 'verify'
+            signed = AWSRequest(method='GET', url=url, headers=headers)
             S3SigV4Auth(Credentials(key_id, anon_key, identity.access_token), 's3', region).add_auth(signed)
-            with self.client(identity, deadline, verification=True) as client:
+            with self.client(identity, deadline, verification=verification) as client:
                 with client.stream('GET', url, headers=dict(signed.headers)) as response:
                     if response.status_code != 200:
                         raise DocumentFailure('file_required' if response.status_code == 404 else 'save_pending')
-                    total, hash_ = 0, hashlib.sha256()
+                    expected = descriptor['fileSize']
+                    if not isinstance(expected, int) or not 0 <= expected <= 10 * 1024 * 1024:
+                        raise DocumentFailure('save_mismatch')
+                    content, total, hash_ = bytearray(), 0, hashlib.sha256()
                     for chunk in response.iter_bytes():
                         total += len(chunk)
-                        if total > operation['snapshot']['fileSize']:
+                        if total > expected:
                             raise DocumentFailure('save_mismatch')
                         hash_.update(chunk)
-                    if total != operation['snapshot']['fileSize'] or hash_.hexdigest() != operation['snapshot']['fileHash']:
+                        if not verification:
+                            content.extend(chunk)
+                    if total != expected or hash_.hexdigest() != descriptor['fileHash']:
                         raise DocumentFailure('save_mismatch')
+                    return bytes(content)
         except DocumentFailure:
             raise
         except Exception:

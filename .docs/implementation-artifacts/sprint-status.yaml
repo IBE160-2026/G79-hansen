@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 17-11-2026 18:40
+last_updated: 17-11-2026 19:34
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -74,7 +74,10 @@ development_status:
   # REST CDN bypass reproduced; local S3 fix passed Python51/browser25/pgTAP15/provider50.
   # Hosted32 and normal-server30 passed; local Save enabled, zero inference/new accounts.
   # Review retains separate physical-file/retention and earlier acceptance gates.
-  3-2-open-your-private-document-library: backlog
+  3-2-open-your-private-document-library: review
+  # Final: Python74; library browser21; Save25/source28; library/Save SQL23+23; local provider17.
+  # Read RPC migration20261117182650; hosted25/normal-server34 passed. Local lint clean; zero real inference/new accounts.
+  # Earlier broad provider reruns stopped at different stages with DocumentFailure; cause not established.
   3-3-synchronize-practice-progress-across-devices: backlog
   3-4-delete-saved-material-completely: backlog
   epic-3-retrospective: optional

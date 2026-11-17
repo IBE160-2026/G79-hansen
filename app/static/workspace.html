@@ -20,9 +20,30 @@
   <p id="source-sign-in" hidden><a href="/account">Logg inn for å bruke eget materiale</a></p>
   <div id="source-error" class="state-notice error" role="alert" tabindex="-1" hidden></div>
   <div class="row actions">
+    <button id="document-library" type="button" hidden>Mine dokumenter</button>
     <button id="source-retry" type="button" hidden>Prøv igjen</button>
     <button id="source-logout" type="button" hidden>Logg ut</button>
   </div>
+  <section id="library" class="panel" aria-labelledby="library-heading" hidden>
+    <h2 id="library-heading" tabindex="-1">Mine dokumenter</h2>
+    <p class="source">Bare materiale du selv har lagret, vises her. Posisjonene viser kortet og spørsmålet som var valgt da materialet ble lagret.</p>
+    <button id="library-back" type="button">Tilbake til materialet</button>
+    <p id="library-status" role="status" aria-live="polite"></p>
+    <div id="library-items"></div>
+    <div class="row actions">
+      <button id="library-retry" type="button" hidden>Prøv å hente dokumenter igjen</button>
+      <button id="library-more" type="button" hidden>Vis flere dokumenter</button>
+    </div>
+  </section>
+  <section id="document-replace" class="panel" aria-labelledby="document-replace-heading" hidden>
+    <h2 id="document-replace-heading" tabindex="-1">Erstatt ulagret materiale?</h2>
+    <p>Hvis du åpner dokumentet, erstattes materialet og innstillingene i arbeidsområdet. Ulagrede endringer går tapt.</p>
+    <div class="row actions">
+      <button id="document-replace-confirm" type="button">Åpne og erstatt</button>
+      <button id="document-replace-cancel" type="button">Avbryt</button>
+    </div>
+  </section>
+  <div id="workspace-active">
   <button id="edit-material" type="button" aria-controls="material-body" aria-expanded="true" hidden>Vis/rediger</button>
   <section id="save-recovery" class="panel" aria-labelledby="save-recovery-heading" hidden>
     <h2 id="save-recovery-heading">Uferdige lagringer</h2>
@@ -91,6 +112,7 @@
     </nav>
     <div id="content" role="tabpanel" aria-labelledby="tab-summary" tabindex="0"></div>
   </section>
+  </div>
   <noscript><p>JavaScript må være aktivert for å bruke eget materiale.</p></noscript>
 </main>
 </body>

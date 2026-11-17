@@ -15,6 +15,8 @@ Let students explicitly save source/results, reopen them privately across visits
 
 ## Requirements & Constraints
 
+- Submission is 15 December 2026. Prioritize the agreed school-project scope, concise context, focused tests and reuse of verified infrastructure.
+
 - Only explicit Save persists source/settings/results; changes require Save again. New session clears only the workspace.
 - First Save captures independent current valid card/quiz positions; absent exercise sections have no position. Replacement Save atomically replaces the generation and resets positions. Open restores stored content and acknowledged positions with answers hidden, without AI calls.
 - Library lists only owner-ready items; pending/deleting recovery is separately discoverable. Restart requires login again but retains saved data/progress.

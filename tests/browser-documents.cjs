@@ -84,6 +84,7 @@ async function main() {
       await page.locator('#edit-material').click();await generate('Unsaved source to discard explicitly.');
       await context.request.post(base+'/__test/save-conflict');await page.locator('#save-document').click();
       await page.locator('#save-reload').waitFor({state:'visible'});await page.locator('#save-reload').click();
+      await page.locator('#document-replace-confirm').click();
       await page.waitForFunction(()=>document.querySelector('#save-status').textContent.startsWith('Lagret versjon'));
       assert.equal(await page.locator('#source-text').inputValue(),'Third synthetic source.');
       await page.locator('#tab-flashcards').click();
@@ -307,7 +308,7 @@ async function main() {
       await page.locator('#save-reload').waitFor({state:'visible'});
       let release,entered;const arrived=new Promise(resolve=>entered=resolve),held=new Promise(resolve=>release=resolve);
       await page.route('**/api/v1/documents/reload',async route=>{entered();await held;await route.fulfill({status:503,json:{code:'save_pending'}});},{times:1});
-      await page.locator('#save-reload').click();await arrived;
+      await page.locator('#save-reload').click();await page.locator('#document-replace-confirm').click();await arrived;
       await page.locator('#edit-material').click();await generate('New generation wins over delayed reload failure.');
       assert.equal(await page.locator('#save-status').textContent(),'');
       release();await page.waitForFunction(()=>!document.querySelector('#save-document').disabled);

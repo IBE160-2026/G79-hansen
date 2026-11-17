@@ -358,3 +358,24 @@ browser suites. Injected-port tests exercise application lifecycle/failures;
 `supabase/tests/save_protocol.test.sql` and the isolated local provider runner
 exercise actual transactions/RLS/Storage. Their exact executed evidence and
 remaining hosted/real-file/provider retention gates belong in the acceptance record.
+
+**Mine dokumenter** lists only your ready saved documents, fifty per page, with
+title, save date and the independently saved card/quiz positions. Listing and
+returning preserve the active draft. Opening asks before replacing unsaved work,
+restores the exact saved source/settings/four sections with answers hidden, and
+makes no model call or generation receipt. Editing then uses normal extraction.
+**Last ned originalfil** verifies the saved original's size and SHA-256 through
+an authenticated, uncached user-JWT S3 read and returns an attachment. The browser
+receives neither object keys nor signed URLs. Downloaded files remain on the
+device after logout. New session clears only the workspace.
+
+Mine dokumenter is active in the existing test setup after local and hosted
+verification on 17 November 2026. Log in again after the local server restart.
+Run `uv run pytest tests/test_library.py tests/test_documents.py
+tests/test_save_acceptance_tools.py -q`, `node tests/browser-library.cjs`, and
+the existing Save browser suite. Real local checks use
+`SAVE_TEST_WSL_DISTRO=SUREUbuntu` with
+`uv run python tests/library_provider_acceptance.py` and
+`supabase/tests/library_protocol.test.sql`. See
+[library acceptance](.docs/implementation-artifacts/library-acceptance.md) for
+executed results and remaining release/retention limits.
