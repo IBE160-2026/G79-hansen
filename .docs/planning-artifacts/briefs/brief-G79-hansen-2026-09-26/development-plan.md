@@ -25,7 +25,7 @@ Live identity/storage uses Supabase Auth/Postgres/private Storage through owner-
 
 ## Scheduling and evidence
 
-Approximate deadline remains 15 December 2026 and the desired core-completion target around 1 December; neither is a confirmed delivery guarantee. Use backlog progress to reassess scope/pace and reserve time for correction. The first increment is runnable demo only; the full live scope is not promised complete in the same session.
+The student confirmed the submission deadline as **15 December 2026** on 17 November 2026. The desired core-completion target remains around 1 December; it is a planning target, not a delivery guarantee. Prioritize the agreed school-project requirements, use focused implementation and verification, and reserve the final two weeks for corrections, documentation and submission. The first increment is runnable demo only; the full live scope is not promised complete in the same session.
 
 Keep README setup/demo/live instructions, lockfile, implementation specs, sprint status and observed validation evidence. Record significant decisions and actual errors/checks in the session/reflection notes; do not invent test outcomes or learning experiences. Browser keyboard/narrow-window/200% zoom and screen-reader checks remain part of final application acceptance.
 

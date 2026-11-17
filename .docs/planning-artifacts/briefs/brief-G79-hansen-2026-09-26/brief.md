@@ -59,7 +59,7 @@ Longer term, the app could support repetition over time and help students revisi
 
 ## Next steps and remaining constraints
 
-The [development plan](development-plan.md) records task order; the [PRD](../../prds/prd-G79-hansen-2026-09-26/prd.md) defines acceptance checks. Finalize provider/model, budget, request limits and technical choices before affected implementation work. Confirm the exact December deadline and consult the actual assessment guidance for delivery evidence; the supplied feedback is not a substitute for the full rubric. Planning can proceed with the decisions above.
+The [development plan](development-plan.md) records task order; the [PRD](../../prds/prd-G79-hansen-2026-09-26/prd.md) defines acceptance checks. Finalize provider/model, budget, request limits and technical choices before affected implementation work. The student confirmed **15 December 2026** as the submission deadline on 17 November 2026. Consult the actual assessment guidance for delivery evidence; the supplied feedback is not a substitute for the full rubric. Planning can proceed with the decisions above.
 
 Scope update 2026-11-10: storage/login adds account, persistence, deletion and access-control work. Reassess the plan after architecture; preserve the agreed quality goals. CV-specific features are not added.
 
