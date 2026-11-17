@@ -1,5 +1,7 @@
 # Åpne punkter
 
+- [ ] 2026-11-17 [Fremdrift – Story3.3](986-2026-11-17-19-47-00-fremdriftssynkronisering.md) - Delvis implementert; stoppet av studenten ved4% igjen av5-timerskvoten. Agent avbrutt. Fortsett eksisterende kode/spec/migrasjon20261117184855; ikke start på nytt. Baseline66 bestod, men progresstester/SQL-race/review/hosted-aktivering gjenstår. Ingen ekte modellkall eller hosted-progressendring.
+
 - [x] 2026-11-17 [Mine dokumenter – Story3.2](987-2026-11-17-19-07-00-mine-dokumenter.md) - Bibliotek/åpning/originalfil aktivert i4b6f0672bd9570d540e324b21e4f39b0571749e3; lesemigrasjon20261117182650. Python74; bibliotek21/Lagre25/kilde28; SQL23+23/lokal provider17; hosted25/normalserver34 bestod. Seks direkte reviewrettelser, ingen ny reviewrunde. Worker14736/port8000; null ekte KI-kall/nye kontoer, budsjett byteuendret. Spec done/sprint review; fysisk retensjon og autosynk/sletting står separat (løst2026-11-17).
 - [ ] 2026-11-17 [Bred lokal provider-verifikasjon](987-2026-11-17-19-07-00-mine-dokumenter.md) - To brede Save-provider-reruns ga DocumentFailure på ulike stadier. Årsak ikke etablert; produksjonsgrenser er uendret. Fokusert lokal bibliotek17 og hosted25 bestod, inkludert faktisk Save/fil/erstatning. Avklar observasjonene før senere full provider-akseptanse; ikke kjør brede tester gjentatt uten ny feilkategori/evidens.
 
