@@ -1,5 +1,84 @@
 # Story 3.1 Save acceptance
 
+## Current status — 17 November 2026
+
+The earlier hosted-disabled statements below are historical. Initial read-only inspection
+found hosted migrations `20261116075612` and `20261116133348` already applied,
+the private `studybuddy-sources` bucket, an active backend verifier and the active
+administrator expiry job. The job completed within two minutes and had no overdue
+pending staging. The student then explicitly approved the concrete correction
+with **“ja godkjenner”**. The exact approved migration was applied as hosted version
+`20261117173439`; its contents match the local file/hash below. Normal local Save
+is now enabled in the ignored `.env`, with the approved S3 configuration and
+existing backend capability. Normal worker **19404** serves port **8000**.
+
+**Final hosted result:** **32 synthetic checks passed** using the existing two
+authorized accounts and an injected model, including exact text/file Save,
+independent positions, restart/fresh-login recovery without inference, byte
+identity, foreign/missing-gate/pending-marker denials, superseded reads after a
+successful read, replacement conflicts and completed replay. Registered deletion
+of this run's superseded synthetic file was acknowledged; physical/backups
+retention is not inferred. Run manifests/results remain in ignored
+`test-results/hosted-save-s3-{manifest,result}.json`. Earlier aborted fixtures keep
+their recovery records.
+
+**Normal-server result:** **30 checks passed**, covering startup/private headers,
+secret-file denial, enabled Save discovery, owner reload/foreign denial with
+actual logins, invalid-input rejection and logout. An initial diagnostic assertion
+used `invalid_request`; the existing API correctly returned `invalid_input`.
+Only that test expectation changed. No product fix or repeated broad suite was
+needed. Both real model allowance files remained byte-identical: original smoke
+counter 4, total attempts 9, USD 0.45 reserved of USD 5, evaluation attempts 5/8.
+No new accounts, emails, password changes, real model calls or deployment.
+
+An existing hosted test had stopped after a successful internal file read was
+served from CDN cache to the same JWT without the backend capability. A fresh
+read-only check of an existing synthetic file reproduced this on both REST GET
+routes. `Cache-Control: no-store` and Range probes in the earlier ignored logs did
+not prevent it. Supabase documents that authenticated REST reads can cache access
+until JWT expiry; S3 does not use that CDN cache:
+[CDN behavior](https://supabase.com/docs/guides/storage/cdn/smart-cdn),
+[S3 user-session authentication](https://supabase.com/docs/guides/storage/s3/authentication).
+No foreign-user leak was established by this observation.
+
+The concrete local correction is
+`supabase/migrations/20261117171627_use_uncached_s3_for_private_file_verification.sql`.
+It replaces only `studybuddy.storage_read_allowed(text)`: allow S3 GET under the
+existing owner/backend/ready-or-internal-pending rules, deny REST reads/metadata,
+and retain registered cleanup DELETE. No new privileged role, bucket, account,
+public-file access, signing/listing, inference or paid resource is introduced.
+`app/adapters/storage.py` signs bounded S3 GETs with botocore, the same user JWT
+and the public legacy anon key. Upload/delete retain their existing REST paths.
+The legacy anon key is required because S3 does not yet accept publishable keys.
+The ordinary Auth/REST publishable key remains unchanged.
+
+Final focused verification: **51 Python tests, 25 Save browser scenarios, 15
+rollback-only pgTAP assertions and 50 real local provider checks passed**. Actual
+S3 reads denied missing gate, missing pending-verification marker, foreign owner
+and superseded file even after an earlier successful read. REST reads stayed
+denied. Missing S3 configuration refused dispatch. The local stack now enables
+S3; its existing volumes were retained during restart. No full-suite rerun was
+needed for unchanged UI/auth/generation behavior. The existing Starlette warning
+remains. Hosted advisors reported only the existing password-leak-protection
+warning; no Auth settings were changed.
+
+**Approved boundary, executed:** this exact additional migration in `studybuddy-test`,
+ignored local S3 region/project-reference/public-anon configuration and backend-key
+path, synthetic hosted acceptance with the existing two authorized test accounts,
+then normal Save activation after passing. No new account, email/password change
+or model inference. Do not infer backup/blob purge,
+representative PDF or full delivery acceptance from these tests. Existing CDN
+entries from old JWTs are not revoked by a policy change; the diagnostic login was
+signed out locally and new tests must use fresh JWTs.
+
+Existing hosted synthetic fixtures remain registered for cleanup; do not delete
+unrelated rows or report physical blob removal without evidence. Any future file
+download feature must use the same uncached owner-checked path, never warm the
+REST CDN endpoint.
+
+Exact additional migration SHA-256 (UTF-8/LF):
+`013e51093fb806b8cc9b3cf07fd931efc2cb952777998da45732928a0167068e`.
+
 Local implementation re-derived on 16 November 2026. Hosted migration/bucket/verifier
 changes to `studybuddy-test` remain unapproved. No hosted accounts, auth settings,
 model calls, real model allowance files or existing secrets were used by the

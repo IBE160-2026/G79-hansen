@@ -43,7 +43,7 @@ enabled = true
 file_size_limit = "10MiB"
 
 [storage.s3_protocol]
-enabled = false
+enabled = true
 
 [storage.analytics]
 enabled = false

@@ -129,3 +129,21 @@ Run document/generation tests, real local SQL/RLS/Storage checks, Save/recovery/
 Parent verification after loop 1: complete baseline diff and re-derived delta read; 514 pytest passed/one inherited skip/one existing warning (50.19s), 23 Save browsers and28/33/11 shared browsers passed, actual provider45/pgTAP23/SQL-cron12 passed. Lint/advisors clean. Final physical-file/backup and hosted gates remain unexecuted. Fresh three-layer review follows.
 
 Final patch verification: 529 passed/one inherited skip/one existing warning (92.30s); Save browser25; actual provider47, pgTAP23, SQL/cron/concurrency18 and expiry-fairness4 passed. Schema lint/advisors and19 unsigned configured startup checks passed. No new model calls/allowance mutations, hosted change or deployment. All29 review findings individually triaged, no deferred findings; physical-file/backup and hosted approval gates remain separate.
+
+### Hosted acceptance correction — 17 November 2026
+
+Hosted schema/bucket/verifier/cron were already installed, contrary to the older
+status narrative above. An existing interrupted acceptance and a fresh read-only
+probe demonstrated JWT-keyed REST CDN caching bypassing the backend/pending-read
+marker after a successful internal file read. Local correction preserves the
+frozen ownership/explicit-Save semantics: uncached S3 session-token GET with the
+same user JWT and public legacy anon key, existing gate and lifecycle checks;
+deny REST reads/metadata and retain registered cleanup. Botocore supplies standard
+SigV4 signing. The exact migration and separate hosted approval scope are in
+`save-acceptance.md`. Final focused checks: Python51, browser25, pgTAP15 and real
+local provider50 passed. No new inference or hosted mutation in this session.
+
+The student subsequently approved the exact hosted package with “ja godkjenner”.
+Migration `20261117173439` applied the approved additional SQL; hosted32 and
+normal-server30 passed, and normal local Save is enabled. Model allowances remain
+byte-identical. Earlier physical-file/retention/release acceptance limits remain.

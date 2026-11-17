@@ -24,6 +24,9 @@ class Settings:
     model_budget_path: str = ""
     save_enabled: bool = False
     save_backend_key_path: str = ""
+    supabase_s3_region: str = ""
+    supabase_s3_key_id: str = ""
+    supabase_s3_anon_key: str = field(default="", repr=False)
 
     @classmethod
     def from_env(cls):
@@ -46,6 +49,9 @@ class Settings:
             model_budget_path=os.environ.get("MODEL_BUDGET_PATH", ""),
             save_enabled=os.environ.get("SAVE_ENABLED") == "true",
             save_backend_key_path=os.environ.get("SAVE_BACKEND_KEY_PATH", ""),
+            supabase_s3_region=os.environ.get("SUPABASE_S3_REGION", ""),
+            supabase_s3_key_id=os.environ.get("SUPABASE_S3_KEY_ID", ""),
+            supabase_s3_anon_key=os.environ.get("SUPABASE_S3_ANON_KEY", ""),
         )
 
     @property

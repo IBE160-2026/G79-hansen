@@ -23,6 +23,9 @@ from uuid import uuid4
 from urllib.parse import urlsplit
 
 import httpx
+from botocore.auth import S3SigV4Auth
+from botocore.awsrequest import AWSRequest
+from botocore.credentials import Credentials
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -95,7 +98,8 @@ def run():
     verifier = hashlib.sha256(key.encode()).hexdigest()
     sql("insert into studybuddy.backend_verifiers(key_id,verifier) values ('" + key_id + "','" + verifier + "'); notify pgrst,'reload schema';")
     admin = {'apikey': config['ANON_KEY'], 'Authorization': 'Bearer ' + config['SERVICE_ROLE_KEY']}
-    settings = SimpleNamespace(supabase_url=url, supabase_key=config['ANON_KEY'], save_backend_key=lambda: key)
+    settings = SimpleNamespace(supabase_url=url, supabase_key=config['ANON_KEY'], save_backend_key=lambda: key,
+        supabase_s3_region='local', supabase_s3_key_id='stub', supabase_s3_anon_key=config['ANON_KEY'])
     repository, storage = SupabaseDocuments(settings), SupabaseStorage(settings)
     owners, passed = [], []
     label = 'setup'
@@ -117,6 +121,13 @@ def run():
 
         def call(identity, action, payload):
             return repository.call(identity, action, payload, time.monotonic() + 20)
+
+        def s3_read(identity, object_key, *, gate=True, verification=False):
+            headers = {'x-studybuddy-backend': key} if gate else {}
+            if verification: headers['x-studybuddy-operation'] = 'verify'
+            signed = AWSRequest(method='GET', url=url+'/storage/v1/s3/studybuddy-sources/'+object_key, headers=headers)
+            S3SigV4Auth(Credentials('stub',config['ANON_KEY'],identity.access_token),'s3','local').add_auth(signed)
+            return client.get(signed.url,headers=dict(signed.headers))
 
         def operation(identity, *, file=None, target=None, revision=None):
             with tempfile.TemporaryDirectory(prefix='save-provider-fixture-') as directory:
@@ -195,6 +206,8 @@ def run():
                 json={'expiresIn':60}).status_code != 200)
             storage.verify(one, op, time.monotonic() + 20)
             check('internal byte verification succeeds', True)
+            check('pending S3 read without internal marker denied after verification',s3_read(one,op['objectKey']).status_code!=200)
+            check('pending S3 read without backend gate denied after verification',s3_read(one,op['objectKey'],gate=False,verification=True).status_code!=200)
             check('foreign internal verification denied', request(two, 'GET', authpath,
                 extra={'x-studybuddy-operation':'verify'}).status_code != 200)
             call(one, 'verified', p)
@@ -204,16 +217,17 @@ def run():
                   internal['fileHash']==hashlib.sha256(content).hexdigest() and internal['fileSize']==len(content))
             unrelated,_=operation(one)
             check('unrelated file uncertainty cannot taint object-free Save',call(one,'commit',unrelated)['cleanupStatus']=='complete')
-            check('ready exact object readable', request(one, 'GET', authpath).content == content)
-            check('ready requires backend gate', request(one, 'GET', authpath, gate=False).status_code != 200)
-            check('ready foreign object denied', request(two, 'GET', authpath).status_code != 200)
+            check('ready exact object readable', s3_read(one,op['objectKey']).content == content)
+            check('ready requires backend gate after successful read', s3_read(one,op['objectKey'],gate=False).status_code != 200)
+            check('ready foreign object denied', s3_read(two,op['objectKey']).status_code != 200)
+            check('REST ready read denied even with gate and verify marker',request(one,'GET',authpath,extra={'x-studybuddy-operation':'verify'}).status_code!=200)
             check('ready signed URL denied', request(one, 'POST', '/storage/v1/object/sign/studybuddy-sources/' + op['objectKey'],
                 json={'expiresIn':60}).status_code != 200)
             check('immutable object overwrite denied', request(one, 'PUT', path, content=b'changed',
                 extra={'Content-Type':'text/plain'}).status_code not in (200, 201))
             replacement, _ = operation(one, target=op['documentId'], revision=1)
             call(one, 'commit', replacement)
-            check('superseded object denied', request(one, 'GET', authpath).status_code != 200)
+            check('superseded object denied after successful ready read', s3_read(one,op['objectKey']).status_code != 200)
             check('superseded cleanup remains discoverable after ready replacement', any(
                 item['operationId'] == p['operationId'] for item in call(one, 'pending', {})['operations']))
             cleanup = call(one, 'cancel', p)

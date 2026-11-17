@@ -553,6 +553,20 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Autorisasjon:** Ingen ny inferens, .env-/modellbudsjettendring, hosted-migrasjon/bucket/verifikator/cron, e-post/konto/passordhandling, kostnad, push eller deploy. Tellere9/4, USD0,45 av5 og evaluering5/8 er uendret. Frosset planhash er bevart. [Godkjenningspakken](../.docs/implementation-artifacts/save-acceptance.md) viser eksakt migrasjon og ikke-hemmelig verifikator til separat hosted-godkjenning. Fysisk blob-kviesens og backup-retensjon er egne porter før reelle filer. Spec done/sprint review gjelder lokal implementering. Studentens egen refleksjon er ikke skrevet av KI.
 
+## 17.11.2026 – Bekreftet frist og enklere arbeidsform
+
+**Studentens korrigering:** «siste arbeidsøktene har tatt litt for lang tid og brukt for mye tokens». Studenten bekreftet innlevering **15.12.2026** for skoleprosjektet i IBE160 ved Høgskolen i Molde.
+
+**KI-bidrag og plan:** Fristen er oppdatert i brief, utviklingsplan og åpne punkter. CLAUDE.md beskriver mindre kontekstbruk, én konkret oppgave om gangen, målrettede tester og korte logger. Kjerne rundt 1. desember er et planmål; resterende tid settes av til rettelser, dokumentasjon og innlevering. Ingen produktkode eller akseptansekrav er endret, og ingen funksjonstester er kjørt. Studentens egen refleksjon er ikke skrevet av KI.
+
+## 17.11.2026 – Cache-feil ved privat lagring
+
+**Dokumentert kontroll:** Hosted-oppsettet var allerede installert, selv om eldre notater sa noe annet. En lesetest med eksisterende syntetisk fil bekreftet at REST-cache kunne returnere tidligere internt verifiserte bytes uten backend-nøkkel for samme JWT. Ingen lekkasje til en annen bruker er etablert. KI korrigerte lesingen til S3 med samme bruker-JWT, eierregler og backend-nøkkel; botocore utfører standardsigneringen. Lokal verifikasjon bestod 51 Python-tester, 25 nettleserscenarioer, 15 SQL-kontroller og 50 faktiske provider-kontroller. Ingen modellkall eller hosted-endring ble gjort. Lagre venter på avtalt separat hosted-godkjenning. Studentens egen refleksjon er ikke skrevet av KI.
+
+## 17.11.2026 – Godkjent hosted-retting og aktivert lagring
+
+**Studentens beslutning:** «ja godkjenner» autoriserte den konkrete hosted-migrasjonen, lokal S3-konfigurasjon, syntetisk kontroll med eksisterende testkontoer og aktivering etter beståtte tester. Migrasjon20261117173439 er brukt; 32 hosted-kontroller og30 kontroller mot vanlig server bestod. Lagre er aktivert på lokal port8000. En test forventet feil feilkode (`invalid_request`); API-et returnerte korrekt eksisterende `invalid_input`, og bare testforventningen ble rettet. Modellbudsjettene er byteuendret; ingen nye kontoer/e-poster/passord/modellkall eller deploy. Syntetisk filopprydding er bekreftet av provider; fysisk blob-/backup-retensjon er fortsatt ikke bevist. Studentens egen refleksjon er ikke skrevet av KI.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

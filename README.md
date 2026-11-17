@@ -297,6 +297,18 @@ screen-reader assessment and earlier real-email gates remain separate.
 
 ## Explicit private Save (Story 3.1)
 
+Storage verification update, 17 November 2026: authenticated REST downloads can
+cache a successful internal read by user JWT and bypass later backend/lifecycle
+checks. Original-file verification now uses uncached S3 session-token reads with
+the same user JWT, owner RLS and backend capability. It requires
+`SUPABASE_S3_REGION`, `SUPABASE_S3_KEY_ID` (project reference) and
+`SUPABASE_S3_ANON_KEY` (legacy public anon key; never a privileged S3/service key).
+The new read-policy migration must be approved and applied before activation.
+See the current status at the top of the Save acceptance record.
+The existing test setup was approved and activated on 17 November: 32 synthetic
+hosted checks and 30 normal-server checks passed without real model calls. The
+local app is available at `http://127.0.0.1:8000/workspace`; fresh login is required.
+
 After generating material, **Lagre** saves the validated source, settings, four
 learning sections, optional original file and the independent current flashcard
 and quiz positions. The optional title accepts 160 Unicode code points. Save

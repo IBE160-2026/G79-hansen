@@ -492,6 +492,7 @@ def test_storage_readback_bounded_hash_and_server_only_headers():
     content=b'original'
     class Config:
         supabase_url='https://synthetic.test'; supabase_key='publishable'
+        supabase_s3_region='local'; supabase_s3_key_id='stub'; supabase_s3_anon_key='synthetic-anon'
         def save_backend_key(self): return 'server-owned-test-gate'
     identity=Identity('owner','synthetic@example.test','user-token','',time.time()+100)
     observed=[]
@@ -501,11 +502,26 @@ def test_storage_readback_bounded_hash_and_server_only_headers():
     storage=SupabaseStorage(Config(),transport=httpx.MockTransport(transport))
     operation={'objectKey':'owner/document/generation/operation','snapshot':{'fileSize':len(content),'fileHash':hashlib.sha256(content).hexdigest()}}
     storage.verify(identity,operation,time.monotonic()+5)
-    assert observed[0].headers['authorization']=='Bearer user-token'
+    assert observed[0].url.path.startswith('/storage/v1/s3/')
+    assert observed[0].headers['authorization'].startswith('AWS4-HMAC-SHA256 ')
+    assert observed[0].headers['x-amz-security-token']=='user-token'
     assert observed[0].headers['x-studybuddy-backend']=='server-owned-test-gate'
     assert observed[0].headers['x-studybuddy-operation']=='verify'
     operation['snapshot']['fileSize']=1
     with pytest.raises(DocumentFailure): storage.verify(identity,operation,time.monotonic()+5)
+
+
+@pytest.mark.parametrize('missing', ['supabase_s3_region','supabase_s3_key_id','supabase_s3_anon_key'])
+def test_storage_s3_missing_configuration_never_dispatches(missing):
+    from types import SimpleNamespace
+    config=SimpleNamespace(supabase_url='https://synthetic.test',supabase_s3_region='local',
+        supabase_s3_key_id='stub',supabase_s3_anon_key='synthetic-anon')
+    setattr(config,missing,'')
+    observed=[]
+    storage=SupabaseStorage(config,transport=httpx.MockTransport(lambda request:observed.append(request)))
+    with pytest.raises(DocumentFailure) as failure:
+        storage.verify(None,{'objectKey':'synthetic'},time.monotonic()+5)
+    assert failure.value.code=='save_unavailable' and not observed
 
 
 @pytest.mark.parametrize('action,status', [('upload',200),('upload',409),('upload',500),('delete',200),('delete',500)])

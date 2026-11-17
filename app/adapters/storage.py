@@ -1,5 +1,9 @@
 """Immutable private uploads and bounded internal readback, never signed URLs."""
 import hashlib
+from urllib.parse import quote
+from botocore.auth import S3SigV4Auth
+from botocore.awsrequest import AWSRequest
+from botocore.credentials import Credentials
 from app.adapters.documents import DocumentFailure, SupabaseDocuments
 
 BUCKET = 'studybuddy-sources'
@@ -21,8 +25,22 @@ class SupabaseStorage(SupabaseDocuments):
 
     def verify(self, identity, operation, deadline):
         try:
+            # Authenticated REST downloads cache by JWT, without our gate or
+            # lifecycle marker. S3 session-token reads re-evaluate RLS per call.
+            region = self.settings.supabase_s3_region
+            key_id = self.settings.supabase_s3_key_id
+            anon_key = self.settings.supabase_s3_anon_key
+            if not region or not key_id or not anon_key:
+                raise DocumentFailure('save_unavailable')
+            url = (self.settings.supabase_url + '/storage/v1/s3/' + BUCKET + '/'
+                   + quote(operation['objectKey'], safe='/'))
+            signed = AWSRequest(method='GET', url=url, headers={
+                'x-studybuddy-backend': self.settings.save_backend_key(),
+                'x-studybuddy-operation': 'verify',
+            })
+            S3SigV4Auth(Credentials(key_id, anon_key, identity.access_token), 's3', region).add_auth(signed)
             with self.client(identity, deadline, verification=True) as client:
-                with client.stream('GET', self.settings.supabase_url + '/storage/v1/object/authenticated/' + BUCKET + '/' + operation['objectKey']) as response:
+                with client.stream('GET', url, headers=dict(signed.headers)) as response:
                     if response.status_code != 200:
                         raise DocumentFailure('file_required' if response.status_code == 404 else 'save_pending')
                     total, hash_ = 0, hashlib.sha256()

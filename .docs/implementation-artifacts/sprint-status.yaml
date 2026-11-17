@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 16-11-2026 08:00
+last_updated: 17-11-2026 18:40
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -70,6 +70,10 @@ development_status:
 
   epic-3: in-progress
   3-1-save-a-consistent-private-snapshot: review
+  # 17 Nov: hosted S3 correction explicitly approved and applied (20261117173439).
+  # REST CDN bypass reproduced; local S3 fix passed Python51/browser25/pgTAP15/provider50.
+  # Hosted32 and normal-server30 passed; local Save enabled, zero inference/new accounts.
+  # Review retains separate physical-file/retention and earlier acceptance gates.
   3-2-open-your-private-document-library: backlog
   3-3-synchronize-practice-progress-across-devices: backlog
   3-4-delete-saved-material-completely: backlog
