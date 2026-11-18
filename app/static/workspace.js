@@ -20,7 +20,10 @@
   let saveUncertain = false, discoveryEpoch = 0;
   let libraryOpen = false, libraryEpoch = 0, libraryCursor = null, libraryBusy = false, draftDirty = false;
   let replacement = null;
+  let deletionBusy = false, deletionCursor = null, deletionView = null;
   const saveMessages = {
+    delete_pending: 'Slettingen er ikke fullført. Tilgangen er stengt. Prøv slettingen igjen.',
+    delete_mismatch: 'Slettingen samsvarer ikke med det opprinnelige forsøket. Hent dokumentlisten på nytt.',
     library_unavailable: 'Dokumentene kunne ikke hentes. Materialet er beholdt. Prøv igjen.',
     document_unknown: 'Dokumentet er ikke tilgjengelig for kontoen. Materialet er beholdt.',
     file_unavailable: 'Originalfilen kunne ikke hentes eller kontrolleres. Prøv igjen.',
@@ -326,6 +329,7 @@
     ++libraryEpoch; libraryOpen = false; libraryBusy = false; libraryCursor = null;
     cancelReplacement(); $('library').hidden = true; $('workspace-active').hidden = false;
     $('library-items').replaceChildren(); $('library-status').textContent = '';
+    $('deletion-items').replaceChildren(); $('deletion-more').hidden = true; deletionCursor = null; deletionView = null;
     saveControls();
     if (focus && view) $('document-library').focus();
   }
@@ -333,6 +337,7 @@
     const submittedView = view, epoch = ++libraryEpoch;
     if (!submittedView || !libraryOpen) return;
     const current = () => libraryOpen && view === submittedView && epoch === libraryEpoch;
+    if (!cursor) deletionView = null;
     libraryBusy = true; $('library').setAttribute('aria-busy', 'true');
     $('library-status').textContent = 'Henter dokumenter …';
     $('library-more').hidden = true; $('library-retry').hidden = true;
@@ -359,11 +364,25 @@
           const download = element('button', 'Last ned originalfil'); download.type = 'button';
           download.onclick = () => downloadDocument(item.documentId, download); actions.append(download);
         }
+        const remove = element('button', 'Slett'); remove.type = 'button';
+        remove.dataset.deleteDocument = ''; remove.disabled = deletionView !== submittedView;
+        remove.onclick = () => confirmDeletion(item, row, remove); actions.append(remove);
         row.append(actions); $('library-items').append(row);
       }
       libraryCursor = data.nextCursor || null;
       $('library-more').hidden = !libraryCursor;
       $('library-status').textContent = $('library-items').children.length ? 'Dokumentene er klare.' : 'Du har ingen lagrede dokumenter. Velg Lagre etter at du har laget læringsmateriale. Tilbake beholder materialet ditt.';
+      if (!cursor) {
+        // Deletion is integrated separately from the already available library.
+        // An absent API/migration must not turn a successful list into an error.
+        try { await discoverDeletions(null, current); }
+        catch {
+          if (current()) {
+            deletionView = null; deletionCursor = null;
+            $('deletion-items').replaceChildren(); $('deletion-more').hidden = true;
+          }
+        }
+      }
     } catch (failure) {
       if (!current()) return;
       $('library-status').textContent = failure.message || saveMessages.library_unavailable;
@@ -379,6 +398,65 @@
     libraryOpen = true; $('workspace-active').hidden = true; $('library').hidden = false;
     $('library-heading').focus(); listDocuments();
   };
+  async function discoverDeletions(cursor, current) {
+    const data = await documentRequest('deletions', {schemaVersion:'1.0', ...(cursor ? {cursor} : {})}, view, current);
+    if (!data || !current()) return;
+    if (!Array.isArray(data.deletions) || data.deletions.length>50) throw new Error(saveMessages.library_unavailable);
+    if (!cursor) $('deletion-items').replaceChildren();
+    for (const item of data.deletions) {
+      const row = element('article', undefined, 'deleting-document');
+      row.append(element('h3', item.title));
+      const notice = element('p', saveMessages.delete_pending); notice.setAttribute('role','status'); row.append(notice);
+      const button = element('button','Prøv sletting igjen'); button.type='button';
+      button.onclick=()=>deleteDocument(item,row,button,notice); row.append(button); $('deletion-items').append(row);
+    }
+    deletionCursor=data.nextCursor||null; $('deletion-more').hidden=!deletionCursor;
+    deletionView = view;
+    for (const button of $('library-items').querySelectorAll('[data-delete-document]')) button.disabled = false;
+  }
+  $('deletion-more').onclick = async () => {
+    if (libraryBusy || deletionBusy || !deletionCursor) return;
+    const submittedView=view, epoch=libraryEpoch;
+    const current=()=>view===submittedView && libraryOpen && libraryEpoch===epoch;
+    libraryBusy=true;
+    try { await discoverDeletions(deletionCursor,current); }
+    catch { if(current()) $('library-status').textContent=saveMessages.library_unavailable; }
+    finally { if(current()) libraryBusy=false; }
+  };
+  function confirmDeletion(item,row,trigger) {
+    if (deletionView !== view || deletionBusy || libraryBusy || saveBusy || row.querySelector('.delete-confirmation')) return;
+    const box=element('div',undefined,'delete-confirmation');
+    const heading=element('p',`Slett «${item.title}»? Kilden, læringsmaterialet og fremdriften blir slettet.`);
+    heading.tabIndex=-1;box.append(heading);
+    const cancel=element('button','Avbryt'),confirm=element('button','Bekreft sletting');
+    cancel.type=confirm.type='button';cancel.onclick=()=>{box.remove();trigger.focus();};
+    confirm.onclick=()=>{
+      if (deletionView !== view || deletionBusy) return;
+      const operation={...item,operationId:crypto.randomUUID()};
+      for(const button of row.querySelectorAll('button')) button.disabled=true;
+      const notice=element('p','Sletter …');notice.setAttribute('role','status');box.replaceChildren(notice);
+      const retry=element('button','Prøv sletting igjen');retry.type='button';box.append(retry);
+      retry.onclick=()=>deleteDocument(operation,row,retry,notice);
+      deleteDocument(operation,row,retry,notice);
+    };
+    box.append(cancel,confirm);row.append(box);heading.focus();
+  }
+  async function deleteDocument(item,row,button,notice) {
+    if (deletionBusy || !view) return;
+    const submittedView=view;
+    // Fence open/download/Save/progress responses before the mutation leaves.
+    if (savedTarget?.documentId===item.documentId || saveAttempt?.documentId===item.documentId) clearDraft();
+    const epoch=++libraryEpoch;
+    const current=()=>view===submittedView && libraryOpen && libraryEpoch===epoch;
+    deletionBusy=true;libraryBusy=true;button.disabled=true;notice.textContent='Sletter …';saveControls();
+    try {
+      const data=await documentRequest('delete',{schemaVersion:'1.0',operationId:item.operationId,documentId:item.documentId},submittedView,current);
+      if (!data || !current()) return;
+      if (data.status==='deleted') {row.remove();$('library-status').textContent='Dokumentet, kilden, læringsmaterialet og fremdriften er slettet.';$('library-heading').focus();}
+      else notice.textContent=saveMessages.delete_pending;
+    } catch(failure) {if(current()) notice.textContent=failure.message||saveMessages.delete_pending;}
+    finally {deletionBusy=false;if(current()){libraryBusy=false;button.disabled=false;}saveControls();}
+  }
   $('library-back').onclick = () => leaveLibrary();
   $('library-retry').onclick = () => { if (!libraryBusy) listDocuments(libraryCursor); };
   $('library-more').onclick = () => { if (!libraryBusy && libraryCursor) listDocuments(libraryCursor); };

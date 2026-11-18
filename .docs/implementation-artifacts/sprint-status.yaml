@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 18-11-2026 15:40
+last_updated: 18-11-2026 18:22
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -82,7 +82,10 @@ development_status:
   # Final: progress Python23/browser16; Save25/library21; pgTAP36/local RPC20; hosted23/normal16 passed.
   # Migration20261118142904; replacement-retry review E1 fixed. Local worker10088/port8000.
   # Zero real inference/new hosted accounts; model budgets byte-identical. Physical-device release remains Epic4.
-  3-4-delete-saved-material-completely: backlog
+  # Local implementation/review complete: Python115; browser deletion7/Save25/library21/progress16;
+  # pgTAP40/provider15 plus actual concurrent identity-reuse regression passed. Three findings fixed.
+  # Migration20261118165334 awaits separate hosted approval; physical retention gates remain open.
+  3-4-delete-saved-material-completely: review
   epic-3-retrospective: optional
 
   epic-4: backlog

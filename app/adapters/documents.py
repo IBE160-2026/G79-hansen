@@ -32,7 +32,7 @@ class SupabaseDocuments:
             yield client
 
     def call(self, identity, action, payload, deadline):
-        if action not in {'get', 'pending', 'library', 'file', 'reload', 'admit', 'attempt', 'verified', 'commit', 'cancel', 'progress_read', 'progress_write'}:
+        if action not in {'get', 'pending', 'library', 'file', 'reload', 'admit', 'attempt', 'upload_settled', 'verified', 'commit', 'cancel', 'progress_read', 'progress_write', 'delete', 'deletions', 'delete_complete'}:
             raise DocumentFailure('save_unavailable')
         try:
             with self.client(identity, deadline) as client:
@@ -52,7 +52,7 @@ class SupabaseDocuments:
                         raise DocumentFailure(value['error'] if value['error'] in {
                             'save_conflict', 'save_mismatch', 'save_expired', 'save_unknown', 'file_required',
                             'document_unknown', 'file_unavailable', 'progress_pending', 'progress_conflict',
-                            'progress_mismatch', 'progress_generation'} else 'save_pending')
+                            'progress_mismatch', 'progress_generation', 'delete_pending', 'delete_mismatch'} else 'save_pending')
                     return value
         except DocumentFailure:
             raise

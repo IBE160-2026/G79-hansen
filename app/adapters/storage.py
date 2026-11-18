@@ -1,5 +1,6 @@
 """Immutable private uploads and bounded internal readback, never signed URLs."""
 import hashlib
+import json
 from urllib.parse import quote
 from botocore.auth import S3SigV4Auth
 from botocore.awsrequest import AWSRequest
@@ -75,5 +76,40 @@ class SupabaseStorage(SupabaseDocuments):
                                    json={'prefixes': [key]}) as response:
                     if response.status_code != 200:
                         raise DocumentFailure()
+                    raw=bytearray()
+                    for chunk in response.iter_bytes():
+                        if len(raw)+len(chunk)>128*1024: raise DocumentFailure()
+                        raw.extend(chunk)
+                    removed=json.loads(raw)
+                    # A 200/empty list can mean RLS hid the object. The
+                    # provider must positively name this exact removed key.
+                    return isinstance(removed,list) and len(removed)==1 and isinstance(removed[0],dict) and removed[0].get('name')==key and removed[0].get('bucket_id',BUCKET)==BUCKET
         except Exception:
             raise DocumentFailure() from None
+
+    def absent(self, identity, key, deadline):
+        """Fresh S3 check after DB-fenced, settled upload attempts.
+
+        Supabase's S3 facade can return 404 from its metadata lookup even
+        while an orphaned physical blob remains. This check is used only
+        alongside the exact positive Storage removal receipt AND all settled
+        durable upload intents. Alone it cannot certify physical removal.
+        The cleanup-only header grants no ordinary file-read authority.
+        """
+        try:
+            if not self.settings.supabase_s3_region or not self.settings.supabase_s3_key_id or not self.settings.supabase_s3_anon_key:
+                raise DocumentFailure('delete_pending')
+            url = self.settings.supabase_url + '/storage/v1/s3/' + BUCKET + '/' + quote(key, safe='/')
+            signed = AWSRequest(method='GET', url=url, headers={
+                'x-studybuddy-backend': self.settings.save_backend_key(), 'x-studybuddy-operation': 'cleanup'})
+            S3SigV4Auth(Credentials(self.settings.supabase_s3_key_id, self.settings.supabase_s3_anon_key,
+                                   identity.access_token), 's3', self.settings.supabase_s3_region).add_auth(signed)
+            with self.client(identity, deadline) as client:
+                with client.stream('GET', url, headers=dict(signed.headers)) as response:
+                    if response.status_code not in (200, 404):
+                        raise DocumentFailure('delete_pending')
+                    return response.status_code == 404
+        except DocumentFailure:
+            raise
+        except Exception:
+            raise DocumentFailure('delete_pending') from None

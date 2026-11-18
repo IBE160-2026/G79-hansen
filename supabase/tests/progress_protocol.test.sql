@@ -18,7 +18,7 @@ select is(has_function_privilege('anon','public.sb_save_progress_read_v1(jsonb)'
 select is((select prosecdef from pg_proc where oid='public.sb_save_progress_write_v1(jsonb)'::regprocedure),false,'write is security invoker');
 select is((select prosecdef from pg_proc where oid='public.sb_save_progress_read_v1(jsonb)'::regprocedure),false,'read is security invoker');
 select is(has_table_privilege('authenticated','studybuddy.progress_mutations','update'),false,'replay records cannot be updated');
-select is(has_table_privilege('authenticated','studybuddy.progress_mutations','delete'),false,'replay records cannot be deleted');
+select is(has_table_privilege('authenticated','studybuddy.progress_mutations','delete'),true,'owner plus backend gate permits deletion cleanup of replay payloads');
 set local role authenticated;
 select set_config('request.jwt.claim.sub','12000000-0000-4000-8000-000000000001',true);
 select set_config('request.jwt.claims','{"sub":"12000000-0000-4000-8000-000000000001","role":"authenticated"}',true);

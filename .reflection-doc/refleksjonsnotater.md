@@ -581,6 +581,12 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Drift og avgrensning:** Docker/systemd-feil avbrøt en ekstra eldre Save-SQL-kjøring, og WSL sluttet å svare. Studenten godkjente uttrykkelig restart av bare SUREUbuntu etter informasjon om SURE-tjenestene. Etterpå svarte probe og alle seks Supabase-containere samt SURE-tjenestene kjørte igjen. Den avbrutte testen er ikke telt som bestått. Migrasjon20261118142904 er brukt i eksisterende testprosjekt; lokal app kjører på port8000. Modellbudsjettene var byteuendret under sluttkontrollene; ingen nye hosted-kontoer, ekte modellkall eller offentlig deploy. Fysiske enheter og tidligere åpne akseptanseporter gjenstår. Se [akseptansebevis](../.docs/implementation-artifacts/progress-acceptance.md). Studentens egen refleksjon er ikke skrevet av KI.
 
+### 18.11.2026 – Plan og baseline for sletting (Story 3.4)
+
+**Dokumenterte fakta:** Studenten ba om Story3.4 med lavt tokenforbruk. Eksisterende lagringsprotokoll skiller mellom registrert sletting og fysisk opplastingsro: Storage DELETE alene dokumenterer ikke at forsinkede skriveroperasjoner er ferdige. [Spesifikasjonen](../.docs/implementation-artifacts/spec-3-4-delete-saved-material-completely.md) beholder derfor varige oppryddingsposter og den separate retensjonsporten. Baseline for lagring/bibliotek/fremdrift:89 bestod; implementering er ikke startet. Plangodkjenning er etterspurt ved bmad-build sitt eksplisitte kontrollpunkt. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
+**Senere godkjenning og resultat samme dag:** Studenten svarte «godkjenner». Sletting er nå implementert og kontrollert lokalt, med navngitt bekreftelse, varig tilstand og eksakte leverandørkvitteringer. Én uavhengig gjennomgang og hovedagentens kontroll avdekket tre feil som ble rettet: gammelt Lagre-ferdigsvar etter sletting, samtidig gjenbruk av slette-ID for ulike dokumenter og sletteknapp før backend-aktivering. Slutt: Python115, nettleser sletting7/Lagre25/bibliotek21/fremdrift16, SQL40, faktisk lokal provider15 og deterministisk samtidig ID-test bestod. Modellbudsjettene var byteuendret; ingen ekte modellkall eller hosted-endringer. [Akseptansebevis](../.docs/implementation-artifacts/deletion-acceptance.md) skiller lokal funksjon fra gjenstående hosted-/backup-/retensjonsgodkjenning. Studentens egen refleksjon er ikke skrevet av KI.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

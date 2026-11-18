@@ -8,6 +8,12 @@ app.state.documents_injected = True
 app.state.documents = Documents(repository, storage, app.state.workspaces, app.state.save_admission)
 
 
+@app.post('/__test/deletion-failure')
+def deletion_failure():
+    repository.fail_action='delete_complete'
+    return {'ok':True}
+
+
 @app.post('/__test/save-failure')
 def save_failure():
     repository.fail_action = 'commit'

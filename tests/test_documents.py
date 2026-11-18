@@ -28,6 +28,7 @@ class MemoryRepository:
         self.calls, self.hook, self.fail_action = [], None, None
         self.lose_ready_reply = False
         self.progress_mutations = {}
+        self.deletions, self.deleted_operations, self.upload_attempts = {}, {}, {}
         self.lose_progress_reply = False
         self.clock = time.time
         self.lock = RLock()
@@ -41,6 +42,38 @@ class MemoryRepository:
         with self.lock:
             self.calls.append(action)
             owner = identity.owner_id
+            if action == 'deletions':
+                rows = sorted((value for (own,_),value in self.deletions.items() if own==owner and value['status']=='deleting'
+                    and (not payload.get('cursor') or value['operationId']>payload['cursor'])),key=lambda x:x['operationId'])[:51]
+                return {'schemaVersion':'1.0','deletions':[deepcopy(value)|{'title':self.documents[owner,value['documentId']]['title']} for value in rows[:50]],
+                    'nextCursor':rows[49]['operationId'] if len(rows)>50 else None}
+            if action in {'delete','delete_complete'}:
+                did,oid=payload['documentId'],payload['operationId']
+                prior=self.deletions.get((owner,oid))
+                if prior and prior['documentId']!=did: raise DocumentFailure('delete_mismatch')
+                if prior and prior['status']=='deleted': return deepcopy(prior)
+                document=self.documents.get((owner,did))
+                if not document: raise DocumentFailure('document_unknown')
+                if any(own==owner and value['documentId']==did and value['operationId']!=oid for (own,_),value in self.deletions.items()):
+                    raise DocumentFailure('delete_mismatch')
+                prior={'schemaVersion':'1.0','documentId':did,'operationId':oid,'status':'deleting'}
+                self.deletions[owner,oid]=prior;document['status']='deleting'
+                operations=[(key,value) for key,value in self.operations.items() if key[0]==owner and value['documentId']==did]
+                for key,value in operations:
+                    if value['status']=='pending':value['status']='cancelled'
+                    value['snapshot']=None;value['cleanupNeeded']=bool(value.get('objectKey'))
+                objects=[{'objectKey':value['objectKey'],'writeUnknown':value.get('writeUnknown',False),'removalVerified':value.get('removalVerified',False)} for _,value in operations if value.get('objectKey')]
+                if action=='delete': return deepcopy(prior)|{'objects':objects}
+                for _,value in operations:
+                    if value.get('objectKey') in payload.get('removedKeys',[]) and not value.get('writeUnknown'):
+                        value['removalVerified']=True
+                if any(value.get('objectKey') and (value.get('writeUnknown') or not value.get('removalVerified')) for _,value in operations):
+                    return deepcopy(prior)
+                for key,value in operations:
+                    self.deleted_operations[key]=did;del self.operations[key]
+                self.progress_mutations={key:value for key,value in self.progress_mutations.items() if not(key[0]==owner and value['request']['documentId']==did)}
+                del self.documents[owner,did];prior['status']='deleted'
+                return deepcopy(prior)
             if action in {'progress_read', 'progress_write'}:
                 saved = self.documents.get((owner, payload['documentId']))
                 if not saved or saved.get('status') != 'ready': raise DocumentFailure('document_unknown')
@@ -69,6 +102,9 @@ class MemoryRepository:
                 return outcome
             key = owner, payload.get('operationId')
             operation = self.operations.get(key)
+            if action in {'get','admit','attempt','verified','commit','cancel'} and (key in self.deleted_operations or
+                any(own==owner and value['documentId']==(operation['documentId'] if operation else payload.get('snapshot',{}).get('documentId')) for (own,_),value in self.deletions.items())):
+                raise DocumentFailure('save_conflict')
             for (own, _), value in self.operations.items():
                 if own == owner and value['status'] in ('pending','conflict','cancelled') and value['expires'] <= self.clock():
                     value['status'], value['snapshot'] = 'expired', None
@@ -86,7 +122,7 @@ class MemoryRepository:
                     'admittedAt':datetime.fromtimestamp(value['expires']-604800,timezone.utc).isoformat(),
                     'expiresAt':datetime.fromtimestamp(value['expires'],timezone.utc).isoformat(),
                     'outcome':value.get('outcome') if value['status']=='ready' else None}
-                    for (own, _), value in self.operations.items() if own == owner and
+                    for (own, _), value in self.operations.items() if own == owner and not any(o==owner and d['documentId']==value['documentId'] for (o,_),d in self.deletions.items()) and
                     (value['status']=='pending' or (value['status']=='ready' and value['completed']+604800>self.clock()) or value.get('cleanupNeeded'))]}
             if action == 'library':
                 rows = sorted((value for (own, document_id), value in self.documents.items() if own == owner and
@@ -133,7 +169,13 @@ class MemoryRepository:
                 return {'cleanupKeys': [operation['objectKey']] if operation.get('objectKey') else [],
                         'cleanupStatus':'cleanup_pending' if operation.get('objectKey') else 'cleanup_complete'}
             if operation['status'] == 'expired': raise DocumentFailure('save_expired')
-            if action == 'attempt': return {'status': 'pending'}
+            if action == 'attempt':
+                uid=str(uuid4());self.upload_attempts[owner,payload['operationId'],uid]=False;operation['writeUnknown']=True
+                return {'status':'pending','uploadId':uid}
+            if action == 'upload_settled':
+                self.upload_attempts[owner,payload['operationId'],payload['uploadId']]=True
+                operation['writeUnknown']=any(not settled for (own,oid,_),settled in self.upload_attempts.items() if own==owner and oid==payload['operationId'])
+                return {'status':'settled'}
             if action == 'verified':
                 operation['verified'] = True
                 return {'status': 'pending'}
@@ -193,6 +235,10 @@ class MemoryStorage:
     def delete(self, identity, key, deadline):
         self.deletes.append(key)
         self.objects.pop(key, None)
+        return True
+
+    def absent(self, identity, key, deadline):
+        return key not in self.objects
 
 
 def setup(tmp_path, repository=None, storage=None):
@@ -590,7 +636,7 @@ def test_storage_unused_oversized_response_is_not_consumed_and_is_closed(action,
     def invoke():
         if action=='upload': storage.upload(identity,operation,b'original',time.monotonic()+5)
         else: storage.delete(identity,operation['objectKey'],time.monotonic()+5)
-    if status==500:
+    if status==500 or action=='delete':
         with pytest.raises(DocumentFailure): invoke()
     else: invoke()
     assert stream.closed

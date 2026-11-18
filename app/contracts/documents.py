@@ -62,6 +62,12 @@ class DiscoverRequest(Contract):
     cursor: Uuid | None = None
 
 
+class DeleteRequest(Contract):
+    schema_version: Literal['1.0']
+    operation_id: Uuid
+    document_id: Uuid
+
+
 def snapshot(submitted, owner_id, file_hash, file_size):
     """No bearer proof/receipt, original bytes, credentials, or transport timestamp."""
     positions = submitted.positions.model_dump(mode='json', by_alias=True)
