@@ -39,7 +39,7 @@ PC hosting entails student-managed availability. Funnel and TLS/redirect changes
 ## Open Questions
 
 1. Accept PC + free Funnel public HTTPS, with PC-on availability, or choose another zero-fee public host requiring new platform investigation? The installed Tailscale is online; plan entitlement and existing mappings still need verification.
-2. Accept daily encrypted DB plus object backup, maximum seven-day retention and a 15 January 2027 shutdown review? Name an existing separate backup medium; otherwise real private files remain gated. No automatic deletion of the shared test project.
+2. Accept daily encrypted DB plus object backup in the dedicated local `C:\StudyBuddy-Backup` folder, maximum seven-day retention and a 15 January 2027 shutdown review? The student selected the folder; confirm the retention/shutdown terms. A local folder does not protect against loss of the PC. No automatic deletion of the shared test project.
 3. Assessor access: separately authorize an individual test account, or select a free SMTP arrangement for ordinary registration/recovery? Built-in email only serves team addresses and has a small shared quota. Never share credentials in Git or assume assessor email authorization.
 
 ## Code Map
