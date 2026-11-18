@@ -36,11 +36,14 @@ PC hosting entails student-managed availability. Funnel and TLS/redirect changes
 
 </frozen-after-approval>
 
+## Confirmed preparation decisions — 18 November continuation
+
+Student selected this Windows PC, free public Funnel access, existing Supabase Free/Paris and same-PC backup in `C:\StudyBuddy-Backup` through submission, accepting PC-loss risk. Assessor gets an individual account; email is explicitly deferred. These authorize local preparation, not public activation, email sending or account creation. See `hosting-local-preparation-4-1.md` for route ownership and the bounded execution sequence.
+
 ## Open Questions
 
-1. Accept PC + free Funnel public HTTPS, with PC-on availability, or choose another zero-fee public host requiring new platform investigation? The installed Tailscale is online; plan entitlement and existing mappings still need verification.
-2. Accept daily encrypted DB plus object backup in the dedicated local `C:\StudyBuddy-Backup` folder, maximum seven-day retention and a 15 January 2027 shutdown review? The student selected the folder; confirm the retention/shutdown terms. A local folder does not protect against loss of the PC. No automatic deletion of the shared test project.
-3. Assessor access: separately authorize an individual test account, or select a free SMTP arrangement for ordinary registration/recovery? Built-in email only serves team addresses and has a small shared quota. Never share credentials in Git or assume assessor email authorization.
+1. Assessor email and account provisioning authorization are deferred by the student. Resume this question when the address is available; do not ask again during independent local preparation.
+2. A 15 January 2027 shutdown review remains a proposal. Schedule review on that date or agree another date before release; never automatically delete the shared project.
 
 ## Code Map
 
@@ -50,6 +53,7 @@ PC hosting entails student-managed availability. Funnel and TLS/redirect changes
 - `scripts/pdf_probe.py`, `app/adapters/pdf.py`: existing Windows Job Object isolation avoids a Linux rewrite.
 - `app/services/model_budget.py`: durable monotonic journal and blocked latch; existing local state must not be initialized anew.
 - `.docs/implementation-artifacts/deletion-acceptance.md`, `deferred-work.md`: retain evidence and outstanding gates.
+- `hosting-local-preparation-4-1.md`: existing 443/8765 football and 8443/3000 SURE mappings are private Serve routes; preserve both. Separate 10000 is the candidate for StudyBuddy, pending fresh conflict checks.
 
 ## Tasks & Acceptance
 
@@ -70,6 +74,8 @@ PC hosting entails student-managed availability. Funnel and TLS/redirect changes
 
 ## Implementation Notes
 
+18 November: authorized local email subtask completed in [spec-4-1-local-email-admission.md](spec-4-1-local-email-admission.md), with 221 offline auth/admission tests and review gaps closed. Durable shared 2-global/1-recipient rolling-hour reservations; unsafe/unconfigured state stops dispatch. No production journal/configuration or server restart. Email implementation is complete locally; assessor provisioning, startup, backup and public acceptance remain unchecked above.
+
 ## Spec Change Log
 
 ## Review Triage Log
@@ -77,3 +83,5 @@ PC hosting entails student-managed availability. Funnel and TLS/redirect changes
 ## Verification
 
 Planning: inspect source/provider docs and read-only connection state; `git diff --check`. No code tests needed for this draft. Implementation: focused auth checks plus actual PC/mobile/external-browser evidence; no broad repeated provider suites without new evidence. Reuse existing Story 3 results with their documented limits.
+
+18 November continuation: read-only local route/process/task ownership established; backup folder empty. Assessor access choice recorded. No app-code change, tests, model calls, backup execution or activation. The earlier frozen proposal is preserved verbatim; confirmed decisions above supersede its unapproved-choice wording for local preparation only.

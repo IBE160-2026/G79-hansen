@@ -182,6 +182,7 @@ async def submit(request, action):
         submitted = await credentials(request)
         if action == "signup":
             state, pending = registry.start_attempt(browser_id, submitted.email, expected_revision=revision)
+            await request.app.state.email_admission.reserve_for_dispatch(submitted.email)
             redirect = settings.app_origin + "/api/v1/auth/callback?" + urlencode({"state": state})
             await run_in_threadpool(adapter.signup, submitted.email, submitted.password, pending, redirect)
             return JSONResponse({"status": "check_email", "message": "Hvis kontoen kan opprettes, får du en e-post. Åpne bekreftelsen i nettleseren der du startet registreringen."})
@@ -258,6 +259,7 @@ async def recovery_request(request: Request):
         revision = registry.retain_browser(browser_id)
         submitted = await credentials(request, RecoveryEmail)
         state, pending = registry.start_attempt(browser_id, submitted.email, "recovery", expected_revision=revision)
+        await request.app.state.email_admission.reserve_for_dispatch(submitted.email)
         redirect = settings.app_origin + "/api/v1/auth/recovery/callback?" + urlencode({"state": state})
         await run_in_threadpool(adapter.request_recovery, submitted.email, pending, redirect)
         return JSONResponse({"status": "check_email", "message": "Hvis kontoen finnes, får du en e-post. Åpne lenken i samme nettleser innen 10 minutter."})

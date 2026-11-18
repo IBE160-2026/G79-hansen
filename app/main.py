@@ -12,6 +12,7 @@ from app.api.sources import Admission, router as sources_router
 from app.adapters.auth import SupabaseAuth
 from app.config import Settings
 from app.services.sessions import Registry, Revocations
+from app.services.email_admission import EmailAdmission
 from app.services.workspaces import Workspaces
 from app.services.model_budget import ModelBudget
 from app.services.generation import GenerationAdmission
@@ -42,7 +43,8 @@ logging.getLogger('uvicorn.access').addFilter(RedactAuthQuery())
 
 
 def create_app(settings=None, *, auth_adapter=None, registry=None, model_adapter=None,
-               workspaces=None, model_budget=None, documents_repository=None, storage_adapter=None):
+               workspaces=None, model_budget=None, documents_repository=None, storage_adapter=None,
+               email_admission=None):
     settings = settings if settings is not None else Settings.from_env()
     application = FastAPI(title='Study Buddy', version='0.1.0', redirect_slashes=False)
     application.state.settings = settings
@@ -50,6 +52,8 @@ def create_app(settings=None, *, auth_adapter=None, registry=None, model_adapter
         idle_seconds=settings.idle_seconds, absolute_seconds=settings.absolute_seconds)
     application.state.auth_revocations = Revocations()
     application.state.auth_adapter = auth_adapter if auth_adapter is not None else SupabaseAuth(settings)
+    application.state.email_admission = (email_admission if email_admission is not None
+                                        else EmailAdmission(settings.auth_email_admission_path))
     application.state.source_admission = Admission()
     application.state.workspaces = workspaces if workspaces is not None else Workspaces(application.state.auth_registry)
     application.state.generation_admission = GenerationAdmission()

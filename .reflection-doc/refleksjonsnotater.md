@@ -593,6 +593,18 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Dokumenterte fakta:** Studenten presiserte «jeg vil ha noe som ikke koster penger» og at foreleser må kunne åpne appen. KI-forslaget om betalt Render ble derfor erstattet med egen Windows-PC og gratis Tailscale Funnel; privat Serve alene dekker ikke behovet. [Hostingplanen](../.docs/implementation-artifacts/hosting-plan-4-1.md) skiller offentlig HTTPS fra privat dokumenttilgang og krever at PC-en er på. Supabase-integrasjonen bekreftet eksisterende Free/Paris-prosjekt, og lokal Tailscale-status viste Running/Online. Backupmedium, retensjon og forelesers konto gjenstår før klargjøring/aktivering; ingen ekstern endring er utført. Den innledende Render-utredningen brukte mer kontekst enn ønsket før kostnadspreferansen ble kjent. Dette er KI-dokumentasjon, ikke studentens egen refleksjon.
 
+### 18.11.2026 – Eksisterende ruter avklart før hosting
+
+**Studentens styring:** Kun målrettede lokale forberedelser, bevar andre tjenester og be om separat offentlig godkjenning først etter sikkerhetskontroller/tilgang. Egen foreleserkonto er valgt; e-post utsettes. Samme-PC backup fram til innlevering og risiko ved PC-tap er akseptert.
+
+**KI-funn og korrigering:** Kun-lesende prosess-/oppstarts-/kildekontroll knytter443/8765 til fotballdashboardet og8443/3000 til SURE. Begge er merket tailnet only; tidligere «Funnel»-omtale beviste ikke offentlig tilgang. Ingen ruter ble endret. [Lokalt driftsnotat](../.docs/implementation-artifacts/hosting-local-preparation-4-1.md) bevarer dem og konkretiserer separat kandidatport10000, sikker oppstart og komplett kryptert backup/7-dagers rotasjon. Backupmappen er fortsatt tom; jobb, sikkerhetskode og akseptanse er ikke ferdige. Ingen tester/modellkall/hosted-endringer/publisering. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
+### 18.11.2026 – Felles lokalt e-postvern (Story 4.1)
+
+**KI-bidrag og kontroll:** Etter «Da går vi videre» ble én lokal deloppgave implementert: varige felles kvoter for registrering og gjenoppretting, to reservasjoner totalt og én per normalisert mottaker per time. SQLite-journalen lagrer nøkkelbaserte avtrykk, ikke rå e-postadresser. Usikre utfall refunderes ikke; manglende/skadet journal avviser sending, mens passordinnlogging virker. Hovedagenten fant en kanselleringsfeil før filarbeidets start; eid skjermet arbeid og egen kontroll retter den. Uavhengig gjennomgang ga to testgap om commit-feil og kansellert HTTP med ekte journal; begge er lukket. Slutt:221 målrettede offline-tester bestod, én arvet advarsel. Ingen funn utsatt i deloppgaven.
+
+**Avgrensning:** Eksisterende server, .env, nøkler, modellbudsjett og Tailscale-ruter er urørt. Ingen ekte e-post/modellkall, hosted-endring, runtime-journal eller offentlig aktivering. Backup, sikker oppstart og foreleseradresse gjenstår. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

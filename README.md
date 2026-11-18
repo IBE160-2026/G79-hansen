@@ -43,6 +43,33 @@ Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i beg
 
 **Glemt passord (Story 2.2)** sender en generell kvittering og bruker en egen PKCE-lenke som må åpnes i samme nettleser/profil innen ti minutter. Lenken gir bare tilgang til skjemaet for nytt passord; den logger deg ikke inn. Et innsendt endringsforsøk bruker opp denne tilgangen før leverandørkallet. Etterpå må du logge inn på vanlig måte. Ved tidsavbrudd kan passordet allerede være endret: prøv innlogging eller be om en ny lenke. Innlogging og gjenoppretting deler maksimalt 1 000 lokale økter; registrering og gjenoppretting deler maksimalt 1 000 ventende forsøk og fire per nettleser. Reell e-post og passordendring krever uttrykkelig testerautorisasjon og er ikke utført av implementasjonstestene. Se [oppsettet](.docs/implementation-artifacts/auth-setup.md) for den ekstra redirect-oppføringen og åpne akseptansepunkter.
 
+Email dispatch additionally requires `AUTH_EMAIL_ADMISSION_PATH`, a dedicated
+server-only SQLite journal. Password login and the fixed demo remain available
+without it. Before enabling email dispatch, explicitly initialize **new** state
+offline, then set the same path in the server process environment:
+
+```powershell
+uv run --locked python -m scripts.email_admission init .auth-email-admission.sqlite3
+```
+
+Initialization refuses existing state or SQLite sidecars. The ignored
+`.auth-email-admission*` files must stay private; for another path, ignore its
+journal and `-journal`, `-wal`, `-shm` sidecars too. HTTP requests never initialize
+or reset state. Signup and password recovery share fixed rolling-hour limits of
+two reservations globally and one per stripped, casefolded recipient across all
+browsers. The journal stores only a locally generated secret, keyed recipient
+digests, timestamps and schema metadata. Atomic durable reservations precede
+provider calls; failed or uncertain calls retain their reservation across restart
+until the rolling window expires. Preserve state and sidecars; do not delete,
+replace or reinitialize them to restore capacity.
+
+Missing, invalid, locked or unwritable state and clock rollback refuse dispatch
+with a generic error. These app-local limits do not count provider sends made
+by other tools or projects. The rolling window uses reservation time; actual
+provider dispatch may occur later. This change is local preparation only: no real mail
+was sent, and the foreleser email/account and public activation remain deferred.
+Focused offline checks: `uv run --locked pytest -q tests/test_email_admission.py tests/test_auth.py`.
+
 ## Verifisering
 
 API-/kontrakttester bruker den låste utviklingsgruppen som `uv sync --locked` installerer:

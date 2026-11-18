@@ -65,9 +65,16 @@ class BrowserAuth:
             raise AuthFailure()
 
 
+class PermissiveEmailAdmission:
+    """Only this synthetic browser-test app bypasses durable mail admission."""
+    async def reserve_for_dispatch(self, recipient):
+        pass
+
+
 adapter = BrowserAuth()
 app = create_app(Settings(True, os.environ["AUTH_TEST_ORIGIN"], "https://example.supabase.co",
-                          "sb_publishable_test", True), auth_adapter=adapter)
+                          "sb_publishable_test", True), auth_adapter=adapter,
+                 email_admission=PermissiveEmailAdmission())
 
 
 @app.get("/__test/links")

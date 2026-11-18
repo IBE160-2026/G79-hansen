@@ -30,6 +30,12 @@ PASSWORD = "TEST_PASSWORD_MUST_NEVER_BE_ECHOED"
 PAYLOAD = {"email": EMAIL, "password": PASSWORD}
 
 
+class PermissiveEmailAdmission:
+    """Explicit legacy-test injection; production adapters never bypass the gate."""
+    async def reserve_for_dispatch(self, recipient):
+        pass
+
+
 class FakeAuth:
     """Only injected by tests; no application setting enables this adapter."""
     def __init__(self):
@@ -92,7 +98,7 @@ class FakeAuth:
 
 def setup(settings=SETTINGS, registry=None):
     fake = FakeAuth()
-    app = create_app(settings, auth_adapter=fake, registry=registry)
+    app = create_app(settings, email_admission=PermissiveEmailAdmission(), auth_adapter=fake, registry=registry)
     return TestClient(app, base_url=settings.app_origin or ORIGIN), fake, app.state.auth_registry
 
 
@@ -425,7 +431,7 @@ def test_sdk_signup_requires_confirmation_and_does_not_enumerate_existing_accoun
     existing = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(
         lambda request: httpx.Response(422, headers={"X-Supabase-Api-Version": "2024-01-01"},
                                        json={"code": "user_already_exists", "message": "PRIVATE_PROVIDER_BODY"})))
-    client = TestClient(create_app(SETTINGS, auth_adapter=existing), base_url=ORIGIN)
+    client = TestClient(create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=existing), base_url=ORIGIN)
     response = post(client)
     assert response.json()["status"] == "check_email"
     assert "PRIVATE" not in response.text and session_cookie(client) is None
@@ -453,7 +459,7 @@ def test_sdk_rejects_incomplete_mismatched_and_failed_provider_responses_without
             return httpx.Response(200, content=b"PRIVATE_PROVIDER_BODY")
         return httpx.Response(200, json=data)
     adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
-    client = TestClient(create_app(SETTINGS, auth_adapter=adapter), base_url=ORIGIN)
+    client = TestClient(create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=adapter), base_url=ORIGIN)
     response = post(client, "login")
     assert response.status_code in (401, 503)
     assert session_cookie(client) is None
@@ -564,7 +570,7 @@ def test_complete_sdk_budget_is_shared_by_token_and_get_user(advance):
 @pytest.mark.parametrize("fail", [False, True])
 def test_overlapping_status_coalesces_validation_without_caching_later_requests(fail):
     async def scenario():
-        app = create_app(SETTINGS, auth_adapter=FakeAuth())
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=FakeAuth())
         fake = app.state.auth_adapter
         entered, release = Event(), Event()
         original = fake.validate
@@ -637,7 +643,7 @@ def test_elapsed_body_budget_rejects_actually_delayed_stream_before_provider(mon
     monkeypatch.setattr(auth, "CREDENTIAL_BODY_SECONDS", 0.03)
     async def scenario():
         fake = FakeAuth()
-        app = create_app(SETTINGS, auth_adapter=fake)
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=fake)
         cancelled = []
         async def delayed():
             body = json.dumps(PAYLOAD).encode()
@@ -723,7 +729,7 @@ def test_credential_accumulator_checks_bound_before_appending(monkeypatch):
 def test_old_status_validation_cannot_erase_new_login_cookie_in_arrival_order(fail):
     async def scenario():
         fake = FakeAuth()
-        app = create_app(SETTINGS, auth_adapter=fake)
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=fake)
         entered, release = Event(), Event()
         def validate(identity):
             entered.set()
@@ -777,7 +783,7 @@ def test_http_signup_passes_each_exact_callback_state_to_real_sdk_transport():
         return httpx.Response(200, json=provider_user(confirmed=False))
     registry = Registry()
     adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
-    client = TestClient(create_app(SETTINGS, auth_adapter=adapter, registry=registry), base_url=ORIGIN)
+    client = TestClient(create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=adapter, registry=registry), base_url=ORIGIN)
     post(client)
     post(client)
     assert len(redirects) == 2
@@ -804,7 +810,7 @@ def test_real_sdk_status_retires_invalid_existing_identity_without_cookie_mutati
         return httpx.Response(200, json=user)
     adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
     registry = Registry()
-    client = TestClient(create_app(SETTINGS, auth_adapter=adapter, registry=registry), base_url=ORIGIN)
+    client = TestClient(create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=adapter, registry=registry), base_url=ORIGIN)
     assert post(client, "login").status_code == 200
     old_cookie = session_cookie(client)
     status_validation[0] = True
@@ -957,7 +963,7 @@ def test_concurrent_password_updates_claim_once_and_late_reply_never_changes_new
             if fail:
                 raise AuthFailure()
         fake.update_password = update
-        app = create_app(SETTINGS, auth_adapter=fake, registry=registry)
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=fake, registry=registry)
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
             boot = await client.get("/api/v1/auth/status")
             protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]}
@@ -1015,7 +1021,7 @@ def test_http_recovery_exact_sdk_redirect_challenge_actual_verifier_and_password
             assert body == {"password": PASSWORD}
         return httpx.Response(200, json=provider_user())
     adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
-    client = TestClient(create_app(SETTINGS, auth_adapter=adapter, registry=registry), base_url=ORIGIN)
+    client = TestClient(create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=adapter, registry=registry), base_url=ORIGIN)
     for _ in range(2):
         assert post(client, "recovery/request", {"email": EMAIL}).status_code == 200
     assert recoveries == [ORIGIN + "/api/v1/auth/recovery/callback?state=" + state for state in registry.pending]
@@ -1082,7 +1088,7 @@ def test_recovery_request_nonexistent_account_ack_and_provider_outage_are_safe()
             return httpx.Response(provider_status, headers={"X-Supabase-Api-Version": "2024-01-01"},
                                   json={} if provider_status == 200 else {"code": "user_not_found" if provider_status == 404 else "unexpected_failure", "message": "PRIVATE_BODY"})
         adapter = SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport))
-        client = TestClient(create_app(SETTINGS, auth_adapter=adapter), base_url=ORIGIN)
+        client = TestClient(create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=adapter), base_url=ORIGIN)
         response = post(client, "recovery/request", {"email": EMAIL})
         assert response.status_code == (503 if provider_status == 503 else 200)
         assert "PRIVATE" not in response.text and session_cookie(client) is None
@@ -1094,7 +1100,7 @@ def test_slow_recovery_body_rejects_before_provider_or_grant_consumption(monkeyp
     monkeypatch.setattr(auth, "CREDENTIAL_BODY_SECONDS", 0.02)
     async def scenario():
         fake, registry = FakeAuth(), Registry()
-        app = create_app(SETTINGS, auth_adapter=fake, registry=registry)
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=fake, registry=registry)
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
             boot = await client.get("/api/v1/auth/status")
             binding = client.cookies["sb_browser"]
@@ -1131,7 +1137,7 @@ def test_real_sdk_recovery_callback_rejects_invalid_identity_before_grant(case):
             user["email_confirmed_at"] = None
         return httpx.Response(200, json=user)
     registry = Registry()
-    client = TestClient(create_app(SETTINGS, auth_adapter=SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport)), registry=registry), base_url=ORIGIN)
+    client = TestClient(create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=SupabaseAuth(SETTINGS, transport=httpx.MockTransport(transport)), registry=registry), base_url=ORIGIN)
     post(client, "recovery/request", {"email": EMAIL})
     state = next(iter(registry.pending))
     response = callback(client, ORIGIN + "/api/v1/auth/recovery/callback?state=" + state)
@@ -1182,7 +1188,7 @@ def test_blocked_recovery_exchange_cannot_replace_intervening_login_and_other_at
     async def scenario():
         fake, registry = FakeAuth(), Registry()
         entered, release = Event(), Event()
-        app = create_app(SETTINGS, auth_adapter=fake, registry=registry)
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=fake, registry=registry)
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
             boot = await client.get("/api/v1/auth/status")
             protection = {"Origin": ORIGIN, "X-CSRF-Token": boot.json()["csrfToken"]}
@@ -1389,7 +1395,7 @@ def test_default_maximum_lifetimes_absolute_expiry_and_recovery_snapshot(monkeyp
 def test_logout_fences_inflight_authority_after_provider_await(flow):
     async def scenario():
         fake = FakeAuth()
-        app = create_app(SETTINGS, auth_adapter=fake)
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=fake)
         entered, release = Event(), Event()
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url=ORIGIN) as client:
             boot = await client.get("/api/v1/auth/status")
@@ -1549,7 +1555,7 @@ def test_expiry_during_validation_fences_authentication_that_started_before_dead
 def test_logout_during_body_stream_prevents_subsequent_provider_work(flow):
     async def scenario():
         fake = FakeAuth()
-        app = create_app(SETTINGS, auth_adapter=fake)
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=fake)
         entered, release = asyncio.Event(), asyncio.Event()
         async def delayed():
             entered.set()
@@ -1572,7 +1578,7 @@ def test_logout_during_body_stream_prevents_subsequent_provider_work(flow):
 def test_provider_denial_fences_unfinished_callback_and_revokes_rejected_identity(purpose):
     async def scenario():
         fake, registry = FakeAuth(), Registry()
-        app = create_app(SETTINGS, auth_adapter=fake, registry=registry)
+        app = create_app(SETTINGS, email_admission=PermissiveEmailAdmission(), auth_adapter=fake, registry=registry)
         entered, release = Event(), Event()
         revoked = []
         fake.revoke = lambda identity, *, budget: revoked.append(identity.access_token)

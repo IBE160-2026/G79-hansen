@@ -27,6 +27,7 @@ class Settings:
     supabase_s3_region: str = ""
     supabase_s3_key_id: str = ""
     supabase_s3_anon_key: str = field(default="", repr=False)
+    auth_email_admission_path: str = ""
 
     @classmethod
     def from_env(cls):
@@ -52,6 +53,7 @@ class Settings:
             supabase_s3_region=os.environ.get("SUPABASE_S3_REGION", ""),
             supabase_s3_key_id=os.environ.get("SUPABASE_S3_KEY_ID", ""),
             supabase_s3_anon_key=os.environ.get("SUPABASE_S3_ANON_KEY", ""),
+            auth_email_admission_path=os.environ.get("AUTH_EMAIL_ADMISSION_PATH", ""),
         )
 
     @property
