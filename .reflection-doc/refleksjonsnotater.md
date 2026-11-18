@@ -605,6 +605,12 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Avgrensning:** Eksisterende server, .env, nøkler, modellbudsjett og Tailscale-ruter er urørt. Ingen ekte e-post/modellkall, hosted-endring, runtime-journal eller offentlig aktivering. Backup, sikker oppstart og foreleseradresse gjenstår. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 18.11.2026 – Lokal Windows-oppstart klargjort (Story 4.1)
+
+**KI-bidrag og korrigeringer:** Etter «da går vi videre» ble separat oppstartsskript/kontrollmodus og placeholder-konfigurasjon laget. Én worker på loopback8000, avgrensede proxy-headere, ingen access-logg og kontroll av eksisterende tilstand før appstart. Native dotenv-varsler kunne ha latt feil input passere; en liten streng, bokstavelig konfigurasjonsleser avviser slike filer uten å vise hemmeligheter. Parent korrigerte tidlig avvisning av brukt/blokkert modellbudsjett: gyldig tilstand skal bevares, og innlogging/lagret materiale skal fortsatt kunne brukes. Ny generering forblir sperret av eksisterende kode.
+
+**Kontroll og avgrensning:**99 fokuserte oppstarts-/e-posttester bestod (12,96s), én arvet advarsel. PowerShell-parse og fire ekte wrapperavvisninger brukte bare syntetiske filer. En eksisterende samtidighetstest traff trygg avvisning av alle forsøk; forventningen om minst én vinner ble rettet til å tillate dette og kontrollere fremdrift uten konkurranse etterpå. Produksjonsgrenser/låser er uendret. Én avgrenset uavhengig gjennomgang uten åpne funn. Ingen ekte miljø-/nøkkel-/budsjett-/server-/Tailscale-/Supabase-endring, modellkall/e-post eller publisering. Backup, runtime-konfigurasjon og foreleseradresse gjenstår. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

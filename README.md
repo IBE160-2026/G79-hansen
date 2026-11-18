@@ -20,6 +20,65 @@ uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 3. Bruk Forrige/Neste. Kort og quiz beholder hver sin posisjon og hvilke svar du har vist når du bytter fane.
 4. Vis/rediger åpner materialet uten å endre fremdriften. Ny økt tømmer arbeidsflaten; velg eksempelet på nytt for å starte igjen.
 
+## Prepared Windows hosted launcher (Story 4.1)
+
+`scripts/start-hosted.ps1` prepares the existing one-process application for a
+separately approved HTTPS proxy. Real startup and proxy activation remain separate
+operator actions. The launcher never activates Funnel, changes Tailscale/Supabase,
+stops another process or initializes state. Existing local/demo commands above
+remain available.
+
+For local preparation, use the ignored `.env.hosted` separately from the current
+local HTTP `.env`, using [.env.hosted.example](.env.hosted.example). Set the exact
+HTTPS origin, including the separate candidate proxy port `10000`, with no path
+or trailing slash, and `AUTH_ALLOW_LOOPBACK_HTTP=false`. Keep real configuration
+and credentials outside Git. Ambient process environment variables take precedence
+over dotenv values, so check the effective environment deliberately. An optional
+`-EnvFile 'literal path'` selects a different file; relative paths are resolved
+from the repository root, regardless of the caller's directory.
+The bounded UTF-8 dotenv reader accepts only the documented application variable
+names and supports `NAME=value`, optional `export`, comments
+and single/double quotes around literal values. It performs no interpolation or
+escape expansion; use literal Windows paths. Malformed lines and duplicate names
+reject the entire file before loading any value.
+
+```powershell
+.\scripts\start-hosted.ps1 -Check
+# Later, after separate approval and with port 8000 available:
+.\scripts\start-hosted.ps1
+```
+
+Check mode validates configuration and existing state without importing the app,
+starting a server or making provider calls. It briefly binds loopback port 8000
+without listening, then closes it; an occupied port rejects startup without
+affecting its owner. Startup fixes `127.0.0.1:8000`, one worker, no reload, proxy
+headers trusted only from `127.0.0.1`, no access log and five-second keepalive.
+It stays in the foreground; Ctrl+C stops that process. A restart invalidates
+in-memory sessions and requires fresh login. The availability probe cannot reserve
+the port across startup; a later bind conflict also fails without stopping anyone.
+
+Enabled generation needs an existing valid budget and a non-placeholder API key.
+A valid blocked/exhausted budget stays unchanged and generation remains denied
+by its existing runtime gate; login and saved material remain reachable.
+Enabled Save needs the existing backend capability,
+Paris (`eu-west-3`), matching project reference/URL and a legacy public anon S3
+key. These are local structural checks, not live provider/key verification.
+Preserve budget, blocked markers, capability, email journal and sidecars across
+restarts; the launcher never creates, repairs, resets or unblocks them. State
+paths must identify distinct regular files. A configured email journal must pass
+read-only schema/clock inspection with no SQLite sidecars present; uncertain
+state rejects preflight. Empty `AUTH_EMAIL_ADMISSION_PATH` explicitly disables
+signup/recovery email and prints a safe notice; password login remains available.
+
+The wrapper uses the installed uv environment with `--offline --no-sync --locked`;
+it performs no setup or downloads. It suppresses native dotenv/exception stderr
+and filters stdout to fixed safe messages. A nonzero exit reports a category
+such as `configuration-invalid`, `state-invalid`, `email-state-invalid`,
+`port-busy` or generic `launch-failed`, with no paths, values or raw exceptions.
+Consult the local example and persistent-state preparation records to resolve
+the category. See [uv run flags](https://docs.astral.sh/uv/reference/cli/#uv-run)
+and [Uvicorn settings](https://uvicorn.dev/settings/).
+
 ## API og avgrensning for demoen
 
 - `GET /health` returnerer `{"status":"ok","mode":"demo"}`.

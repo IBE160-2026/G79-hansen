@@ -76,6 +76,8 @@ Student selected this Windows PC, free public Funnel access, existing Supabase F
 
 18 November: authorized local email subtask completed in [spec-4-1-local-email-admission.md](spec-4-1-local-email-admission.md), with 221 offline auth/admission tests and review gaps closed. Durable shared 2-global/1-recipient rolling-hour reservations; unsafe/unconfigured state stops dispatch. No production journal/configuration or server restart. Email implementation is complete locally; assessor provisioning, startup, backup and public acceptance remain unchecked above.
 
+Later continuation: [local startup subtask](spec-4-1-local-hosted-startup.md) complete/reviewed with99 focused checks. `scripts/start-hosted.ps1`, preflight and placeholder hosted environment are prepared. Parent startup/configuration task above remains unchecked because actual private hosted configuration and runtime startup are still unexecuted; backup/account/public acceptance remain pending. No existing runtime state or routes changed.
+
 ## Spec Change Log
 
 ## Review Triage Log

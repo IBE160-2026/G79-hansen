@@ -124,6 +124,41 @@ class EmailAdmission:
                 raise AuthFailure()
         return secret
 
+    def _inspection_state(self):
+        if self.path is None:
+            raise AuthFailure()
+        info = self.path.lstat()
+        if not stat.S_ISREG(info.st_mode) or info.st_size > MAX_FILE_BYTES:
+            raise AuthFailure()
+        for suffix in ('-journal', '-wal', '-shm'):
+            try:
+                Path(str(self.path) + suffix).lstat()
+            except FileNotFoundError:
+                continue
+            raise AuthFailure()
+        return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns
+
+    def inspect_ready(self):
+        """Validate existing state without recovery, reservation or clock updates."""
+        connection = None
+        try:
+            before = self._inspection_state()
+            # immutable prevents even SQLite's read-side recovery/sidecar writes.
+            # Refuse uncertain or concurrently changed state instead of repairing it.
+            connection = sqlite3.connect(self.path.as_uri() + '?mode=ro&immutable=1', uri=True,
+                                         timeout=0, isolation_level=None)
+            connection.execute('PRAGMA trusted_schema = OFF')
+            connection.execute('PRAGMA query_only = ON')
+            connection.execute('BEGIN')
+            self._validate(connection, self.clock())
+            if self._inspection_state() != before:
+                raise AuthFailure()
+        except (OSError, sqlite3.Error, ValueError, OverflowError):
+            raise AuthFailure() from None
+        finally:
+            if connection is not None:
+                connection.close()
+
     def reserve(self, recipient):
         """Commit before dispatch; errors deliberately reveal no state or addresses."""
         connection = None

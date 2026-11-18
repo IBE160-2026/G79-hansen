@@ -147,8 +147,12 @@ def test_concurrent_separate_instances_never_exceed_combined_limits(journal, sam
 
     with ThreadPoolExecutor(max_workers=8) as pool:
         admitted = list(pool.map(reserve, range(8)))
-    assert 1 <= sum(admitted) <= (1 if same_recipient else 2)
+    # Zero-timeout contenders may all reject; progress is checked without contention.
+    assert 0 <= sum(admitted) <= (1 if same_recipient else 2)
     assert len(rows(path)) == sum(admitted)
+    if not any(admitted):
+        EmailAdmission(path, clock=lambda: now[0]).reserve(EMAIL)
+        assert len(rows(path)) == 1
 
 
 def test_async_journal_jobs_have_bounded_admission(journal):
