@@ -57,15 +57,28 @@ async function main() {
       assert.equal(await page.locator('#save-document').isDisabled(),true);
       assert.equal((await(await context.request.get(base+'/__test/save-state')).json()).documents,1);
     });
-    await check('technical failure preserves results and exact retry',async()=>{
+    await check('uncertain replacement replay preserves later navigation and reveals then syncs them',async()=>{
       await page.locator('#edit-material').click();await generate('Second synthetic source.');
-      await context.request.post(base+'/__test/save-failure');
+      await context.request.post(base+'/__test/save-lose-ready');
       await page.locator('#save-document').click();await page.locator('#save-again').waitFor({state:'visible'});
       assert.equal(await page.locator('#results').isVisible(),true);
+      const originalSave=structuredClone(lastSave);
       const before=await(await context.request.get(base+'/__test/save-state')).json();
-      await page.locator('#save-again').click();await saved();
+      await page.locator('#tab-flashcards').click();await page.locator('#next').click();await page.locator('#reveal').click();
+      await page.locator('#tab-quiz').click();await page.locator('#next').click();
+      let entered,release;const arrived=new Promise(resolve=>entered=resolve),held=new Promise(resolve=>release=resolve);
+      await page.route('**/api/v1/documents/save',async route=>{const response=await route.fetch();entered();await held;await route.fulfill({response});},{times:1});
+      await page.locator('#save-again').click();await arrived;
+      // No navigation after retry dispatch: it must retain the original counter.
+      await page.locator('#reveal').click();release();await saved();
+      await page.waitForFunction(()=>document.querySelector('#progress-status').textContent==='Fremdriften er lagret.');
+      assert.match(await page.locator('#content .label').textContent(),/ 2 av /);assert.equal(await page.locator('#answer').isVisible(),true);
+      await page.locator('#tab-flashcards').click();assert.match(await page.locator('#content .label').textContent(),/ 2 av /);assert.equal(await page.locator('#answer').isVisible(),true);
       const after=await(await context.request.get(base+'/__test/save-state')).json();
       assert.equal(after.modelCalls,before.modelCalls);assert.equal(after.documents,1);assert.equal(after.operations,before.operations);
+      assert.deepEqual(lastSave,originalSave,'retry wire payload must remain exact and contain no navigation metadata');
+      assert.deepEqual(after.positions[0],{flashcardId:originalSave.bundle.flashcards[1].id,quizId:originalSave.bundle.quiz[1].id});
+      assert.equal(after.progressRevisions[0],2);
     });
     await check('conflict preserves draft and offers explicit choices',async()=>{
       await page.locator('#edit-material').click();await generate('Third synthetic source.');

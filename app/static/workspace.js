@@ -16,7 +16,7 @@
   let csrf = null, view = null, revision = 0, sequence = 0, authSequence = 0;
   let active = null, authActive = null, lifetime = null, busy = false, logoutPending = false;
   let observation = null, logoutBusy = false, logoutController = null, logoutSequence = 0;
-  let saveAttempt = null, savedTarget = null, saveBusy = false, saveEpoch = 0;
+  let saveAttempt = null, saveAttemptNavigation = null, savedTarget = null, saveBusy = false, saveEpoch = 0;
   let saveUncertain = false, discoveryEpoch = 0;
   let libraryOpen = false, libraryEpoch = 0, libraryCursor = null, libraryBusy = false, draftDirty = false;
   let replacement = null;
@@ -52,6 +52,142 @@
       return data;
     } finally { clearTimeout(timer); }
   }
+  // Progress authority follows the active workspace, never library pagination.
+  let progressEpoch = 0, progressState = null, practiceNavigation = 0;
+  const progressRequests = new Set();
+  const progressMessages = {
+    progress_conflict: 'Fremdriften er endret på en annen enhet',
+    progress_generation: 'Dokumentet har en ny versjon. Åpne det lagrede dokumentet på nytt.',
+    progress_pending: 'Fremdriften er ikke bekreftet.',
+    progress_mismatch: 'Fremdriftsoppdateringen ble avvist. Hent siste fremdrift.',
+  };
+  function progressNotice(message = '', recover = false, retryable = false) {
+    $('progress-status').textContent = message;
+    $('progress-fetch').hidden = !recover;
+    $('progress-retry').hidden = !retryable;
+    $('progress-fetch').disabled = !!progressState?.busy;
+    $('progress-retry').disabled = !!progressState?.busy;
+  }
+  function clearProgress() {
+    ++progressEpoch; progressState = null;
+    for (const request of progressRequests) { clearTimeout(request.timer); request.controller.abort(); }
+    progressRequests.clear(); progressNotice();
+  }
+  function fenceProgressForOpen() {
+    const previous = progressState;
+    clearProgress();
+    if (previous) {
+      progressState = {...previous, epoch:progressEpoch, busy:false, blocked:true, failure:'progress_pending', frozen:null, queued:null};
+      progressNotice('Hent siste fremdrift før videre lagring.',true);
+    }
+  }
+  function practicePositions() {
+    return {flashcardId: bundle.flashcards[positions.flashcards]?.id || null, quizId: bundle.quiz[positions.quiz]?.id || null};
+  }
+  function samePositions(one, two) { return one?.flashcardId === two?.flashcardId && one?.quizId === two?.quizId; }
+  function startProgress(progressRevision, acknowledged) {
+    clearProgress();
+    progressState = {epoch: progressEpoch, view, documentId: savedTarget.documentId, generationId: savedTarget.generationId,
+      revision: progressRevision, acknowledged, queued: null, frozen: null, busy: false, blocked: false};
+    progressNotice('Fremdriften er lagret.');
+  }
+  function progressCurrent(state) {
+    return progressState === state && state.epoch === progressEpoch && view === state.view &&
+      savedTarget?.documentId === state.documentId && savedTarget?.generationId === state.generationId && bundle?.generationId === state.generationId;
+  }
+  function validProgress(data, state) {
+    return data?.schemaVersion === '1.0' && data.documentId === state.documentId && data.generationId === state.generationId &&
+      Number.isSafeInteger(data.progressRevision) && data.progressRevision >= 1 && data.positions &&
+      [['flashcards','flashcardId'],['quiz','quizId']].every(([section,key]) => bundle[section].length ?
+        bundle[section].some(item => item.id === data.positions[key]) : data.positions[key] === null);
+  }
+  async function progressRequest(path, body, state) {
+    const request = {controller: new AbortController(), timer: null};
+    request.timer = setTimeout(() => { if (progressCurrent(state)) request.controller.abort(); }, 20000);
+    progressRequests.add(request);
+    try {
+      const response = await fetch('/api/v1/progress/' + path, {method: 'POST', credentials: 'same-origin', cache: 'no-store',
+        signal: request.controller.signal, headers: {'Content-Type':'application/json','X-CSRF-Token':csrf,'X-Session-View':state.view}, body: JSON.stringify(body)});
+      if (!progressCurrent(state)) return null;
+      if (response.status === 401) { endAccess(); return null; }
+      const data = await response.json();
+      if (!progressCurrent(state)) return null;
+      if (!response.ok) { const failure = new Error(progressMessages[data.code] || progressMessages.progress_pending); failure.code = data.code; throw failure; }
+      if (!validProgress(data,state)) throw new Error(progressMessages.progress_pending);
+      return data;
+    } finally { clearTimeout(request.timer); progressRequests.delete(request); }
+  }
+  function queueProgress() {
+    const state = progressState;
+    if (!state || !progressCurrent(state)) return;
+    state.queued = practicePositions();
+    if (!state.busy && !state.blocked && !state.frozen) sendProgress(state);
+  }
+  async function sendProgress(state) {
+    if (!progressCurrent(state) || state.busy || state.blocked) return;
+    if (!state.frozen) {
+      if (!state.queued || samePositions(state.queued,state.acknowledged)) { state.queued = null; return; }
+      state.frozen = {schemaVersion:'1.0',documentId:state.documentId,generationId:state.generationId,
+        mutationId:crypto.randomUUID(),expectedProgressRevision:state.revision,positions:state.queued};
+      state.queued = null;
+    }
+    state.busy = true; progressNotice('Lagrer fremdrift …');
+    try {
+      let data;
+      // One automatic retry of the exact admitted request after uncertain transport.
+      for (let attempt=0; attempt<2; attempt++) {
+        try { data = await progressRequest('write',state.frozen,state); break; }
+        catch (failure) {
+          if (!progressCurrent(state)) return;
+          if (attempt || (failure.code && !['progress_pending','save_capacity'].includes(failure.code))) throw failure;
+        }
+      }
+      if (!data || !progressCurrent(state)) return;
+      state.revision = data.progressRevision; state.acknowledged = data.positions; state.frozen = null;
+      // Acknowledgement never jumps the visible position back during coalescing.
+      progressNotice('Fremdriften er lagret.');
+    } catch (failure) {
+      if (!progressCurrent(state)) return;
+      state.blocked = true;
+      state.failure = failure.code || 'progress_pending';
+      progressNotice(progressMessages[state.failure] || progressMessages.progress_pending, true,
+        !['progress_conflict','progress_generation','progress_mismatch'].includes(state.failure));
+    } finally {
+      if (progressCurrent(state)) {
+        state.busy = false;
+        $('progress-fetch').disabled = false; $('progress-retry').disabled = false;
+        if (!state.blocked && state.queued) sendProgress(state);
+      }
+    }
+  }
+  $('progress-retry').onclick = () => {
+    const state = progressState;
+    if (!state || !progressCurrent(state) || state.busy || !state.frozen || state.failure === 'progress_conflict') return;
+    state.blocked = false; sendProgress(state);
+  };
+  $('progress-fetch').onclick = async () => {
+    const state = progressState;
+    if (!state || !progressCurrent(state) || state.busy) return;
+    state.busy = true; progressNotice('Henter siste fremdrift …',true);
+    try {
+      const data = await progressRequest('read',{schemaVersion:'1.0',documentId:state.documentId,generationId:state.generationId},state);
+      if (!data || !progressCurrent(state)) return;
+      for (const [section,key] of [['flashcards','flashcardId'],['quiz','quizId']])
+        positions[section] = Math.max(0,bundle[section].findIndex(item => item.id === data.positions[key]));
+      revealed = {flashcards:new Set(),quiz:new Set()};
+      state.revision = data.progressRevision; state.acknowledged = data.positions;
+      state.frozen = null; state.queued = null; state.blocked = false; state.failure = null;
+      renderLearning(); progressNotice('Siste fremdrift er hentet. Svarene er skjult.');
+    } catch (failure) {
+      if (!progressCurrent(state)) return;
+      state.blocked = true;
+      if (failure.code === 'progress_generation') state.failure = failure.code;
+      progressNotice((progressMessages[state.failure] || progressMessages.progress_pending) + ' Siste fremdrift kunne ikke hentes.',true,
+        !!state.frozen && !['progress_conflict','progress_generation','progress_mismatch'].includes(state.failure));
+    } finally {
+      if (progressCurrent(state)) { state.busy = false; $('progress-fetch').disabled = false; $('progress-retry').disabled = false; }
+    }
+  };
   async function discoverSaves(cursor = null, pageEpoch = null) {
     const submittedView = view;
     if (!submittedView) return;
@@ -132,6 +268,7 @@
     saveBusy = true; $('save-status').textContent = 'Lagrer privat …'; saveControls();
     try {
       if (!saveAttempt || asNew) {
+        const navigation = practiceNavigation;
         const title = $('save-title').value;
         const effectiveTitle = title || bundle.source.title;
         if ([...effectiveTitle].length > 160) throw new Error('Tittelen kan ha høyst 160 tegn.');
@@ -148,21 +285,27 @@
           frozen.contentBase64 = await encodeFile(file.files[0]);
         }
         if (view !== submittedView || revision !== submittedRevision || epoch !== saveEpoch) return;
-        saveAttempt = frozen; saveUncertain = false;
+        saveAttempt = frozen; saveAttemptNavigation = navigation; saveUncertain = false;
       }
       firstDispatch = !saveUncertain; saveUncertain = true;
       const result = await documentRequest('save', saveAttempt, submittedView);
       if (!result || view !== submittedView || revision !== submittedRevision || bundle?.generationId !== generation || epoch !== saveEpoch) return;
       if (result.status !== 'ready') throw new Error(saveMessages.save_pending);
       savedTarget = {documentId: result.documentId, revision: result.revision, generationId: result.generationId};
-      saveAttempt = null; $('save-status').textContent = 'Lagret privat. Øvingen beholdes ved denne lagringen.';
+      const initialPositions = saveAttempt.expectedRevision === null ? saveAttempt.positions :
+        {flashcardId:bundle.flashcards[0]?.id || null,quizId:bundle.quiz[0]?.id || null};
+      if (saveAttempt.expectedRevision !== null && saveAttemptNavigation === practiceNavigation) {
+        positions = {flashcards:0,quiz:0}; revealed = {flashcards:new Set(),quiz:new Set()}; renderLearning();
+      }
+      startProgress(result.progressRevision || 1,initialPositions); queueProgress();
+      saveAttempt = null; saveAttemptNavigation = null; $('save-status').textContent = 'Lagret privat. Øvingen beholdes ved denne lagringen.';
       draftDirty = false;
       for (const id of ['save-again', 'save-reload', 'save-new']) $(id).hidden = true;
       discoverSaves();
     } catch (failure) {
       if (view !== submittedView || epoch !== saveEpoch) return;
       $('save-status').textContent = failure.message || saveMessages.save_pending;
-      if (failure.code === 'invalid_input' && firstDispatch) { saveAttempt = null; saveUncertain = false; }
+      if (failure.code === 'invalid_input' && firstDispatch) { saveAttempt = null; saveAttemptNavigation = null; saveUncertain = false; }
       $('save-again').hidden = !saveAttempt;
       $('save-reload').hidden = failure.code !== 'save_conflict' || !savedTarget;
       $('save-new').hidden = failure.code !== 'save_conflict';
@@ -251,6 +394,7 @@
     if (candidate) openDocument(candidate.documentId);
   };
   async function openDocument(documentId) {
+    fenceProgressForOpen();
     const submittedView = view, epoch = ++libraryEpoch, submittedRevision = revision, submittedSequence = sequence, inLibrary = libraryOpen;
     const current = () => view === submittedView && epoch === libraryEpoch && revision === submittedRevision && sequence === submittedSequence && libraryOpen === inLibrary;
     const notice = inLibrary ? $('library-status') : $('save-status');
@@ -259,6 +403,7 @@
       const data = await documentRequest('reload', {schemaVersion: '1.0', documentId}, submittedView, current);
       if (!data || !current()) return;
       if (data.status !== 'ready' || data.documentId !== documentId || data.acceptance?.schemaVersion !== '1.0' ||
+          !Number.isSafeInteger(data.progressRevision) || data.progressRevision < 1 ||
           !Number.isSafeInteger(data.revision) || data.revision < 1 || data.generationId !== data.bundle?.generationId ||
           !['paste', 'text-file', 'pdf'].includes(data.acceptance.kind) ||
           !Number.isInteger(data.acceptance.characterCount) || data.acceptance.characterCount < 1 || data.acceptance.characterCount > 30000 ||
@@ -278,7 +423,8 @@
       language.value = bundle.settings.language; detail.value = bundle.settings.detail; subject.value = bundle.settings.subject;
       showMethod(); render({...data.acceptance, clientRevision: revision}); accepted = null;
       savedTarget = {documentId: data.documentId, revision: data.revision, generationId: data.generationId};
-      $('save-title').value = data.title; saveAttempt = null; draftDirty = false;
+      $('save-title').value = data.title; saveAttempt = null; saveAttemptNavigation = null; draftDirty = false;
+      startProgress(data.progressRevision,data.positions);
       for (const [section, key] of [['flashcards', 'flashcardId'], ['quiz', 'quizId']]) positions[section] = Math.max(0, bundle[section].findIndex(item => item.id === data.positions[key]));
       $('generation-warnings').replaceChildren(...bundle.warnings.map(warning => generated('p', warning, 'state-notice')));
       renderLearning(); $('results').hidden = false; leaveLibrary(false); materialOpen(false);
@@ -356,7 +502,8 @@
     $('edit-material').setAttribute('aria-expanded', String(open));
   }
   function clearResults() {
-    ++saveEpoch; saveAttempt = null; saveUncertain = false; $('save-status').textContent = '';
+    clearProgress();
+    ++saveEpoch; saveAttempt = null; saveAttemptNavigation = null; saveUncertain = false; $('save-status').textContent = '';
     for (const id of ['save-again', 'save-reload', 'save-new']) $(id).hidden = true;
     bundle = null; receipt = null; activeTab = 'summary';
     positions = {flashcards: 0, quiz: 0}; revealed = {flashcards: new Set(), quiz: new Set()};
@@ -591,6 +738,8 @@ function renderLearning() {
     button.disabled = index + delta < 0 || index + delta >= items.length;
     button.onclick = () => {
       positions[activeTab] += delta;
+      ++practiceNavigation;
+      queueProgress();
       renderLearning();
       announceItem();
       ($(id).disabled ? $(id === "next" ? "previous" : "next") : $(id)).focus();

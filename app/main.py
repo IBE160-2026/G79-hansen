@@ -19,6 +19,7 @@ from app.adapters.model import OpenAIModel
 from app.api.generation import router as generation_router
 from app.api.workspaces import router as workspaces_router
 from app.api.documents import router as documents_router
+from app.api.progress import router as progress_router
 from app.adapters.documents import SupabaseDocuments
 from app.adapters.storage import SupabaseStorage
 from app.services.documents import Documents, SaveAdmission
@@ -66,11 +67,12 @@ def create_app(settings=None, *, auth_adapter=None, registry=None, model_adapter
     application.include_router(workspaces_router)
     application.include_router(generation_router)
     application.include_router(documents_router)
+    application.include_router(progress_router)
 
     @application.middleware('http')
     async def private_headers(request: Request, call_next):
         response = await call_next(request)
-        if request.url.path in ('/account', '/workspace') or request.url.path.startswith(('/api/v1/auth', '/api/v1/sources', '/api/v1/generation', '/api/v1/workspaces', '/api/v1/documents')):
+        if request.url.path in ('/account', '/workspace') or request.url.path.startswith(('/api/v1/auth', '/api/v1/sources', '/api/v1/generation', '/api/v1/workspaces', '/api/v1/documents', '/api/v1/progress')):
             response.headers['Cache-Control'] = 'no-store'
             response.headers['Pragma'] = 'no-cache'
             response.headers['Referrer-Policy'] = 'no-referrer'
@@ -79,7 +81,7 @@ def create_app(settings=None, *, auth_adapter=None, registry=None, model_adapter
 
     @application.exception_handler(RequestValidationError)
     async def invalid_request(request: Request, exc: RequestValidationError):
-        if request.url.path.startswith(('/api/v1/auth', '/api/v1/sources', '/api/v1/generation', '/api/v1/workspaces', '/api/v1/documents')):
+        if request.url.path.startswith(('/api/v1/auth', '/api/v1/sources', '/api/v1/generation', '/api/v1/workspaces', '/api/v1/documents', '/api/v1/progress')):
             return JSONResponse(status_code=422, content={'code': 'invalid_request',
                 'message': 'Forespørselen ble avvist.', 'requestId': str(uuid4())})
         return JSONResponse(status_code=422, content={'code': 'unsupported_demo_input',

@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 17-11-2026 19:34
+last_updated: 18-11-2026 15:40
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -78,7 +78,10 @@ development_status:
   # Final: Python74; library browser21; Save25/source28; library/Save SQL23+23; local provider17.
   # Read RPC migration20261117182650; hosted25/normal-server34 passed. Local lint clean; zero real inference/new accounts.
   # Earlier broad provider reruns stopped at different stages with DocumentFailure; cause not established.
-  3-3-synchronize-practice-progress-across-devices: backlog
+  3-3-synchronize-practice-progress-across-devices: review
+  # Final: progress Python23/browser16; Save25/library21; pgTAP36/local RPC20; hosted23/normal16 passed.
+  # Migration20261118142904; replacement-retry review E1 fixed. Local worker10088/port8000.
+  # Zero real inference/new hosted accounts; model budgets byte-identical. Physical-device release remains Epic4.
   3-4-delete-saved-material-completely: backlog
   epic-3-retrospective: optional
 

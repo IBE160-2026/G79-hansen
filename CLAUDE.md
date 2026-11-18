@@ -6,6 +6,8 @@ Studenten opplever at de siste øktene har tatt for lang tid og brukt for mange 
 
 ## Sesjonslogg
 
+Ta hensyn til studentens 5-timersbruksgrense: begrens nye agentkontekster og unødvendige test-/reviewrunder, og lagre korte fortsettelsesnotater underveis. Ikke anslå gjenværende kvote uten faktisk måling.
+
 Når en oppgave eller økt avsluttes, før sluttoppsummeringen, bruk `sesjonslogg`-skillen: dokumenter Oppgave + Plan + Resultat + åpne punkter i `.logs/<bruker>/`, og før åpne punkter i `.logs/<bruker>/issues.md`. Skillen committer loggfila lokalt; push gjør du selv. Gruppens egne regler for commit og språk gjelder foran dette.
 
 ## Refleksjonsgrunnlag

@@ -36,7 +36,15 @@ def upload_failure():
 @app.get('/__test/save-state')
 def save_state():
     return {'documents': len(repository.documents), 'operations': len(repository.operations), 'modelCalls': model.calls,
-            'positions': [value['positions'] for value in repository.documents.values()], 'files':len(storage.objects)}
+            'positions': [value['positions'] for value in repository.documents.values()], 'files':len(storage.objects),
+            'progressRevisions':[value['progressRevision'] for value in repository.documents.values()],
+            'progressMutations':len(repository.progress_mutations)}
+
+
+@app.post('/__test/progress-lose-ready')
+def progress_lose_ready():
+    repository.lose_progress_reply = True
+    return {'ok':True}
 
 
 @app.post('/__test/save-restart')

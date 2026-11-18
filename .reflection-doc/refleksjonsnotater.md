@@ -573,6 +573,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Resultat og avgrensning:** Lesemigrasjon20261117182650 er brukt i eksisterende testprosjekt og biblioteket er aktivt på lokal port8000. Ingen nye kontoer, ekte KI-kall, budsjettendringer, kostnader eller offentlig deploy. Eldre PDF-/tilgjengelighets-/retensjonsporter består. Studentens egen refleksjon er ikke skrevet av KI.
 
+## 18.11.2026 – Automatisk øvefremdrift ferdig
+
+**Studentens styring:** Arbeidet ble stoppet 17.11 ved rapportert 4 % av femtimerskvoten og gjenopptatt med «kan vi fortsette». Eksisterende kode og implementasjonsagent ble gjenbrukt. Én fokusert uavhengig gjennomgang erstattet flere brede reviewkontekster; gjenværende kvote ble ikke anslått.
+
+**KI-bidrag og kontroll:** Lagrede kort-/quizposisjoner synkroniseres med egen revisjon og varig identitet for eksakte gjentakelser. En gammel visning må hente bekreftet fremdrift før videre lagring. Review fant at gjentatt erstatningslagring kunne nullstille mellomliggende navigasjon; privat metadata fra det opprinnelige forsøket og en nettleserregresjon retter dette. Sluttkontroller bestod: Python23, fremdriftsnettleser16, Lagre25/bibliotek21, SQL36, lokal RPC20, hosted23 og normalserver16. Faktisk samtidige forespørsler ga én vinner og én konflikt; tapt ferdigsvar ble gjentatt uten dobbel revisjonsøkning.
+
+**Drift og avgrensning:** Docker/systemd-feil avbrøt en ekstra eldre Save-SQL-kjøring, og WSL sluttet å svare. Studenten godkjente uttrykkelig restart av bare SUREUbuntu etter informasjon om SURE-tjenestene. Etterpå svarte probe og alle seks Supabase-containere samt SURE-tjenestene kjørte igjen. Den avbrutte testen er ikke telt som bestått. Migrasjon20261118142904 er brukt i eksisterende testprosjekt; lokal app kjører på port8000. Modellbudsjettene var byteuendret under sluttkontrollene; ingen nye hosted-kontoer, ekte modellkall eller offentlig deploy. Fysiske enheter og tidligere åpne akseptanseporter gjenstår. Se [akseptansebevis](../.docs/implementation-artifacts/progress-acceptance.md). Studentens egen refleksjon er ikke skrevet av KI.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

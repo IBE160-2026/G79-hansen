@@ -32,6 +32,8 @@ class SupabaseDocuments:
             yield client
 
     def call(self, identity, action, payload, deadline):
+        if action not in {'get', 'pending', 'library', 'file', 'reload', 'admit', 'attempt', 'verified', 'commit', 'cancel', 'progress_read', 'progress_write'}:
+            raise DocumentFailure('save_unavailable')
         try:
             with self.client(identity, deadline) as client:
                 with client.stream('POST', self.settings.supabase_url + '/rest/v1/rpc/sb_save_' + action + '_v1',
@@ -49,7 +51,8 @@ class SupabaseDocuments:
                     if value.get('error'):
                         raise DocumentFailure(value['error'] if value['error'] in {
                             'save_conflict', 'save_mismatch', 'save_expired', 'save_unknown', 'file_required',
-                            'document_unknown', 'file_unavailable'} else 'save_pending')
+                            'document_unknown', 'file_unavailable', 'progress_pending', 'progress_conflict',
+                            'progress_mismatch', 'progress_generation'} else 'save_pending')
                     return value
         except DocumentFailure:
             raise

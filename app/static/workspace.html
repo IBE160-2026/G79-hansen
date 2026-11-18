@@ -26,7 +26,7 @@
   </div>
   <section id="library" class="panel" aria-labelledby="library-heading" hidden>
     <h2 id="library-heading" tabindex="-1">Mine dokumenter</h2>
-    <p class="source">Bare materiale du selv har lagret, vises her. Posisjonene viser kortet og spørsmålet som var valgt da materialet ble lagret.</p>
+    <p class="source">Bare materiale du selv har lagret, vises her. Posisjonene viser sist bekreftede fremdrift for kort og quiz.</p>
     <button id="library-back" type="button">Tilbake til materialet</button>
     <p id="library-status" role="status" aria-live="polite"></p>
     <div id="library-items"></div>
@@ -102,6 +102,11 @@
         <button id="save-new" type="button" hidden>Lagre som nytt</button>
       </div>
       <p id="save-status" role="status" aria-live="polite"></p>
+      <p id="progress-status" role="status" aria-live="polite"></p>
+      <div class="row actions">
+        <button id="progress-retry" type="button" hidden>Prøv samme oppdatering igjen</button>
+        <button id="progress-fetch" type="button" hidden>Hent siste fremdrift</button>
+      </div>
     </div>
     <div id="generation-warnings"></div>
     <nav class="tabs" role="tablist" aria-label="Læringsdeler">

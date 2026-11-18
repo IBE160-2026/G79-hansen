@@ -379,3 +379,18 @@ the existing Save browser suite. Real local checks use
 `supabase/tests/library_protocol.test.sql`. See
 [library acceptance](.docs/implementation-artifacts/library-acceptance.md) for
 executed results and remaining release/retention limits.
+
+Saved practice navigation now synchronizes the independent card/quiz positions.
+Only acknowledged progress is guaranteed after leaving. A stale view reports
+**Fremdriften er endret på en annen enhet** and requires **Hent siste fremdrift**;
+fetching hides answers. An uncertain write retries its exact mutation once, then
+offers explicit retry/refetch. Editing or generating new material requires an
+explicit content Save before progress sync resumes. Opening a newer saved
+generation requires reopening the document. No inference occurs during sync.
+
+Focused checks: `uv run --locked pytest tests/test_progress.py -q`,
+`node tests/browser-progress.cjs`, `supabase/tests/progress_protocol.test.sql`, and
+the isolated local `tests/progress_provider_acceptance.py` runner with
+`SAVE_TEST_WSL_DISTRO=SUREUbuntu`. See
+[progress acceptance](.docs/implementation-artifacts/progress-acceptance.md)
+for exact executed results and remaining integration limits.

@@ -10,6 +10,10 @@ from app.api.auth import BROWSER_COOKIE, context, current_session, protected
 from app.api.sources import unique_object
 
 MESSAGES = {
+    'progress_pending': 'Fremdriften er ikke bekreftet. Prøv samme oppdatering igjen eller hent siste fremdrift.',
+    'progress_conflict': 'Fremdriften er endret på en annen enhet',
+    'progress_mismatch': 'Fremdriftsoppdateringen samsvarer ikke med det opprinnelige forsøket.',
+    'progress_generation': 'Dokumentet har en ny versjon. Åpne det lagrede dokumentet på nytt.',
     'library_unavailable': 'Dokumentene kunne ikke hentes. Materialet er beholdt. Prøv igjen.',
     'document_unknown': 'Dokumentet er ikke tilgjengelig for kontoen. Materialet er beholdt.',
     'file_unavailable': 'Originalfilen kunne ikke hentes eller kontrolleres. Prøv igjen.',
@@ -42,7 +46,8 @@ MESSAGES = {
 def error(code, *, save_disabled=False):
     if code not in MESSAGES:
         code = 'generation_failed'
-    status = {'session_ended': 401, 'request_rejected': 403, 'generation_capacity': 429,
+    status = {'progress_pending': 503, 'progress_conflict': 409, 'progress_mismatch': 409, 'progress_generation': 409,
+              'session_ended': 401, 'request_rejected': 403, 'generation_capacity': 429,
               'workspace_capacity': 429, 'generation_timeout': 504, 'model_unavailable': 503,
               'budget_unavailable': 503, 'generation_failed': 503, 'body_timeout': 408,
               'wire_limit': 413, 'stale_workspace': 409, 'command_replayed': 409,

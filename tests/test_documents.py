@@ -27,6 +27,8 @@ class MemoryRepository:
         self.operations, self.documents, self.objects = {}, {}, {}
         self.calls, self.hook, self.fail_action = [], None, None
         self.lose_ready_reply = False
+        self.progress_mutations = {}
+        self.lose_progress_reply = False
         self.clock = time.time
         self.lock = RLock()
 
@@ -39,6 +41,32 @@ class MemoryRepository:
         with self.lock:
             self.calls.append(action)
             owner = identity.owner_id
+            if action in {'progress_read', 'progress_write'}:
+                saved = self.documents.get((owner, payload['documentId']))
+                if not saved or saved.get('status') != 'ready': raise DocumentFailure('document_unknown')
+                if saved['generationId'] != payload['generationId']: raise DocumentFailure('progress_generation')
+                def result():
+                    return deepcopy({key:saved[key] for key in ('schemaVersion','documentId','generationId','progressRevision','positions')})
+                if action == 'progress_read': return result()
+                mutation_key = owner,payload['mutationId']
+                for section,key in (('flashcards','flashcardId'),('quiz','quizId')):
+                    if payload['positions'][key] not in ({item['id'] for item in saved['bundle'][section]} or {None}):
+                        raise DocumentFailure('progress_mismatch')
+                previous = self.progress_mutations.get(mutation_key)
+                if previous:
+                    if previous['request'] != payload: raise DocumentFailure('progress_mismatch')
+                    if 'error' in previous['outcome']: raise DocumentFailure(previous['outcome']['error'])
+                    return deepcopy(previous['outcome'])
+                if saved['progressRevision'] != payload['expectedProgressRevision']:
+                    self.progress_mutations[mutation_key] = {'request':deepcopy(payload),'outcome':{'error':'progress_conflict'}}
+                    raise DocumentFailure('progress_conflict')
+                saved['positions'] = deepcopy(payload['positions']); saved['progressRevision'] += 1
+                outcome = result()
+                self.progress_mutations[mutation_key] = {'request':deepcopy(payload),'outcome':deepcopy(outcome)}
+                if self.lose_progress_reply:
+                    self.lose_progress_reply = False
+                    raise DocumentFailure('progress_pending')
+                return outcome
             key = owner, payload.get('operationId')
             operation = self.operations.get(key)
             for (own, _), value in self.operations.items():
@@ -77,7 +105,7 @@ class MemoryRepository:
                     if not saved.get('objectKey'): raise DocumentFailure('document_unknown')
                     return {key:saved[key] for key in ('documentId','generationId','revision','title','objectKey','fileHash','fileSize')} | {
                         'mediaType':'application/pdf' if saved['acceptance']['kind']=='pdf' else 'text/plain'}
-                return deepcopy({key:saved[key] for key in ('schemaVersion','status','documentId','generationId','revision','title','acceptance','bundle','positions')})
+                return deepcopy({key:saved[key] for key in ('schemaVersion','status','documentId','generationId','revision','progressRevision','title','acceptance','bundle','positions')})
             if action == 'admit':
                 if operation:
                     return {'operation': deepcopy(operation)}
@@ -122,11 +150,11 @@ class MemoryRepository:
                 for (own,_),value in self.operations.items():
                     if own==owner and value['documentId']==frozen['documentId'] and value['status']=='ready' and value.get('objectKey'):
                         value['cleanupNeeded']=True
-                self.documents[document_key] = {**deepcopy(frozen), 'status': 'ready', 'revision': revision,'objectKey':operation['objectKey'],
+                self.documents[document_key] = {**deepcopy(frozen), 'status': 'ready', 'revision': revision,'progressRevision':1,'objectKey':operation['objectKey'],
                     'updatedAt':datetime.fromtimestamp(self.clock(),timezone.utc).isoformat()}
                 outcome = {'schemaVersion': '1.0', 'status': 'ready', 'operationId': payload['operationId'],
                     'documentId': frozen['documentId'], 'generationId': frozen['generationId'], 'digest': operation['digest'],
-                    'revision': revision, 'cleanupStatus': 'pending' if operation['objectKey'] else 'complete'}
+                    'revision': revision, 'progressRevision':1, 'cleanupStatus': 'pending' if operation['objectKey'] else 'complete'}
                 operation.update(status='ready', outcome=outcome, snapshot=None, completed=self.clock())
                 if self.lose_ready_reply:
                     self.lose_ready_reply = False
