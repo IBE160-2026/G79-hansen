@@ -64,6 +64,14 @@ Given current, old and provisional objects plus an uncertain delayed upload, whe
 
 ## Implementation Notes
 
+Hosted activation approved with “ja godkjenner” on18 November. The reviewed
+migration was applied as20261118172916 to existing studybuddy-test (Free/Paris).
+Ordinary app restarted at port8000/worker25940. Hosted16, normal deletion22,
+ordinary browser6 and normal progress16 passed; direct DB postcheck confirmed
+only content-free tombstones/outcome remain for the new synthetic document.
+Existing accounts reused; real model ledgers byte-identical. No public deploy.
+The following local-only implementation notes are historical.
+
 Local implementation completed 18 November: CLI-created migration
 `20261118165334_delete_saved_material_completely.sql`; no hosted migration.
 New uploads register exact durable attempt IDs. Only the terminal response for
@@ -101,6 +109,6 @@ One focused independent edge-case review plus parent diff/matrix audit; overlapp
 - `node tests/browser-deletion.cjs` — 7 passed; affected browser regressions: Save25/library21/progress16 passed. Parent reran Save/library after the patches; progress16 remains the unchanged earlier run.
 - Isolated local `supabase/tests/deletion_protocol.test.sql` — 40 pgTAP assertions passed, rolled back; includes seven-day pruning and indefinite uncertain-record retention.
 - `SAVE_TEST_WSL_DISTRO=SUREUbuntu uv run python tests/deletion_provider_acceptance.py` — 15 passed with real local owner JWTs/Storage. Current+superseded files complete; delayed chunked upload during deletion is fenced and remains uncertain/retryable across service reconstruction.
-- No real-file, hosted, independent physical-erasure or backup-retention acceptance is claimed. Lost provider removal acknowledgements require independent reconciliation and remain pending.
+- No real-file, independent physical-erasure or backup-retention acceptance is claimed. Lost provider removal acknowledgements require independent reconciliation and remain pending. Hosted synthetic integration passed after separate approval as recorded above.
 - Parent final pgTAP rerun40 passed against the corrected local function. `SAVE_TEST_WSL_DISTRO=SUREUbuntu uv run python tests/deletion_identity_concurrency_acceptance.py` passed the deterministic identity race. No review finding deferred.
 - Matrix audit: cancel/confirm/complete and lost reply/restart have browser coverage; foreign/unknown/auth contracts have Python/provider coverage; captured Save replay, in-flight file read and actual delayed upload cover lifecycle races; superseded/current removal and pgTAP cover transactional completion. All covering checks executed and passed.

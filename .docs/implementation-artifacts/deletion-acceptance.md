@@ -1,8 +1,10 @@
 # Story 3.4: delete saved material completely
 
-Local implementation evidence, 18 November 2026. Hosted migration and real-file
-retention acceptance remain separate approvals/gates. No hosted changes, real
-model calls, credentials or real study files were used.
+Implementation and existing-test-project integration evidence, 18 November 2026.
+The student explicitly approved hosted activation with “ja godkjenner”. Migration
+`20261118172916` is applied in `studybuddy-test` (Free/Paris); the ordinary app
+was restarted on port8000, worker25940. No real model calls, new accounts or real
+study files were used. Real-file backup/physical-retention acceptance remains open.
 
 ## Implemented protocol
 
@@ -80,11 +82,42 @@ named result; the cleanup awaits backend object deletion. This is operational
 removal evidence for these acknowledged objects, not a backup erasure claim.
 S3 404 is used only together with that acknowledgement and write quiescence.
 
+## Existing test-project activation
+
+The reviewed local migration `20261118165334_delete_saved_material_completely.sql`
+was applied unchanged as hosted version `20261118172916`. Schema inspection
+confirmed owner RLS on all four new tables, invoker deletion functions, anonymous
+denial and the administrator-only active tombstone cleanup job. Security advisors
+showed only the previously recorded leaked-password-protection warning; Auth
+settings were unchanged.
+
+- Actual hosted preparation saved and replaced one new synthetic text file,
+  with an injected synthetic model and an isolated temporary budget. Existing
+  authorized accounts were reused. Resumed hosted acceptance: **16 passed**.
+- A simulated cleanup failure before any Storage delete persisted the deleting
+  identity; ordinary app restart/fresh login resumed it. Normal-server deletion:
+  **22 passed**, including actual current/superseded removal, exact retry,
+  identity binding, foreign denial and no-store responses.
+- Direct database postcheck: document/source/bundle/progress/progress-request/
+  Save-operation/object/upload-attempt counts were all zero for this run; two
+  content-free Save tombstones and the deleted outcome remained.
+- Ordinary-server browser: **6 passed** for enabled deletion, named confirmation,
+  cancellation without a delete request, preserved existing synthetic entry,
+  focus, script-error absence and unchanged model allowance.
+- Existing ordinary-server progress regression: **16 passed** after integration,
+  including normal ready-document reading and cross-owner denial. Both real
+  model ledgers remained byte-identical throughout.
+
+The first hosted harness stopped because it required403 for a stale view;
+the existing contract correctly returns401. The corrected harness resumed the
+same synthetic document without creating more files. The first browser probe
+clicked the library during initial pending-Save discovery and met the existing
+per-session429 guard; waiting for startup discovery produced the final six passes.
+Production limits were unchanged. Ignored scripts/results are
+`test-results/hosted-deletion-*`, `normal-deletion-*` and `normal-progress-*`.
+
 ## Remaining gates and conservative recovery
 
-- Migration `20261118165334_delete_saved_material_completely.sql` is prepared
-  for separate concrete hosted approval. The hosted browser must not use the
-  new deletion API before that migration is applied.
 - Legacy uncertain uploads, lost provider remove acknowledgements, orphaned
   physical blobs and provider failures without terminal evidence remain
   deleting/retryable. No timer or automatic record purge turns them into
@@ -93,9 +126,9 @@ S3 404 is used only together with that acknowledgement and write quiescence.
 - Database backups/PITR, object versioning/replicas/provider backups, their
   retention periods and independently measured physical erasure have not been
   accepted. Application deletion does not claim immediate backup destruction.
-- Local synthetic ownership/Storage/race evidence does not establish hosted,
-  production multi-device or real-file acceptance. Historical broad Save
-  provider timing instability remains outside this focused run.
+- Local and hosted synthetic evidence does not establish public hosting, two
+  physical devices or real-file acceptance. Historical broad Save provider
+  timing instability remains outside this focused run.
 - Existing TestClient/httpx deprecation warning remains unchanged.
 
 Raw pgTAP output and the summarized local run record are under ignored

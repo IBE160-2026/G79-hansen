@@ -395,15 +395,16 @@ the isolated local `tests/progress_provider_acceptance.py` runner with
 [progress acceptance](.docs/implementation-artifacts/progress-acceptance.md)
 for exact executed results and remaining integration limits.
 
-Local Story 3.4 adds **Slett** in Mine dokumenter: a named confirmation includes
+Story 3.4 adds **Slett** in Mine dokumenter: a named confirmation includes
 the source, learning material and progress; **Avbryt** changes nothing. Confirmed
 deletion closes access immediately, clears the active saved workspace and only
 reports success after verified object cleanup and transactional data removal.
 Failures remain under pending deletions with **Prøv sletting igjen**, including
 after fresh login. Unknown upload attempts stay tracked until reconciled.
 
-The CLI-created deletion migration is local-only and awaits separate hosted
-approval. Focused checks are `uv run pytest tests/test_deletion.py -q`,
+The reviewed deletion migration was approved and applied to the existing test
+project as `20261118172916` on18 November2026. The ordinary local app on port8000
+is restarted; log in again to use deletion. Focused checks are `uv run pytest tests/test_deletion.py -q`,
 `node tests/browser-deletion.cjs`, `supabase/tests/deletion_protocol.test.sql` and
 `SAVE_TEST_WSL_DISTRO=SUREUbuntu uv run python tests/deletion_provider_acceptance.py`.
 See [deletion acceptance](.docs/implementation-artifacts/deletion-acceptance.md)
