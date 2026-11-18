@@ -90,6 +90,9 @@ development_status:
   epic-3-retrospective: optional
 
   epic-4: backlog
+  # 18 Nov: Story 4.1 hosting plan/spec drafted. Student requires zero new hosting fees
+  # and an ordinary public link for assessor; proposes existing Windows PC + Tailscale Funnel.
+  # Provider/backup/access decisions and activation remain unapproved; no public deployment.
   4-1-reach-the-app-securely-from-two-devices: backlog
   4-2-verify-the-full-release-and-assessor-setup: backlog
   epic-4-retrospective: optional

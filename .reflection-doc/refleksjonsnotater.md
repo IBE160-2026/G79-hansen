@@ -589,6 +589,10 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Etter uttrykkelig hosted-godkjenning:** Studenten svarte «ja godkjenner» til konkret migrasjon, lokal restart og syntetisk verifisering. Migrasjon20261118172916 er anvendt i eksisterende Free/Paris-testprosjekt; appworker25940/port8000 er aktiv. Hosted16, normal sletting22, faktisk nettleser6 og normal fremdrift16 bestod. Ny syntetisk fil med erstattet versjon ble slettet etter simulert oppryddingsfeil og fersk innlogging; databasekontroll viste null innholds-/objekt-/forsøksposter og to innholdsfrie Save-tombstones. KI-testen antok først403 der kontrakten korrekt gir401; testen ble rettet og samme fil gjenbrukt. Første nettleserprobe traff eksisterende429-kapasitetsvern ved oppstartsdiscovery; endelig kontroll ventet på denne og bestod. Produksjonsgrenser ble ikke endret. Ingen nye kontoer/ekte modellkall eller modellbudsjettendring; fysisk-/backup-retensjon er fortsatt ikke godkjent.
 
+### 18.11.2026 – Gratis offentlig hostingplan (Story 4.1)
+
+**Dokumenterte fakta:** Studenten presiserte «jeg vil ha noe som ikke koster penger» og at foreleser må kunne åpne appen. KI-forslaget om betalt Render ble derfor erstattet med egen Windows-PC og gratis Tailscale Funnel; privat Serve alene dekker ikke behovet. [Hostingplanen](../.docs/implementation-artifacts/hosting-plan-4-1.md) skiller offentlig HTTPS fra privat dokumenttilgang og krever at PC-en er på. Supabase-integrasjonen bekreftet eksisterende Free/Paris-prosjekt, og lokal Tailscale-status viste Running/Online. Backupmedium, retensjon og forelesers konto gjenstår før klargjøring/aktivering; ingen ekstern endring er utført. Den innledende Render-utredningen brukte mer kontekst enn ønsket før kostnadspreferansen ble kjent. Dette er KI-dokumentasjon, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
