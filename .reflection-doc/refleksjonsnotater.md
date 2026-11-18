@@ -611,6 +611,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Kontroll og avgrensning:**99 fokuserte oppstarts-/e-posttester bestod (12,96s), én arvet advarsel. PowerShell-parse og fire ekte wrapperavvisninger brukte bare syntetiske filer. En eksisterende samtidighetstest traff trygg avvisning av alle forsøk; forventningen om minst én vinner ble rettet til å tillate dette og kontrollere fremdrift uten konkurranse etterpå. Produksjonsgrenser/låser er uendret. Én avgrenset uavhengig gjennomgang uten åpne funn. Ingen ekte miljø-/nøkkel-/budsjett-/server-/Tailscale-/Supabase-endring, modellkall/e-post eller publisering. Backup, runtime-konfigurasjon og foreleseradresse gjenstår. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 18.11.2026 – Lokal kryptert backupkomponent (Story 4.1)
+
+**Studentens avklaring:** Studenten spurte «Hva er dette til» om eksporttilgang og presiserte «Jeg har ikke laget noe passord». KI forklarte forskjellen mellom appinnlogging og komplett database-/fileksport. Ingen passord ble laget eller nullstilt; ekte eksport ble utsatt til separat tilgang er avklart.
+
+**KI-bidrag og kontroll:** For klargjorte eksportfiler er lokal kryptering, 7-dagers navnedatobasert opprydding og utpakking til ny karantenemappe implementert. Fernet-nøkkelen beskyttes av Windows-kontoen via DPAPI, uten nytt backup-passord. Parent korrigerte at mtime kunne forlenge retensjon, og at deaktivert e-post måtte kunne erklæres uten å dikte opp en journal. Én uavhengig gjennomgang fant manglende grense for antall mapper før utpakking; kontrollen ble flyttet fram og testet med over 6 000 impliserte mapper. 62 fokuserte syntetiske tester bestod (17,84s), inkludert ekte Windows-kryptering. Ingen funn utsatt i komponenten.
+
+**Faktisk tilstand:** Den tomme C:\StudyBuddy-Backup-mappen fikk ACL for operatøren, SYSTEM og administratorer. Ingen ekte kopier ble lagt der. Database/Storage-eksport, konsistens, daglig planlegging og faktisk databasegjenoppretting er fortsatt ikke bevist. Ingen modell-/e-post-/providerkall, app-/rute-/konto-/passord-/Supabase-endring eller publisering. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

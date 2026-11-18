@@ -5,6 +5,7 @@ description = "A same-origin, fixed-example study demo"
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "botocore>=1.40,<2",
+  "cryptography==50.0.2",
   "fastapi>=0.162.4,<0.163",
   "httpx>=0.28,<0.29",
   "pypdf==7.0.1",

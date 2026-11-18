@@ -66,3 +66,9 @@ Thumbs.db
 
 # Server-only authentication email journal and SQLite sidecars
 .auth-email-admission*
+
+# Private prepared backup sources, quarantine and encrypted local bundles
+.backup-prepared/
+.backup-quarantine/
+*.sbb
+*.sbb.partial

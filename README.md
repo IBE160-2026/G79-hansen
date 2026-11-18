@@ -79,6 +79,24 @@ Consult the local example and persistent-state preparation records to resolve
 the category. See [uv run flags](https://docs.astral.sh/uv/reference/cli/#uv-run)
 and [Uvicorn settings](https://uvicorn.dev/settings/).
 
+## Local prepared-export backup component (Story 4.1)
+
+`scripts/backup-studybuddy.ps1` packs explicitly prepared database, Storage and
+local-state copies into authenticated encrypted bundles, rotates recognized files
+at seven days, and extracts only into a new quarantine directory. The default
+encrypted root is `C:\StudyBuddy-Backup`; prepare private ACLs before use. The
+complete plaintext bundle is limited to 64 MiB and exists only in memory while
+packing. Each fresh Fernet key is protected with Windows DPAPI CurrentUser,
+normally binding recovery to the same account/profile/PC.
+
+See [the exact source contract, commands and recovery limits](.docs/implementation-artifacts/backup-local-4-1.md).
+Coverage is **prepared export only**. Live exports/administrative access,
+consistent snapshot capture, daily scheduling, actual PostgreSQL/Storage import,
+monotonic budget/journal reconciliation and replay of post-snapshot deletions
+remain pending. Never replace current state with quarantined older copies.
+Rotation occurs only on invocation and cannot expire copies while the PC is off;
+same-PC risk is accepted through submission on 15 December 2026.
+
 ## API og avgrensning for demoen
 
 - `GET /health` returnerer `{"status":"ok","mode":"demo"}`.

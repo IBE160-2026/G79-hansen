@@ -78,6 +78,8 @@ Student selected this Windows PC, free public Funnel access, existing Supabase F
 
 Later continuation: [local startup subtask](spec-4-1-local-hosted-startup.md) complete/reviewed with99 focused checks. `scripts/start-hosted.ps1`, preflight and placeholder hosted environment are prepared. Parent startup/configuration task above remains unchecked because actual private hosted configuration and runtime startup are still unexecuted; backup/account/public acceptance remain pending. No existing runtime state or routes changed.
 
+Later backup continuation: [local prepared-bundle component](spec-4-1-local-backup-bundle.md) complete/reviewed with 62 focused checks, including real Windows crypto. Actual root ACL restricted, root still empty. Student has no established export password/access. Parent backup task remains unchecked: full live capture, consistency, scheduling, actual isolated PostgreSQL/Storage import and monotonic/deletion reconciliation are still unproven. No password/account/provider/runtime/public change.
+
 ## Spec Change Log
 
 ## Review Triage Log

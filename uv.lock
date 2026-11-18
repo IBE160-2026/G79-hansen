@@ -552,6 +552,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "botocore" },
+    { name = "cryptography" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "pypdf" },
@@ -571,6 +572,7 @@ pdf-experiment = [
 [package.metadata]
 requires-dist = [
     { name = "botocore", specifier = ">=1.40,<2" },
+    { name = "cryptography", specifier = "==50.0.2" },
     { name = "fastapi", specifier = ">=0.162.4,<0.163" },
     { name = "httpx", specifier = ">=0.28,<0.29" },
     { name = "pypdf", specifier = "==7.0.1" },
