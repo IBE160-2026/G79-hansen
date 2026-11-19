@@ -7,6 +7,15 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
 ## Ferdig kontrollert
 
+- [x] README/ren oppstart19.11: kopi av versjonerte filer fra3484527, med
+  oppdatert README, uten `.env`, nøkler, lokale journaler eller eksisterende
+  `.venv`. `uv sync --locked` laget nytt miljø og installerte47 pakker.
+  README-kommandoen med ledig port8001 startet demoen; side, demo-helsesjekk,
+  fixture og alle fire læringsdeler bestod. Egen kontrollserver er avsluttet;
+  original PID25940/port8000 ble ikke erstattet. Dette er Windows på samme PC
+  med Python3.13.7/uv0.8.15 fra før og mulig gjenbruk av pakkebuffer, ikke bevis
+  for nyinstallasjon av Python/uv på andre maskiner eller operativsystemer.
+  Ingen ny full testpakke eller ekte modell-/provider-/e-postkall.
 - [x] Nøkkelfri demo i separat midlertidig server:19.11 bestod alle11 scenarier i
   `tests/browser-demo.cjs`. Appvariabler og eventuell ekstern demo-adresse ble
   fjernet bare fra kontrollprosessens miljø. Ingen `.env` ble lastet av serveren.
@@ -23,9 +32,10 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
 1. **Oppgavekrav:** Finn/sammenhold faktisk oppgavetekst og sensorveiledning med
    denne leveransen. Faglærertilbakemeldingen er ikke full vurderingsveiledning.
-2. **README og oppsett:** Gjør inngangen kort og tydelig. Kontroller oppsett fra
-   ren kopi uten nøkler; dagens kontroll brukte installerte avhengigheter og
-   beviser ikke nyinstallasjon. Skill fast demo fra valgfri live-konfigurasjon.
+2. **README og oppsett:** Ren kopi/nytt virtuelt miljø og demooppstart er
+   kontrollert på Windows. README har kort oppskrift, portalternativ og tydelig
+   demo/live-skille; tekniske detaljer er sammenleggbare. Eventuell kontroll på
+   en annen maskin er fortsatt egen leveransekontroll, ikke allerede bevist.
 3. **Brukbarhet og gjenværende feil:** Gjør én samlet manuell hovedflyt, med
    tastatur/skjermleser og tydelige feilmeldinger. Gjenbruk eksisterende
    innholds-/tilgangsevidens; kjør bare nye tester for faktiske hull/endringer.

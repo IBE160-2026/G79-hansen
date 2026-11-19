@@ -1,8 +1,9 @@
-# G79 — Gruppe123
+# StudyBuddy – G79-hansen
 
 Gruppeprosjekt i **IBE160 Programmering med KI** ved Høgskolen i Molde, høsten 2026 (15 studiepoeng).
 
-Repoet inneholder gruppens applikasjon og dokumentasjon av utvikling, testing og kvalitetssikring med KI.
+StudyBuddy gjør kursmateriale om til sammendrag, begreper, flashcards og quiz
+med kildehenvisninger. Prosjektet bruker Python/FastAPI og HTML/CSS/JavaScript.
 
 **Leveranseplan19.11:** Lokal kjørbarhet, eksisterende kjernefunksjoner og
 Supabase-lagring prioriteres. Offentlig lenke er et valgfritt tillegg; videre
@@ -11,9 +12,21 @@ ikke ferdig produksjonsdrift. Mål: fungerende kjerne1.12, innleveringsklar
 applikasjon, README og rapport8.12, fast innlevering15.12.2026.
 Se [avtalt avgrensning](.docs/implementation-artifacts/leveranseavgrensning-2026-11-19.md).
 
-## Kjør studiedemoen lokalt
+## Start demoen uten nøkler
 
-Demoen er én FastAPI-applikasjon med vanlig HTML, CSS og JavaScript. Ingen API-nøkler, kontoer eller skytjenester er nødvendige. Installer [uv](https://docs.astral.sh/uv/getting-started/installation/) først. Kjør fra repoets rot:
+Demoen bruker **faste eksempeldata og ferdige svar**. Den viser studieflyten,
+men genererer ikke nye svar fra egne dokumenter. Ingen API-nøkler, kontoer,
+Supabase-oppsett, Node.js eller betalte tjenester trengs for å kjøre demoen.
+
+Installer [uv](https://docs.astral.sh/uv/getting-started/installation/).
+Hent repoet med Git, eller last ned og pakk ut en ZIP-kopi:
+
+```powershell
+git clone https://github.com/IBE160-2026/G79-hansen.git
+cd G79-hansen
+```
+
+Åpne en terminal i prosjektmappen (der `pyproject.toml` ligger), og kjør:
 
 ```powershell
 uv sync --locked
@@ -26,10 +39,44 @@ Kjør demoen fra en terminal uten eksporterte appvariabler. `--no-env-file`
 hindrer innlesing av lokal `.env`; eventuelle miljøvariabler i terminalen har
 fortsatt virkning. Live-innlogging/generering/lagring er separat konfigurasjon.
 
+Hvis port 8000 allerede er i bruk, la den prosessen stå og velg en ledig port:
+
+```powershell
+uv run --no-env-file uvicorn app.main:app --host 127.0.0.1 --port 8001
+```
+
+Åpne da `http://127.0.0.1:8001`. Oppstartsloggen viser hvilken adresse som brukes.
+
+## Prøv studieflyten
+
 1. Les det faste eksempelet «Hukommelse og aktiv gjenhenting» og trykk **Lag læringsmateriale**.
 2. Bytt mellom Sammendrag, Begreper, Flashcards og Quiz. Svar og kildehenvisning vises sammen når du trykker Vis svar / Vis fasit.
 3. Bruk Forrige/Neste. Kort og quiz beholder hver sin posisjon og hvilke svar du har vist når du bytter fane.
 4. Vis/rediger åpner materialet uten å endre fremdriften. Ny økt tømmer arbeidsflaten; velg eksempelet på nytt for å starte igjen.
+
+## Demo og live-funksjoner
+
+| Modus | Tilgjengelig |
+| --- | --- |
+| Demo uten nøkler | Fast eksempel, fire læringsdeler, kildehenvisninger og øving. Tilstanden finnes i nettleserminnet og forsvinner ved omlasting. |
+| Separat konfigurert live-modus | Egen tekst/tekstfil/PDF, modellgenerering, innlogging, Mine dokumenter, lagring, fremdrift og sletting. Krever Supabase og serverens modellnøkkel/budsjett. |
+
+PDF-støtten gjelder tekstbaserte PDF-er; OCR og tolkning av figurer/tabeller
+inngår ikke. Modellens svar må kontrolleres mot kildehenvisningene. Offentlig
+lenke og komplett automatisert backup er utsatt; løsningen er ikke dokumentert
+som ferdig produksjonsdrift.
+
+Videre dokumentasjon:
+
+- [Leveransesjekkliste og gjenværende arbeid](.docs/implementation-artifacts/delivery-checklist-2026-11-19.md)
+- [Refleksjonsnotater som grunnlag for studentens rapport](.reflection-doc/refleksjonsnotater.md)
+- [Krav og avgrensning](.docs/planning-artifacts/prds/prd-G79-hansen-2026-09-26/prd.md)
+
+<details>
+<summary>Teknisk dokumentasjon, valgfritt live-oppsett og tidligere kontrollresultater</summary>
+
+Detaljene under trengs ikke for å starte den nøkkelfrie demoen. Live-oppsett
+bruker egne nøkler og tjenester; ikke kopier gruppens hemmeligheter til Git.
 
 ## Optional Windows hosted launcher (deferred Story 4.1)
 
@@ -129,7 +176,7 @@ same-PC risk is accepted through submission on 15 December 2026.
 - `POST /api/v1/demo/generate` tar nøyaktig `{"schemaVersion":"1.0","fixtureId":"memory-basics-v1"}` og returnerer alle fire deler samlet. Hver del har stabile element- og kilde-ID-er; hver generering får en ny `generationId`.
 - [API-dokumentasjon](http://127.0.0.1:8000/docs) viser kontraktene. Ukjent eksempel, versjon, egne kildefelt, innstillinger og andre ekstra felt gir forståelig HTTP 422 uten behandling eller lagring.
 
-Studiedemoen bruker faste syntetiske eksempeldata på norsk med kort sammendrag. Ingen AI-modell behandler demoteksten. Egen tekst, tekstfil/PDF og språk-/detaljvalg er tilgjengelig i det private arbeidsområdet `/workspace`, med separat aktivert modellkonfigurasjon. Eksplisitt privat Lagre er implementert med separat konfigurasjon og er deaktivert som standard; Mine dokumenter og løpende fremdriftssynkronisering er senere arbeid. Den aktive demotilstanden finnes bare i minnet på den åpne siden og forsvinner ved omlasting. Feil gir eksplisitt prøv-igjen; demoen bytter aldri til et falskt vellykket svar.
+Studiedemoen bruker faste syntetiske eksempeldata på norsk med kort sammendrag. Ingen AI-modell behandler demoteksten. Egen tekst, tekstfil/PDF og språk-/detaljvalg er tilgjengelig i det private arbeidsområdet `/workspace`, med separat aktivert modellkonfigurasjon. Eksplisitt privat Lagre er implementert med separat konfigurasjon og er deaktivert som standard; Mine dokumenter og løpende fremdriftssynkronisering er implementert i live-modus. Den aktive demotilstanden finnes bare i minnet på den åpne siden og forsvinner ved omlasting. Feil gir eksplisitt prøv-igjen; demoen bytter aldri til et falskt vellykket svar.
 
 Demoen trenger ingen konfigurasjon og gjør ingen Supabase-kall. `/account` tilbyr norsk registrering og innlogging når Supabase er uttrykkelig aktivert og riktig konfigurert; ellers viser siden at innlogging er utilgjengelig. Bare eksplisitte offentlige UI-filer serveres; repositoryfiler og dokumentasjon er ikke statisk tilgjengelige. Den historiske UX-prototypen ligger uendret under `.docs/planning-artifacts/ux-designs/`.
 
@@ -562,3 +609,5 @@ the existing StudyBuddy PID25940 still uses8000. Nothing was restarted or
 published. Eventual launch must use the normal operator/profile and avoid
 conflicting ambient app variables; final preflight/start and backup/access
 acceptance are still pending.
+
+</details>

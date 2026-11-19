@@ -661,6 +661,12 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Kontroll og videre prioritet:** En separat nøkkelfri demoserver, med appvariabler fjernet bare fra kontrollprosessens miljø, bestod11 eksisterende nettleserscenarier.21 forespørsler brukte faste demosvar; ingen modell-/provider-/e-postkall. Eksisterende server/nøkler/budsjett/ruter er urørt. Epic4/Story4.2 er startet for lokal leveranse, mens4.1 forblir utsatt/ufullført. En kort sjekkliste prioriterer faktisk oppgavetekst, README/ren installasjon, manuell brukbarhet og rapport innen8.12-målet. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 19.11.2026 – README og oppstart fra ren kopi
+
+**KI-bidrag og kontroll:** README fikk en kort sensorinngang, Git/ZIP-oppsett, nøkkelfri oppstart, ledig port som alternativ, studieflyt og tydelig demo/live-skille. Tekniske detaljer er bevart i en sammenleggbar del. Ren kopi av versjonerte filer fikk nytt virtuelt miljø; uv installerte47 låste pakker. Demoen startet på8001 uten appvariabler/nøkler, og side/helsesjekk/fixture/fire læringsdeler bestod. Ingen nye modell-/provider-/e-postkall eller brede testpakker. Dette brukte eksisterende Python/uv og mulig pakkebuffer på samme Windows-PC, ikke en uprøvd påstand om ren annen maskin.
+
+**KI-korrigeringer:** Git-arkivets LF og arbeidskopiens CRLF ga først feil råbyte-sammenligning; normalisert tekst bekreftet samme kilde. Stopp av uv-launcheren etterlot egen uvicorn-prosess27292. Agenten kontrollerte eksakt kontrollkopisti og port før denne prosessen ble stoppet; eksisterende PID25940/port8000 ble ikke erstattet. Kontrollkopien opprettet ingen private tilstandsfiler. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
