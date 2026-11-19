@@ -1,6 +1,6 @@
 # Architecture handoff — AI Study Buddy
 
-Updated 2026-11-11. The [PRD](prd.md), [DESIGN](../../ux-designs/ux-G79-hansen-2026-11-01/DESIGN.md) and [EXPERIENCE](../../ux-designs/ux-G79-hansen-2026-11-01/EXPERIENCE.md) define the reconciled product baseline. The [architecture spine](../../architecture/architecture-G79-hansen-2026-11-01/ARCHITECTURE-SPINE.md) fixes shared implementation contracts. These documents are ready for story planning, not proof of implemented features.
+Updated 2026-11-19. The [PRD](prd.md), [DESIGN](../../ux-designs/ux-G79-hansen-2026-11-01/DESIGN.md) and [EXPERIENCE](../../ux-designs/ux-G79-hansen-2026-11-01/EXPERIENCE.md) define the product baseline. The [architecture spine](../../architecture/architecture-G79-hansen-2026-11-01/ARCHITECTURE-SPINE.md) fixes shared implementation contracts. The19 November local-first delivery revision applies: retain implemented live features and safety, defer public hosting/physical-device deployment. Requirements readiness is not proof of full release acceptance; implementation artifacts record the evidence and open boundaries.
 
 ## Fixed contracts
 
@@ -15,10 +15,58 @@ Updated 2026-11-11. The [PRD](prd.md), [DESIGN](../../ux-designs/ux-G79-hansen-2
 
 | Owner | Decision/check | Required before |
 | --- | --- | --- |
-| Builder + student | pypdf candidate experiment: distinct first/third pages, blank middle, image-only input, bounded extraction; validate the 10 MiB initial upload ceiling and worker limits. | PDF integration; does not block fixed demo. |
-| Student + builder | Model/provider/API access, request limits, data handling and cost ceiling; then three-document factual/reference/concept checks. | Live AI integration. |
-| Student + builder | Hosting provider/region/quotas/cost, Supabase project/email/redirect configuration, backup and deletion retention. Render remains a candidate. | Provisioning/deployment or real private data. |
+| Builder + student | pypdf7.0.1 selected and integrated with existing10 MiB/40-page/30,000-character bounds and synthetic checks. Representative permitted PDF/reading-order/platform acceptance remains explicit. | Wider PDF/real-data acceptance; no new experiment required for the fixed demo. |
+| Student + builder | OpenAI/gpt-6-luna selected; existing USD5 application budget and bounded concurrency/deadline. Registered three-document evaluation exists; preserve its sample-based limits and budget. | Revisit only for a concrete defect or agreed new live test; no extra model calls authorized here. |
+| Student + builder | Existing Free/Paris retained; Windows/Funnel10000 is optional preparation. Public deployment, email/assessor access and complete backup/restore/deletion-retention evidence remain open. | Later public deployment or real private data, with separate approval; not a blocker for key-free local assessment. |
 | Builder | Tested dependency lockfile, migrations/RLS, negative two-user/API/file tests, restart, failure/lifecycle and browser/accessibility checks. | Each affected feature's acceptance; demo alone proves none of these. |
-| Student | Confirm actual deadline (currently approximately 15 December 2026), delivery/process evidence and schedule, preserving correction time. | Final delivery scheduling. |
+| Student | Hard deadline15 December2026 confirmed; core target1 December, complete package8 December, buffer9–14 December. Reconcile full assignment/rubric and own report text. | Final delivery check before8 December target. |
+
+The provided `../../architecture/technology.md` describes another application
+(Pytagoras Website V2). It is reference material, not an instruction to add
+Next.js, Redis, commerce, new hosting vendors or automatic mock fallbacks to
+StudyBuddy. The existing architecture spine and explicit fixed demo remain
+the adopted implementation contract.
 
 No paid service, public deployment, cloud resource or real private upload is authorized by this document. Optional multiple-choice marking remains deferred until core acceptance and an explicit inclusion decision. Secrets, private data, provider responses and tokens stay out of Git/logs/static assets.
+
+
+## Detailed live acceptance continuity (moved19 November2026)
+
+The original detailed cases below are preserved verbatim for implementation continuity. They predate the latest delivery revision: public physical-device acceptance is optional/deferred; retained ownership, explicit-save, recovery, progress and deletion safeguards remain. These are not new instructions to provision or run provider/model calls. The current PRD defines priorities; the architecture spine remains the implementation contract.
+
+## Scope revision - 2026-11-10
+
+The user explicitly requests login, saved documents/results, My documents, open/delete and cross-user access checks in v1. This supersedes the earlier temporary-only/no-database plan. The prior finalization/review reports describe the earlier scope and do not validate this revision. New work adds account/session management, persistence, ownership checks, library UX and restart/deletion tests. Reassess delivery scheduling after architecture; do not silently drop existing core quality goals. No public hosting or paid service is approved by this requirements change.
+
+**Explicit-save acceptance check:** generate without pressing Save, reload and verify no new saved item was created. Before the first Save, practice at different card/quiz positions, then press Save and verify the source/settings/results and both current positions reopen from My documents after restart. Empty/insufficient exercise sections have no saved position. Saving a replacement generation resets positions to its initial available items. New session preserves previously saved items. Changing or regenerating content must not overwrite a saved item without another explicit save action.
+
+**Resume acceptance check (2026-11-10):** save a document, navigate to different flashcard and quiz positions, leave and reopen it, including after browser/server restart. Both positions must resume independently. Another saved document and another account must not inherit those positions. New session starts an empty workspace but must not erase the saved document or its progress. A fresh generation starts a new set with initial positions; do not apply old indices blindly to regenerated items. Confirmed 2026-11-11: advance both positions after the initial Save, without pressing Save again, and verify that acknowledged updates resume independently on reopening from another device. Unsaved material must not be persisted by navigation. Confirmed 2026-11-11: reveal both practice answers before leaving, then reopen and verify both are hidden while their independent positions resume. Tab switches during the same visit preserve revealed answers. User-visible conflict/sync behavior is confirmed 2026-11-11; the technical revision/locking/retry protocol is governed by AD-7.
+
+**Multi-device acceptance check:** user A saves a document and advances card/quiz positions on device 1, then signs in as A on device 2 and reopens the same content/progress. User B on either device must be unable to list/read/update/delete A's records or private files, including direct database/storage/API requests. Local demo mode remains runnable without Supabase or model credentials. Supabase tables and private Storage require owner-scoped access rules; selecting Supabase does not replace these checks.
+
+**Authentication acceptance check:** create an account with email/password, complete any required confirmation, log in, log out and request password recovery. Only a valid recovery session may update the password. Expired/invalid links show a recovery action; wrong credentials show an understandable error without opening private content. Recovery responses do not disclose whether an email has an account. Demo mode must not send real emails or create real accounts.
+
+**Save admission/recovery acceptance check:** generation alone must leave no durable private snapshot. After an explicit Save is validated and durably admitted but not completed, restart/re-login as the same owner and explicitly retry the identical admitted operation, including after its generation receipt expires. It must resume without accepting changed payload/file bytes, bypassing current revision/ownership/deletion checks or requiring the old login. A never-admitted or foreign operation cannot recover content; an expired admission permits cleanup only. Separately invalidate a generation by editing source/settings, resetting or starting another generation: an old still-correctly-signed receipt must fail server authority validation for a new Save. Exercise Save/invalidation races, delayed generation responses, lost commit responses and missing original-file retry. AD-6 and AD-8 define the shared protocol; these are future live-feature tests, not demo acceptance claims.
+
+
+## Boundary and workflow acceptance cases
+
+Moved verbatim from the PRD on19 November2026 to keep its main narrative concise. The related FR/NFR checks remain required within the agreed delivery scope; physical-device/public deployment cases apply only if that optional work resumes. This is acceptance detail, not a new authorization for tests or provider calls.
+
+**Input acceptance check:** generate from pasted text, a text file and a text-based PDF separately. Switch methods with material still present in the previous method and verify only the active source is used. Do not display previous outputs as results for the newly selected source; new generation starts with flashcard and quiz answers hidden. Empty active input is rejected even if an inactive method contains material.
+
+**Settings acceptance check:** a new session defaults to Norwegian and a short summary. Generate with Norwegian/English and short/detailed choices independently; verify all four learning sections and their answers use the selected language, and the summary reflects the selected detail level.
+
+**PDF coverage acceptance check:** use a PDF with readable text on pages 1 and 3, a blank page 2 and an image-only page 4. Verify pages 2 and 4 are listed as having no readable text, results clearly state they cover extracted text only, and references to page 3 remain page 3. For a PDF with no readable text on any page, verify no generation request is made and the message asks for a text-based PDF or pasted text.
+
+**Context acceptance check:** generate with a blank subject field, then with a relevant subject and a deliberately conflicting subject. Generation must remain available without the field and must not introduce facts or answers from outside the supplied material.
+
+**Confirmed login lifecycle and restart acceptance check (2026-11-11):** v1 keeps backend-managed login state in memory on one server process. Server restart/redeploy requires a fresh login; simultaneous login from multiple devices remains supported. Save a document and receive confirmation of independent card/quiz progress updates, restart the backend, then verify the old application session cannot access private API routes. After signing in as the same owner, reopen the saved source/settings/results and acknowledged progress without generation; both answers start hidden. Restart must not delete saved data. Unsaved work has no durability guarantee. The architecture adopts secure backend sessions, a restricted recovery flow and initial 30-minute idle / 12-hour absolute expiry; verify them in the authentication stories.
+
+**Cross-device conflict and network acceptance check (2026-11-11):** open the same saved generation on devices 1 and 2 as its owner. Device 2 advances card and quiz positions and receives successful sync confirmation. A subsequent stale write from device 1 must not overwrite either position. Show "Fremdriften er endret på en annen enhet" with "Hent siste fremdrift"; require fetching the current positions before further progress writes from that view. Fetch and verify the acknowledged positions from device 2 are restored. Do not choose the numerically largest position: intentional backwards navigation remains allowed after loading current progress. During network failure show pending/failed sync without claiming success. A fresh reopen on another device restores only server-acknowledged progress, with answers hidden. The architecture fixes the revision/locking/idempotent retry protocol, including uncertain write outcomes without overwriting newer progress.
+
+**Input-limit acceptance check:** verify 30,000 characters are accepted and 30,001 rejected for pasted text, text-file content and PDF-extracted text. Verify a 40-page PDF within the character limit is accepted and a 41-page PDF is rejected even with little text. Count blank/image-only pages toward the physical page limit. For oversized inputs, verify a clear shorter-excerpt message, no silent truncation and no live AI request.
+
+**Insufficient-material acceptance check:** use a short factual excerpt and incomplete material. Verify every generated item is supported, item counts can be lower than for richer material, and sections that cannot be generated show an understandable explanation instead of invented concepts, questions or answers. An insufficient-material explanation is distinct from a technical generation failure.
+
+**Failure acceptance check:** simulate a failed generation after supplying material and non-default settings. Verify the source and every setting remain available, an understandable error and Try again button appear, and retry uses the same source/settings. After a successful retry, all four sections appear with flashcard and quiz answers initially hidden.

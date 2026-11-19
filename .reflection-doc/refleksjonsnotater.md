@@ -685,6 +685,18 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **KI-kontroll og korrigering:** Standard systemrøtter ga TLS-feil. Agenten klassifiserte klientfeilen uten rå diagnostikk; en passordfri probe bekreftet sertifikatkjedeproblemet. Det var ikke bevis på feil passord. Offisiell dokumentasjon viste bruk av prosjekt-CA. Med validert CA i midlertidig klientfil bestod verifisert TLS og en fast read-only database-/rolle-sjekk, etterfulgt av rollback. Tempfilopprydding ble bekreftet. Ingen SSL-enforcement-/systemtillits-/konto-/ruteendring, eksport eller modell-/e-postkall. Standardhelperen er fortsatt uendret og trenger eksplisitt CA-oppsett før rutinemessig bruk; den vellykkede sjekken var en kontrollert engangskjøring. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 19.11.2026 – Faglærerens PRD-tilbakemelding fulgt opp
+
+**Grunnlag og KI-endring:** Tilbakemeldingen12.11 gjaldt eldre PRD, før senere modell-/budsjett-/frist- og leveransevalg. Agenten avklarte fem punkter: prioritert omfang med datofallback, tese/illustrativ UJ-1/glossar, testbare FR-3/4 og FR-8a/b/c under stabil FR-8, faktiske eksisterende kostnads-/samtidighetsgrenser, samt skille mellom produktkrav og teknisk akseptansedetalj. Ingen ny3/time-kvote eller funksjon ble innført; automatisk struktur-/referansekontroll ble ikke fremstilt som bevis for semantisk riktighet.
+
+**Kontroll og grenser:** PRD3520→3004 ord; alle12 toppnivå-FR-/5 NFR-ID-er beholdt. Ti flyttede tekstblokker er kontrollert uendret i vedlegget og lokale lenker bestod. Én kildeavstemming fant tre gamle status-/tekstmotsetninger som ble rettet; ingen tapte krav gjenstår. technology.md beskriver en annen applikasjon og ble ikke innført som StudyBuddy-arkitektur. Ingen kodeendringer, app-/test-/modell-/providerkall eller nye driftskrav. Full oppgavetekst, faktisk skjermleser og studentens egne refleksjoner er fortsatt åpne. Studenten er spurt om egen læring/forenkling; dette er KI-faktagrunnlag, ikke studentens erfaringer.
+
+### 19.11.2026 – Studentens første egne læringspunkter til rapporten
+
+**Studentens egenopplysning:** Studenten beskrev at de har lært hvordan man arbeider og kommuniserer med KI, bruker kontekstvinduet, forstår at det har en begrensning, og at prompt engineering er viktig for å få mer ut av tilgjengelig daglig/ukentlig bruk. Studenten ønsker mer tenketid om hva som ville blitt gjort enklere ved ny start.
+
+**KI-bearbeiding:** Disse punktene er tatt inn som tydelig merket foreløpig egenrefleksjon i rapportutkastets4.1 og første læringspunkt i7. Språket er bearbeidet, men det er ikke lagt til kodeforståelse, tidsbesparelser, følelser eller vurderinger studenten ikke har oppgitt. Ingen mekanisk likhet mellom kontekstvindu og bruksgrenser er påstått. Andre personlige felt står åpne; studenten ba deretter om å fortsette.
+
 ## Mal for neste hendelse
 
 

@@ -3,8 +3,12 @@
 **Arbeidsutkast19.11.2026, laget med KI-støtte. Ikke ferdig innleveringsrapport.**
 Dette dokumentet samler dokumenterbare prosjektfakta etter rapportmalen.
 Felt merket **Din refleksjon** skal fylles med studentens egne erfaringer og
-vurderinger. Teksten påstår ikke hva studenten har lært, følt eller forstått.
+vurderinger. Personlige erfaringer tas bare inn når studenten har oppgitt dem.
 Opplysninger og vurderingskrav må kontrolleres før innlevering15.12.2026.
+
+Foreløpig egenrefleksjon i4.1 og læringspunktet i7 bygger på studentens
+oppgitte stikkord19.11, språklig bearbeidet med KI. Øvrige personlige felt
+er fortsatt åpne; studenten ønsker mer tenketid.
 
 ## 1. Gruppeinformasjon
 
@@ -84,6 +88,13 @@ Slett. Beskriv hvilke deler av løsningen du kan forklare uten KI-hjelp.
 
 ### 3.3 Omfang og KI-feil
 
+Faglærerens PRD-tilbakemelding12.11 pekte på stort omfang, manglende tese/
+brukerreise/glossar, overlastede krav og uavklarte kostnadsgrenser.19.11 ble
+dette avstemt mot senere beslutninger og kode: eksisterende USD5-vern ble
+dokumentert, nye funksjoner ble ikke lagt til, omfanget ble prioritert og
+detaljerte test-/mekanismebeskrivelser flyttet til vedlegg uten tap av krav.
+Se [sporbar oppfølging](../.docs/implementation-artifacts/prd-feedback-followup-2026-11-19.md).
+
 Studenten påpekte at hosting/backup var blitt for omfattende. Dette førte til
 en enklere leveranseplan. Et konkret agentproblem var å forveksle Windows-
 sandkassekontoen med den virkelige operatøren ved filtilgang; feilen ble
@@ -95,6 +106,12 @@ ikke bare at en kommando ble kjørt.
 **Din refleksjon:** Hvordan påvirket omfanget tiden og oversikten din? Hva
 ville du avgrenset tidligere? Skill egen erfaring fra agentens beskrivelse.
 
+Faglærerens konkrete refleksjonsspørsmål: Hvilke autentiserings-/synkdetaljer
+foreslo KI, og hvilke ville du selv valgt for en studentapp? Hvis du bare
+hadde tid til halvparten av innlogging/lagringskravene, hva ville gitt mest
+brukerverdi? Besvar med egne begrunnelser; den tekniske dokumentoppdateringen
+over er ikke et svar på dine vegne.
+
 ## 4. Kritisk vurdering av KI
 
 ### 4.1 Fordeler
@@ -102,6 +119,15 @@ ville du avgrenset tidligere? Skill egen erfaring fra agentens beskrivelse.
 Loggene viser konkrete KI-bidrag til sammenhengende krav/kode, automatiserte
 kontroller, dokumenterte feilkategorier og sporbare rettelser. Dette er
 eksempler å vurdere, ikke en ferdig konklusjon om læring eller spart tid.
+
+**Min foreløpige refleksjon, basert på egne stikkord19.11:**
+
+Jeg har lært mer om hvordan jeg kan arbeide med KI og kommunisere tydelig.
+Jeg har også lært om å bruke kontekstvinduet og blitt mer bevisst på at det har
+en begrensning. Prompt engineering er viktig for å bruke KI-verktøyet
+effektivt og få mest mulig ut av den tilgjengelige bruken fra dag til dag og
+uke til uke. Jeg trenger fortsatt mer tenketid før jeg kan beskrive hva jeg
+ville gjort enklere dersom jeg startet prosjektet på nytt.
 
 **Din refleksjon:** Hvilket bidrag var mest nyttig for deg, og hvorfor?
 Bruk ett konkret før/etter-eksempel.
@@ -177,8 +203,9 @@ Forklar hva du vil gjøre enklere. Knytt anbefalingene til egne eksempler.
 
 **Din refleksjon – fylles etter at du har skrevet delene over:**
 
-1. Viktigste konkrete lærdom: **[din tekst]**.
-2. Viktigste endring du ville gjort ved ny start: **[din tekst]**.
+1. Foreløpig læringspunkt: tydelig KI-kommunikasjon, prompt engineering og
+   bevisst bruk av et begrenset kontekstvindu. Se egenrefleksjonen i4.1.
+2. Viktigste endring du ville gjort ved ny start: **[mer tenketid ønsket av studenten]**.
 3. Viktigste råd til andre studenter: **[din tekst og begrunnelse]**.
 
 Avslutt med din samlede vurdering av prosjektet og egen utvikling. Ikke

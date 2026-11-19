@@ -7,6 +7,12 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
 ## Ferdig kontrollert
 
+- [x] PRD-tilbakemeldingen fra12.11 er fulgt opp19.11: prioritert omfang/fallback,
+  tese/UJ-1/glossar, presise FR-3/4/8 og eksisterende modell-/kostnadsgrenser.
+  Detaljerte sjekker er flyttet uendret til vedlegg. Alle12 FR-/5 NFR-ID-er
+  beholdt,10 flyttede tekstblokker og lokale lenker kontrollert; én kildeavstemming
+  uten gjenværende tapte krav. [Oppfølging og leveransehull](prd-feedback-followup-2026-11-19.md).
+
 - [x] Avgrenset instrumentert tastatur-/visningskontroll19.11: fire kontrollpunkter
   observert med forventet resultat, desktop og390px visuelt inspisert, ingen
   eksterne sideforespørsler eller JavaScript-feil. Én misvisende statuslinje
@@ -37,7 +43,8 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 ## Neste konkrete leveransearbeid
 
 1. **Oppgavekrav:** Finn/sammenhold faktisk oppgavetekst og sensorveiledning med
-   denne leveransen. Faglærertilbakemeldingen er ikke full vurderingsveiledning.
+   denne leveransen. PRD-tilbakemeldingen12.11 er gjennomgått og rettet lokalt;
+   den er fortsatt ikke full vurderingsveiledning.
 2. **README og oppsett:** Ren kopi/nytt virtuelt miljø og demooppstart er
    kontrollert på Windows. README har kort oppskrift, portalternativ og tydelig
    demo/live-skille; tekniske detaljer er sammenleggbare. Eventuell kontroll på
