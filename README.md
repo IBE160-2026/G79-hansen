@@ -528,3 +528,16 @@ is restarted; log in again to use deletion. Focused checks are `uv run pytest te
 See [deletion acceptance](.docs/implementation-artifacts/deletion-acceptance.md)
 for executed evidence, seven-day content-free retry retention and the remaining
 backup/physical-retention gates before real files.
+
+
+Local backup retention is prepared, **not installed**. Preview the exact task with
+`./scripts/install-backup-retention.ps1 -Plan`; later install with
+`./scripts/install-backup-retention.ps1` under the same Windows operator.
+The installer refuses an existing `StudyBuddy-Backup-Rotation` task and query
+errors. The hidden limited task rotates recognized seven-day archives at03:00
+local and at same-user logon, with catchup when available. It requires that user
+to be logged on, does not wake the PC and cannot delete files while powered off.
+This schedules expiry only; daily full database/Storage backup is still pending.
+Real hosted startup now completes expiry before app import, or refuses startup;
+`--check` stays read-only. Password capture/authentication is deferred at the
+student's request. No task, real backup or public link was created in preparation.

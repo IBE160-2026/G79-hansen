@@ -291,3 +291,25 @@ actual Windows DPAPI capture/Python unwrap, exclusive writes, sanitized failures
 literal path parsing, exact command/stdin/TLS/read-only settings, bounded reads,
 timeouts, client failure and unexpected query output. Live credential capture
 and authenticated connection verification remain separate pending operator steps.
+
+
+## Prepared retention task ? 19 November
+
+`./scripts/install-backup-retention.ps1 -Plan` returns metadata without Scheduler
+or private-root access. Later `./scripts/install-backup-retention.ps1` registers
+only `\StudyBuddy-Backup-Rotation`, refusing collisions or query errors. It uses
+the current operator's Interactive token and Limited privileges, installed
+`.venv/Scripts/pythonw.exe`, fixed repository working directory and
+`-m scripts.backup_studybuddy rotate --root "C:\StudyBuddy-Backup"`.
+Daily03:00 local and same-user logon triggers catch up when available; the user
+must be logged on. Battery operation is allowed, overlapping runs ignored and
+runtime capped at five minutes. No wake or network condition is required.
+The PC cannot expire files while off; expiry also runs after successful hosted
+preflight, before app import. An expiry error blocks startup with a safe category;
+`--check` never performs expiry.
+
+**No task has been registered.** This prepares seven-day deletion, not daily
+backup creation. Full export/consistency/isolated import remain pending. The
+student explicitly deferred checking password capture/authentication; do not
+reopen its prompt or request another reset.75 focused offline scheduler/startup
+checks passed, with all Scheduler operations mocked and real roots untouched.

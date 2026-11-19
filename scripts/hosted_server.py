@@ -159,6 +159,15 @@ def load_application():
     return app
 
 
+def expire_backups():
+    """Reuse the local bundle policy without credentials or application state."""
+    try:
+        from scripts.backup_studybuddy import rotate
+        rotate(Path(r'C:\StudyBuddy-Backup'))
+    except Exception:
+        raise StartupFailure('backup-retention-failed') from None
+
+
 def main(argv=None):
     args = sys.argv[1:] if argv is None else argv
     env_file = None
@@ -177,6 +186,7 @@ def main(argv=None):
         if args == ['--check']:
             print('hosted-startup: check-passed')
             return 0
+        expire_backups()
         # app.main's existing module application uses these same effective settings.
         # Importing it earlier would construct the app before the safety checks.
         application = load_application()

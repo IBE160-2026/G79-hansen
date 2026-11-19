@@ -619,6 +619,20 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Faktisk tilstand:** Den tomme C:\StudyBuddy-Backup-mappen fikk ACL for operatøren, SYSTEM og administratorer. Ingen ekte kopier ble lagt der. Database/Storage-eksport, konsistens, daglig planlegging og faktisk databasegjenoppretting er fortsatt ikke bevist. Ingen modell-/e-post-/providerkall, app-/rute-/konto-/passord-/Supabase-endring eller publisering. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 19.11.2026 – Databasepassord endret av studenten; lokal innlesing avventes
+
+**Studentens handling:** Studenten rapporterte «endret passordet» etter Database settings-veiledningen. Agenten utførte ingen passordendring og ba ikke om hemmeligheten i chatten.
+
+**KI-bidrag og feilretting:** Maskert lokal innlesing og Windows-beskyttet lagring samt fast readonly/TLS-kontroll ble klargjort. Testens mockvariabel brukte feil PowerShell-scriptområde og brøt syntetisk Unicode-innlesing. Parent fant og rettet dette; ekte passord var ikke involvert. En barnediagnose sto379,6s i godkjenningsventing før avbrudd; parent tok over avgrenset kontroll. Slutt:48 syntetiske tester bestod (63,26s), én uavhengig gjennomgang uten funn. Dette brukte mer tid enn ønsket; testfeil og godkjenningsventing må skilles fra produktfeil.
+
+**Faktisk utfall:** Første brukerinnlesingsprosess avsluttet uten lagret credential-fil. Om brukeren så/skrev i vinduet eller avbrøt er ikke avklart. Ingen faktisk databaseautentisering eller backup er utført. Ingen app-/rute-/rolle-/kontoendring, modell-/e-postkall eller publisering. Dette er dokumenterte KI-fakta, ikke studentens egen refleksjon.
+
+### 19.11.2026 – Passordsjekk utsatt; lokal retensjon klargjort
+
+**Studentens styring:** «får ikke sjekket det nå, ta det senere, vi kan gå videre». Passordinnlesing/autentisering utsettes, og agenten fortsetter en uavhengig lokal deloppgave uten nytt innlesingsvindu.
+
+**KI-bidrag og kontroll:** En installer for skjult opprydding kl.03 og ved innlogging, med begrenset operatørtilgang og ren forhåndsvisning, samt utløpskontroll før hosted-appimport ble klargjort. Feil i oppryddingen stopper oppstart; kontrollmodus endrer ingen backupfiler.75 fokuserte offline-tester bestod (32,71s), med simulerte Windows-jobber. Sandkassen blokkerte uv-bufferen; den avgrensede kontrollen ble kjørt med normal brukerprofil. Ingen jobb er faktisk registrert, og ingen ekte backup/passordsjekk eller publisering er utført. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

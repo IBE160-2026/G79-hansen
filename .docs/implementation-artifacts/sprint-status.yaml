@@ -97,7 +97,9 @@ development_status:
   # Local email admission subtask done/reviewed: 221 offline tests. Runtime journal/config still pending.
   # Local startup launcher/preflight done/reviewed: 99 focused tests; actual runtime config/startup unexecuted.
   # Local encrypted prepared-bundle/rotation/quarantine component done: 62 tests, private root ACL; no real backup.
-  # Export access/password, live consistent capture, scheduling and actual DB/Storage restore remain open.
+  # Student changed DB password; local capture/auth check explicitly deferred. No real backup.
+  # Retention scheduler installer + expiry before hosted startup prepared; no task registered.
+  # Live consistent capture, daily backup scheduling and actual DB/Storage restore remain open.
   # Public activation incomplete; no public deployment.
   4-1-reach-the-app-securely-from-two-devices: backlog
   4-2-verify-the-full-release-and-assessor-setup: backlog

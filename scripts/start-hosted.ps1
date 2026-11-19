@@ -20,7 +20,7 @@ try {
     # Suppress stderr and admit only our fixed, value-free stdout messages.
     $ErrorActionPreference = 'Continue'
     & $uv.Source @uvArguments 2>$null | ForEach-Object {
-        if ($_ -cmatch '^hosted-startup: (check-passed|email-disabled \(password login available\)|environment-invalid|configuration-invalid|state-invalid|model-state-invalid|save-state-invalid|email-state-invalid|port-busy|arguments-invalid|launch-failed)$') {
+        if ($_ -cmatch '^hosted-startup: (check-passed|email-disabled \(password login available\)|environment-invalid|configuration-invalid|state-invalid|model-state-invalid|save-state-invalid|email-state-invalid|backup-retention-failed|port-busy|arguments-invalid|launch-failed)$') {
             Write-Output $_
         }
     }

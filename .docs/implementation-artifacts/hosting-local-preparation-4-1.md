@@ -50,4 +50,12 @@ The student instructed continuation. Shared durable signup/recovery admission is
 
 ## Subsequent local backup component — 18 November
 
-[Prepared-bundle subtask](spec-4-1-local-backup-bundle.md) complete locally: authenticated encryption with CurrentUser-protected keys, seven-day invocation-based expiry and byte-exact new-directory quarantine extraction. Final proof 62 synthetic tests; one independent directory-bound finding was patched. The actual backup root remains empty and now has private operator/SYSTEM/Administrators ACLs. Student has not established a database password/export access; no password was created/reset. Live roles/schema/data and Storage export, consistency, scheduled operation, actual isolated DB/Storage import and state/deletion reconciliation remain open. File extraction is not a database restore. Do not request publication approval yet.
+[Prepared-bundle subtask](spec-4-1-local-backup-bundle.md) complete locally: authenticated encryption with CurrentUser-protected keys, seven-day invocation-based expiry and byte-exact new-directory quarantine extraction. Final proof 62 synthetic tests; one independent directory-bound finding was patched. The actual backup root has no real archives and has private operator/SYSTEM/Administrators ACLs. Live roles/schema/data and Storage export, consistency, scheduled operation, actual isolated DB/Storage import and state/deletion reconciliation remain open. File extraction is not a database restore. Do not request publication approval yet.
+
+## Export-access update — 19 November
+
+The student reports manually changing the database password. Masked local DPAPI capture and a fixed read-only TLS connection helper are prepared (48 synthetic checks). The first prompt process exited without a saved credential; its cause is unconfirmed. The student explicitly deferred checking this. Do not reopen the prompt, request another password reset or retry live authentication until they resume this step. No real authenticated export or backup has occurred.
+
+## Retention preparation — 19 November
+
+The installer now prepares a current-user, limited interactive task for daily03:00 and logon expiry, with catchup when available, no wake/network requirement and a hidden pythonw action. `-Plan` does not contact Scheduler or the private backup root; installation refuses existing exact-name tasks and query errors. No task has been registered. A real hosted start now reuses expiry before importing the app and refuses startup on failure; `--check` stays read-only. Focused offline checks:75 passed. This prepares deletion of expired archives, not creation of daily backups.

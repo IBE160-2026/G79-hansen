@@ -24,6 +24,7 @@ PROJECT = 'abcdefghijklmnopqrst'
 SETTINGS = Settings(auth_enabled=True, app_origin='https://study.test:10000',
                     supabase_url=f'https://{PROJECT}.supabase.co',
                     supabase_key='sb_publishable_' + 'a' * 32)
+EXPIRE_BACKUPS = hosted.expire_backups
 
 
 def anon_key(role='anon'):
@@ -36,6 +37,7 @@ def anon_key(role='anon'):
 def offline(monkeypatch):
     # Any ordinary preflight probe is replaced, including successful checks.
     monkeypatch.setattr(hosted, 'probe_port', Mock())
+    monkeypatch.setattr(hosted, 'expire_backups', Mock())
     monkeypatch.setattr(Settings, 'from_env', classmethod(lambda cls: SETTINGS))
     application_import = Mock(side_effect=AssertionError('application must not be imported'))
     monkeypatch.setattr(hosted, 'load_application', application_import)
@@ -71,6 +73,7 @@ def test_check_all_features_is_read_only(enabled, tmp_path, monkeypatch, offline
     assert capsys.readouterr().out == 'hosted-startup: check-passed\n'
     offline.assert_not_called()
     hosted.probe_port.assert_called_once_with()
+    hosted.expire_backups.assert_not_called()
 
 
 def test_disabled_email_is_explicit_and_launch_is_fixed(monkeypatch, offline, capsys):
@@ -87,6 +90,47 @@ def test_disabled_email_is_explicit_and_launch_is_fixed(monkeypatch, offline, ca
                                access_log=False, timeout_keep_alive=5,
                                log_config=None, log_level='critical')
     assert 'email-disabled (password login available)' in capsys.readouterr().out
+
+
+def test_retention_runs_after_preflight_before_import_and_server(monkeypatch, offline):
+    import uvicorn
+    events = []
+    monkeypatch.setattr(hosted, 'preflight', lambda settings: events.append('preflight'))
+    hosted.expire_backups.side_effect = lambda: events.append('expiry')
+    offline.side_effect = lambda: events.append('app') or object()
+    monkeypatch.setattr(uvicorn, 'run', lambda *args, **kwargs: events.append('server'))
+    assert hosted.main([]) == 0
+    assert events == ['preflight', 'expiry', 'app', 'server']
+
+
+def test_preflight_failure_never_runs_retention(offline, capsys):
+    hosted.probe_port.side_effect = hosted.StartupFailure('port-busy')
+    assert hosted.main([]) == 1
+    hosted.expire_backups.assert_not_called()
+    offline.assert_not_called()
+
+
+def test_retention_uses_existing_policy_at_fixed_root(monkeypatch):
+    from scripts import backup_studybuddy
+    rotate = Mock()
+    monkeypatch.setattr(backup_studybuddy, 'rotate', rotate)
+    EXPIRE_BACKUPS()
+    rotate.assert_called_once_with(Path(r'C:\StudyBuddy-Backup'))
+
+
+@pytest.mark.parametrize('error', [OSError('SECRET_SENTINEL'), RuntimeError('SECRET_SENTINEL')])
+def test_retention_failure_is_safe_and_prevents_application(monkeypatch, offline, capsys, error):
+    import uvicorn
+    from scripts import backup_studybuddy
+    monkeypatch.setattr(backup_studybuddy, 'rotate', Mock(side_effect=error))
+    monkeypatch.setattr(hosted, 'expire_backups', EXPIRE_BACKUPS)
+    run = Mock()
+    monkeypatch.setattr(uvicorn, 'run', run)
+    assert hosted.main([]) == 1
+    assert capsys.readouterr().out == ('hosted-startup: email-disabled (password login available)\n'
+                                      'hosted-startup: backup-retention-failed\n')
+    offline.assert_not_called()
+    run.assert_not_called()
 
 
 @pytest.mark.parametrize('changes', [

@@ -55,6 +55,8 @@ Capture/check helpers implemented. Final parent focused suite:48 passed in63.26s
 
 ## Spec Change Log
 
+19 November: student explicitly deferred checking the local capture outcome. Keep real capture/authentication pending; continue independent local preparation without reopening the prompt or requesting another reset.
+
 ## Review Triage Log
 
 | Finding | Verdict | Resolution |
