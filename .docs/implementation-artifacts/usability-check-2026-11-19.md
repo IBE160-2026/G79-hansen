@@ -34,10 +34,12 @@ langtidsminnet?». Dette er synlig i390px-skjermbildet. `announceItem()` i
 `app/static/app.js` oppdaterer status ved kortnavigering, mens faneklikk bare
 bytter `active` og kaller `render()`.
 
-**Åpent for retting:** Oppdater status konsekvent ved fanebytte slik at den
-stemmer med aktiv læringsdel, uten ekstra genereringskall eller endring av
-uavhengige posisjoner/svar. Verifiser kort2→quiz1 og tilbake med tastatur,
-inkludert oppsummerings-/begrepsfaner. Skjermleserutfall er ikke observert.
+**Rettet19.11 etter studentens «rett denne»:** `announceSection()` beskriver
+aktiv fane og oppdateres ved klikk/piltaster. Øvingsfaner beskriver gjeldende
+spørsmål; sammendrag/begreper og tomme deler har egne statusmeldinger.
+Regresjonen kontrollerer full spørsmålstekst, fokus, bevarte uavhengige
+posisjoner/viste svar og uendret antall genereringer, også tomme deler.
+Skjermleserutfall er fortsatt ikke observert.
 
 ## Liten tekstkorrigering utført
 

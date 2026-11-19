@@ -205,6 +205,68 @@ async function main() {
       assert.equal(generationCalls, 1);
     });
 
+    await check('tab status follows selection without changing practice state or generating again', async () => {
+      const before = generationCalls;
+      await page.locator('#tab-flashcards').click();
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'tab-flashcards');
+      assert.equal(await page.locator('#status').innerText(), `Kort 2 av 3. ${validBundle.flashcards[1].question}`);
+      await visible(page, '#answer');
+      await page.locator('#tab-flashcards').focus();
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'tab-quiz');
+      assert.equal(await page.locator('#status').innerText(), `Spørsmål 2 av 2. ${validBundle.quiz[1].question}`);
+      await visible(page, '#answer');
+      await page.locator('#previous').click();
+      assert.equal(await page.locator('#status').innerText(), `Spørsmål 1 av 2. ${validBundle.quiz[0].question}`);
+      await visible(page, '#answer', false);
+      await page.locator('#tab-quiz').focus();
+      await page.keyboard.press('Home');
+      assert.equal(await page.locator('#status').innerText(), 'Sammendrag er valgt.');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'tab-summary');
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await page.locator('#status').innerText(), 'Begreper er valgt.');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'tab-concepts');
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await page.locator('#status').innerText(), `Kort 2 av 3. ${validBundle.flashcards[1].question}`);
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'tab-flashcards');
+      await visible(page, '#answer');
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await page.locator('#status').innerText(), `Spørsmål 1 av 2. ${validBundle.quiz[0].question}`);
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'tab-quiz');
+      await visible(page, '#answer', false);
+      assert.equal(generationCalls, before);
+    });
+
+    await check('empty-section tab status describes insufficiency without extra generation', async () => {
+      const fresh = await context.newPage();
+      fresh.on('pageerror', error => errors.push(error.message));
+      const empty = structuredClone(validBundle);
+      const sections = {summary: 'Sammendrag', concepts: 'Begreper', flashcards: 'Flashcards', quiz: 'Quiz'};
+      let calls = 0;
+      for (const key of Object.keys(sections)) {
+        empty[key] = [];
+        empty.insufficiency[key] = `Ikke nok grunnlag for ${sections[key]}.`;
+      }
+      try {
+        await fresh.route('**/api/v1/demo/generate', route => {
+          calls++;
+          return route.fulfill({json: empty});
+        });
+        await fresh.goto(baseURL);
+        await ready(fresh);
+        await generate(fresh);
+        for (const [key, name] of Object.entries(sections)) {
+          await fresh.locator(`#tab-${key}`).click();
+          assert.equal(await fresh.evaluate(() => document.activeElement.id), `tab-${key}`);
+          assert.equal(await fresh.locator('#status').innerText(), `${name}: ${empty.insufficiency[key]}`);
+          assert.match(await fresh.locator('#content').innerText(), /Ikke nok grunnlag/);
+        }
+        assert.equal(calls, 1);
+      } finally {
+        await fresh.close();
+      }
+    });
+
     await check('keyboard tabs, reveal, source expansion and visible focus', async () => {
       await page.locator('#tab-summary').focus();
       await page.keyboard.press('ArrowRight');

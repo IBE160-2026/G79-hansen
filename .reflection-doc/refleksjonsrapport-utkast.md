@@ -161,7 +161,8 @@ Avgrensede lag for tjenester, adaptere og grensesnitt samt låste avhengigheter
 gjør det mulig å undersøke deler av løsningen separat. Tester er likevel ikke
 det samme som forståelse eller full dekning.19.11 fant visuell inspeksjon en
 gammel statuslinje ved fanebytte til quiz, selv om fire instrumenterte
-tastatur-/visningspunkter hadde bestått. Funn og grenser er dokumentert i
+tastatur-/visningspunkter hadde bestått. Feilen ble deretter rettet med
+regresjonskontroll av status, fokus og bevart øvingstilstand. Funn og grenser er dokumentert i
 [brukskontrollen](../.docs/implementation-artifacts/usability-check-2026-11-19.md).
 
 **Din refleksjon:** Hvor lett er det for deg å finne og endre riktig sted i

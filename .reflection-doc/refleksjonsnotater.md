@@ -673,6 +673,12 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Tekst og rapport:** En foreldet demotekst om at lagring «kommer senere» er korrigert til separat live-modus. Rapportmalen ble brukt til et KI-merket faktautkast med kilder og tydelige felt for studentens egne refleksjoner; ingen erfaringer/læring er diktet opp. Studenten er spurt om én egen lærdom og én ting de ville gjort annerledes. Rapporten er fortsatt uferdig og er ikke full oppgavetekstkontroll. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 19.11.2026 – Demostatus ved fanebytte rettet
+
+**Studentens instruksjon:** «rett denne» om statuslinjen som viste forrige flashcard over quiz. Samme statusfunksjon brukes nå ved navigering og valg av fane: gjeldende spørsmål, navn på sammendrag/begreper eller forklaring ved tom del. Ingen ny generering eller endring av uavhengige posisjoner/svar.
+
+**Kontroll:** Én avgrenset gjennomgang fant to testgap: prefix-sjekker bekreftet ikke hele spørsmålsteksten, og fokus var ikke eksplisitt sjekket i de nye tilfellene. Direkte kontroller ble lagt til. Slutt:13 demoscenarier bestod med21 faste demoforespørsler, inkludert mus/tastatur, tomme deler, posisjoner, svar og fokus. Ingen ekte modell-/provider-/e-postkall eller endring av innlogget live-modus. Faktisk skjermleser er fortsatt ikke kontrollert. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

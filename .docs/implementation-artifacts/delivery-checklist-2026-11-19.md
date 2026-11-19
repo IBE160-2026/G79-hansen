@@ -10,7 +10,7 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 - [x] Avgrenset instrumentert tastatur-/visningskontroll19.11: fire kontrollpunkter
   observert med forventet resultat, desktop og390px visuelt inspisert, ingen
   eksterne sideforespørsler eller JavaScript-feil. Én misvisende statuslinje
-  funnet ved fanebytte og står åpen. Dette erstatter ikke manuell skjermleser-
+  funnet ved fanebytte og deretter rettet med egen regresjon. Dette erstatter ikke manuell skjermleser-
   eller full tilgjengelighetskontroll. Se [resultat og funn](usability-check-2026-11-19.md).
 
 - [x] README/ren oppstart19.11: kopi av versjonerte filer fra3484527, med
@@ -45,7 +45,7 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 3. **Brukbarhet og gjenværende feil:** Gjør én samlet manuell hovedflyt, med
    tastatur/skjermleser og tydelige feilmeldinger. Gjenbruk eksisterende
    innholds-/tilgangsevidens; kjør bare nye tester for faktiske hull/endringer.
-   Rett konkret demo-statusfeil fra19.11; faktisk manuell skjermlesergjennomgang
+   Demo-statusfeilen fra19.11 er rettet; faktisk manuell skjermlesergjennomgang
    gjenstår. Oppsummer resterende live-innloggings-/PDF-/slettebegrensninger ærlig.
 4. **Rapport og levering:** Fyll rapporten med studentens egne vurderinger, og
    bruk refleksjonsnotatene som faktagrunnlag. Sjekk kilder, oppstartsoppskrift,

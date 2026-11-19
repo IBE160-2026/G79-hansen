@@ -127,7 +127,15 @@ function references(items) {
   return element("p", "Kilde: " + items.map(reference => reference.label).join(", "), "reference");
 }
 
-function announceItem() {
+function announceSection() {
+  if (!bundle[active].length) {
+    $("status").textContent = `${names[active]}: ${bundle.insufficiency[active] || "Materialet gir ikke nok grunnlag for denne delen."}`;
+    return;
+  }
+  if (active === "summary" || active === "concepts") {
+    $("status").textContent = `${names[active]} er valgt.`;
+    return;
+  }
   const index = positions[active];
   $("status").textContent = `${active === "flashcards" ? "Kort" : "Spørsmål"} ${index + 1} av ${bundle[active].length}. ${bundle[active][index].question}`;
 }
@@ -179,7 +187,7 @@ function render() {
     button.onclick = () => {
       positions[active] += delta;
       render();
-      announceItem();
+      announceSection();
       ($(id).disabled ? $(id === "next" ? "previous" : "next") : $(id)).focus();
     };
     navigation.append(button);
@@ -277,7 +285,7 @@ $("reset").onclick = () => {
 
 const tabs = Array.from(document.querySelectorAll("[data-tab]"));
 tabs.forEach((tab, index) => {
-  tab.onclick = () => { active = tab.dataset.tab; render(); };
+  tab.onclick = () => { active = tab.dataset.tab; render(); announceSection(); };
   tab.onkeydown = event => {
     let next;
     if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
