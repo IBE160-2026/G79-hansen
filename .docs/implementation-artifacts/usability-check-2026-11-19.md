@@ -3,6 +3,10 @@
 Instrumentert lokal nettlesergjennomgang og visuell inspeksjon av skjermbilder.
 Dette er **ikke** en manuell skjermlesertest eller full tilgjengelighetsakseptanse.
 
+Senere samme dag ble en egen, veiledet manuell demotest brukerbekreftet.
+Se [skjermleserobservasjoner og grenser](screen-reader-check-2026-11-19.md);
+den skal ikke blandes sammen med den instrumenterte kontrollen nedenfor.
+
 Computer-use ble forsøkt, men meldte at nettlesertilgang manglet. Ingen
 eksisterende Firefox-fane eller Supabase-side ble betjent. Kontrollserveren
 brukte faste demodata, ledig loopbackport56690 og et miljø uten appnøkler.

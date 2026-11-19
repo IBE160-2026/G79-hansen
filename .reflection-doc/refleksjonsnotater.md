@@ -697,6 +697,12 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **KI-bearbeiding:** Disse punktene er tatt inn som tydelig merket foreløpig egenrefleksjon i rapportutkastets4.1 og første læringspunkt i7. Språket er bearbeidet, men det er ikke lagt til kodeforståelse, tidsbesparelser, følelser eller vurderinger studenten ikke har oppgitt. Ingen mekanisk likhet mellom kontekstvindu og bruksgrenser er påstått. Andre personlige felt står åpne; studenten ba deretter om å fortsette.
 
+### 19.11.2026 – Faktisk skjermleserkontroll av demoen
+
+**Gjennomføring og brukerobservasjoner:** Studenten ønsket å ta en lyttetest med Windows Skjermleser. Først åpnet ikke siden/leseren som forventet; agenten bekreftet HTTP200 fra demoen og fant leseren stoppet. Etter manuell adresseinstruks og direkte start av det installerte Narrator-programmet ble prosess/vindu observert, og studenten bekreftet oppstart. I veiledede tastatursteg bekreftet studenten knapp/resultat, fanebytte, avdekket svar/kilde, riktig quizspørsmål uten skjult fasit lest og Ny økt med tilgjengelig/lest eksempelvelger. Browsermetadata viste Firefox160.0; Narrator-filversjon10.0.26100.9949.
+
+**Grenser og avslutning:** Agenten hørte ikke lyden; resultatene er studentrapporterte for de konkrete spørsmålene, ikke ordrett transkripsjon eller full WCAG-/live-flyt-akseptanse. Ingen private kontoer/filer eller ekte modellkall inngikk. Etter studentens spørsmål om å slå av ble det veiledet om Caps Lock+Esc; senere prosesskontroll viste Narrator stoppet. Ingen appkode, server eller innstillinger ble endret. Full oppgavetekst/sensorveiledning er etterspurt med filsti/lenke; mer personlig rapporttenking står fortsatt åpen.
+
 ## Mal for neste hendelse
 
 

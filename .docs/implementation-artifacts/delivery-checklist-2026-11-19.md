@@ -7,6 +7,12 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
 ## Ferdig kontrollert
 
+- [x] Veiledet manuell Narrator-kontroll av den faste demoen19.11: studenten
+  bekreftet knapp/resultat, tastaturfaner, avdekket svar/kilde, riktig quiz uten
+  skjult fasit lest og Ny økt/eksempelvelger. Firefox160.0/Narrator10.0.26100.9949.
+  [Brukerobservasjoner og eksakte grenser](screen-reader-check-2026-11-19.md).
+  Dette er ikke full WCAG-/live-flyt-/alle-nettlesere-akseptanse.
+
 - [x] PRD-tilbakemeldingen fra12.11 er fulgt opp19.11: prioritert omfang/fallback,
   tese/UJ-1/glossar, presise FR-3/4/8 og eksisterende modell-/kostnadsgrenser.
   Detaljerte sjekker er flyttet uendret til vedlegg. Alle12 FR-/5 NFR-ID-er
@@ -52,8 +58,10 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 3. **Brukbarhet og gjenværende feil:** Gjør én samlet manuell hovedflyt, med
    tastatur/skjermleser og tydelige feilmeldinger. Gjenbruk eksisterende
    innholds-/tilgangsevidens; kjør bare nye tester for faktiske hull/endringer.
-   Demo-statusfeilen fra19.11 er rettet; faktisk manuell skjermlesergjennomgang
-   gjenstår. Oppsummer resterende live-innloggings-/PDF-/slettebegrensninger ærlig.
+   Demo-statusfeilen og manuell skjermleserkontroll av demoen er fulgt opp.
+   Innlogget arbeidsområde/PDF-/feilflyt og andre hjelpemiddel-/nettlesergrenser
+   er ikke dekket av denne demotesten. Oppsummer resterende
+   live-innloggings-/PDF-/slettebegrensninger ærlig.
 4. **Rapport og levering:** Fyll rapporten med studentens egne vurderinger, og
    bruk refleksjonsnotatene som faktagrunnlag. Sjekk kilder, oppstartsoppskrift,
    hemmeligheter/testdata og nødvendige innleveringsfiler i en samlet gjennomgang

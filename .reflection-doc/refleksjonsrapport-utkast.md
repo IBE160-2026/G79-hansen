@@ -191,6 +191,14 @@ tastatur-/visningspunkter hadde bestått. Feilen ble deretter rettet med
 regresjonskontroll av status, fokus og bevart øvingstilstand. Funn og grenser er dokumentert i
 [brukskontrollen](../.docs/implementation-artifacts/usability-check-2026-11-19.md).
 
+Senere19.11 gjennomførte studenten en veiledet manuell test med Windows
+Skjermleser i Firefox160.0. Studenten bekreftet opplesning av knapp/resultat,
+tastaturfaner, avdekket svar/kilde, riktig quiz uten skjult fasit lest og
+reset til eksempelvelger. Dette er en avgrenset brukerbekreftet demotest;
+agenten hørte ikke lyden, og det er ikke full WCAG-/live-flyt-akseptanse.
+[Faktiske observasjoner og grenser](../.docs/implementation-artifacts/screen-reader-check-2026-11-19.md)
+er dokumentert separat.
+
 **Din refleksjon:** Hvor lett er det for deg å finne og endre riktig sted i
 koden? Beskriv én feil du undersøkte, eller én kodebit du fortsatt ikke forstår.
 

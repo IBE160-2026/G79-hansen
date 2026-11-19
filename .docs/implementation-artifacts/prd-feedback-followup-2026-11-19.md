@@ -30,8 +30,10 @@ polished locally. No application code or infrastructure changed.
 
 1. Reconcile the **full assignment and assessment rubric**, which are not
    supplied by this formative feedback. Do not invent criteria or promise grades.
-2. Finish the remaining **manual quality/accessibility check**, including actual
-   screen-reader use and honest documentation of existing PDF/auth/live limits.
+2. Finish the remaining **manual quality/accessibility check**. Guided actual
+   Narrator use of the fixed demo was user-confirmed19 November; see its
+   [scoped results](screen-reader-check-2026-11-19.md). Keep honest boundaries
+   for the untested private workspace/PDF/auth/error flows and other platforms.
    Reuse prior source/content/access evidence; run only checks for concrete gaps.
 3. Complete the **student's own reflections and final report/package**.
    The [report draft](../../.reflection-doc/refleksjonsrapport-utkast.md) remains
