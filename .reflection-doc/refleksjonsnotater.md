@@ -667,6 +667,12 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **KI-korrigeringer:** Git-arkivets LF og arbeidskopiens CRLF ga først feil råbyte-sammenligning; normalisert tekst bekreftet samme kilde. Stopp av uv-launcheren etterlot egen uvicorn-prosess27292. Agenten kontrollerte eksakt kontrollkopisti og port før denne prosessen ble stoppet; eksisterende PID25940/port8000 ble ikke erstattet. Kontrollkopien opprettet ingen private tilstandsfiler. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 19.11.2026 – Avgrenset brukskontroll og faktagrunnlag til rapport
+
+**KI-bidrag og kontroll:** Computer-use-inventaret rapporterte at nettlesertilgang mangler. Ingen eksisterende Firefox-/Supabase-fane ble styrt. I stedet ble en lokal isolert Playwright-gjennomgang med tastaturhandlinger, fire kontrollpunkter og visuelt inspiserte desktop-/390px-bilder brukt. Punktene ga forventede resultater og ingen eksterne sideforespørsler/JS-feil, men et bilde viste gammel kortstatus over aktiv quiz. Dette står som konkret retting, ikke full tilgjengelighetsgodkjenning. Skjermleser er ikke brukt. Kontrollhjelperen fikk90s tidsavbrudd under avslutning etter lagret evidens; separat kontroll bekreftet ingen gjenværende kontrolllytter, og original PID25940/8000 bestod.
+
+**Tekst og rapport:** En foreldet demotekst om at lagring «kommer senere» er korrigert til separat live-modus. Rapportmalen ble brukt til et KI-merket faktautkast med kilder og tydelige felt for studentens egne refleksjoner; ingen erfaringer/læring er diktet opp. Studenten er spurt om én egen lærdom og én ting de ville gjort annerledes. Rapporten er fortsatt uferdig og er ikke full oppgavetekstkontroll. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

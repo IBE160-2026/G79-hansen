@@ -7,6 +7,12 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
 ## Ferdig kontrollert
 
+- [x] Avgrenset instrumentert tastatur-/visningskontroll19.11: fire kontrollpunkter
+  observert med forventet resultat, desktop og390px visuelt inspisert, ingen
+  eksterne sideforespørsler eller JavaScript-feil. Én misvisende statuslinje
+  funnet ved fanebytte og står åpen. Dette erstatter ikke manuell skjermleser-
+  eller full tilgjengelighetskontroll. Se [resultat og funn](usability-check-2026-11-19.md).
+
 - [x] README/ren oppstart19.11: kopi av versjonerte filer fra3484527, med
   oppdatert README, uten `.env`, nøkler, lokale journaler eller eksisterende
   `.venv`. `uv sync --locked` laget nytt miljø og installerte47 pakker.
@@ -39,11 +45,14 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 3. **Brukbarhet og gjenværende feil:** Gjør én samlet manuell hovedflyt, med
    tastatur/skjermleser og tydelige feilmeldinger. Gjenbruk eksisterende
    innholds-/tilgangsevidens; kjør bare nye tester for faktiske hull/endringer.
-   Oppsummer resterende live-innloggings-/PDF-/slettebegrensninger ærlig.
+   Rett konkret demo-statusfeil fra19.11; faktisk manuell skjermlesergjennomgang
+   gjenstår. Oppsummer resterende live-innloggings-/PDF-/slettebegrensninger ærlig.
 4. **Rapport og levering:** Fyll rapporten med studentens egne vurderinger, og
    bruk refleksjonsnotatene som faktagrunnlag. Sjekk kilder, oppstartsoppskrift,
    hemmeligheter/testdata og nødvendige innleveringsfiler i en samlet gjennomgang
-   før8.12. Ingen nye funksjoner etter1.12.
+   før8.12. Et [fakta-/arbeidsutkast](../../.reflection-doc/refleksjonsrapport-utkast.md)
+   er laget19.11, med egne refleksjoner/korrekt studentinfo og sluttkontroll
+   fortsatt åpne. Ingen nye funksjoner etter1.12.
 
 ## Utsatt, ikke ferdig
 
