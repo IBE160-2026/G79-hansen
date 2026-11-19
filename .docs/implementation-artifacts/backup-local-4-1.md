@@ -1,5 +1,24 @@
 # Local prepared-export backup bundles (Story 4.1 component)
 
+**Access update19 November2026, completed15:25:** Student resumed the deferred
+password step, entered it in the local masked window under normal Windows
+operator fredr and confirmed `password-saved`. The DPAPI credential exists at
+the documented private path. System-root TLS failed before authentication;
+no password failure was inferred. Student then downloaded the project CA to
+`C:\StudyBuddy-Backup\prod-ca-2021.crt` from Database Settings/SSL Configuration,
+following the current [connection documentation](https://supabase.com/docs/guides/database/connecting-to-postgres#ssl).
+A bounded valid-CA check and one verify-full authenticated read-only probe
+passed with that explicit CA; expected database/role were confirmed and the
+transaction rolled back. Temporary container CA cleanup was confirmed. No
+raw password/diagnostic was printed, system trust changed, export taken or
+provider setting/account/public activation changed.
+
+The successful CA adapter was a controlled one-off, not a production helper
+change. The unmodified ordinary checker command below still selects system
+roots and has not worked for this certificate chain. Wire the downloaded CA
+explicitly before claiming repeatable backup-client readiness. Authenticated
+access is verified; export privileges, all-user coverage and full backup are not.
+
 This component packages **prepared export only**. A successful pack or byte-exact
 file extraction does not establish an operational complete Supabase backup,
 database consistency, or a successful PostgreSQL/Storage restore. No database

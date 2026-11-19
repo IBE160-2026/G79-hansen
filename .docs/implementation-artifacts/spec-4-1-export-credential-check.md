@@ -2,7 +2,7 @@
 title: Capture local export password and verify read-only database access
 type: chore
 created: 2026-11-19
-status: in-progress
+status: done
 route: dispatch
 review_loop_iteration: 0
 baseline_commit: 53c46688245e66f496f8e921e6881a93d6599066
@@ -54,6 +54,29 @@ Use one compact implementation and focused checks. Parent handles interactive la
 Capture/check helpers implemented. Final parent focused suite:48 passed in63.26s outside the sandbox, including actual synthetic .NET DPAPI capture and Python unwrap. One focused independent review reported no findings. Real capture and authenticated connection remain pending. Parent launched capture process26796; it exited without the credential file. Cause (cancel, launch restriction or runtime failure) is not confirmed; student status has been requested. Do not claim a stored password or successful login.
 
 ## Spec Change Log
+
+19 November15:25: capture and actual authenticated read-only verification are
+complete. Student downloaded the project CA from the Supabase dashboard to
+`C:\StudyBuddy-Backup\prod-ca-2021.crt`. Bounded PEM/X.509 validation confirmed
+a currently valid CA. One controlled run of check_connection used the CA in a
+private temporary container file, retained verify-full and the exact fixed
+endpoint/query, and returned connection-ok-with-project-ca. Cleanup confirmed.
+Public CA SHA256:700723581420dd1ac98fd7e9ac529f0ef210eadcaf87fc868a3ad7d114c2f3b7.
+No database export/restore, Storage access or provider mutation occurred.
+The CA adapter was one-off: the unmodified default CLI still selects system
+roots, so repeatable CA wiring remains a later backup task. Do not present the
+default CLI as verified working or this probe as full export acceptance.
+
+19 November, resumed: user asked to take the previously deferred step now and
+confirmed `password-saved` after local capture under normal operator fredr.
+The existing helper could read/decrypt the credential. Two bounded read-only
+connection attempts stopped at TLS verification; safe classification reported
+an untrusted certificate chain. A subsequent no-password probe confirmed that
+TLS category. No password rejection or successful database login is established.
+System CA bundle exists in the local PostgreSQL17.11 client container; its
+OpenSSL command-line executable is absent. Keep verify-full; request the
+project CA certificate from Database Settings/SSL Configuration per current
+official documentation. No SSL-enforcement setting was changed.
 
 19 November: student explicitly deferred checking the local capture outcome. Keep real capture/authentication pending; continue independent local preparation without reopening the prompt or requesting another reset.
 

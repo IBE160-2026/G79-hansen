@@ -679,7 +679,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Kontroll:** Én avgrenset gjennomgang fant to testgap: prefix-sjekker bekreftet ikke hele spørsmålsteksten, og fokus var ikke eksplisitt sjekket i de nye tilfellene. Direkte kontroller ble lagt til. Slutt:13 demoscenarier bestod med21 faste demoforespørsler, inkludert mus/tastatur, tomme deler, posisjoner, svar og fokus. Ingen ekte modell-/provider-/e-postkall eller endring av innlogget live-modus. Faktisk skjermleser er fortsatt ikke kontrollert. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 19.11.2026 – Utsatt passordsjekk fullført med eksplisitt CA
+
+**Studentens handling:** Studenten ba om å ta det utsatte steget, skrev eksisterende databasepassord i maskert lokalt PowerShell-felt og bekreftet `password-saved`. Deretter lastet studenten ned prosjektets offentlige CA-sertifikat fra Supabase til den private backupmappen. Passordet ble ikke sendt i chatten eller endret på nytt.
+
+**KI-kontroll og korrigering:** Standard systemrøtter ga TLS-feil. Agenten klassifiserte klientfeilen uten rå diagnostikk; en passordfri probe bekreftet sertifikatkjedeproblemet. Det var ikke bevis på feil passord. Offisiell dokumentasjon viste bruk av prosjekt-CA. Med validert CA i midlertidig klientfil bestod verifisert TLS og en fast read-only database-/rolle-sjekk, etterfulgt av rollback. Tempfilopprydding ble bekreftet. Ingen SSL-enforcement-/systemtillits-/konto-/ruteendring, eksport eller modell-/e-postkall. Standardhelperen er fortsatt uendret og trenger eksplisitt CA-oppsett før rutinemessig bruk; den vellykkede sjekken var en kontrollert engangskjøring. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
+
 
 ### DD.MM.ÅÅÅÅ – Kort tittel
 

@@ -57,7 +57,9 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 ## Utsatt, ikke ferdig
 
 Offentlig HTTPS/Funnel, foreleserkonto/e-post, to-fysiske-enheter og komplett
-automatisk DB+Storage-backup/isolert restore. Passordsjekken venter fortsatt.
+automatisk DB+Storage-backup/isolert restore. Passordsjekken ble gjenopptatt og
+bestod19.11 med lokalt kryptert passord og eksplisitt prosjekt-CA/verify-full;
+dette er ikke komplett backup-/eksportakseptanse.
 Eksisterende rotasjonsjobb og privat `.env.hosted` beholdes urørt. Ved senere
 offentlig bruk/reelle private data gjelder tidligere sikkerhets-/tilgangs-/
 backupporter og separat publiseringsgodkjenning. Ingen slik akseptanse hevdes.
