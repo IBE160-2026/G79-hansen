@@ -717,6 +717,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Kilde:** [Løpende resultatlogg](../.docs/implementation-artifacts/live-walkthrough-2026-11-19.md).
 
+### 19.11.2026 – Live-kontroll fullført for tekst og avgrenset opprydding
+
+**Kontrollresultat:** Studenten bekreftet gjenåpning på kort2/quiz1 med skjult kortsvar, sletting av den nye Fjord-testen, bortfall av den gamle123-oppføringen og utlogging etter omlasting. «Ny økt» var først vanskelig å finne; veiledning via «Vis/rediger» løste gjennomføringen. Ingen kodeendring er gjort. PDF, full feilflyt og full tilgjengelighet er ikke dekket. Journalen forble11 forsøk/USD0,55 reservert, slik at bare ett nytt modellforsøk ble observert i gjennomgangen.
+
+**Senere studentinstruks og administrativ handling:** Etter først å være usikker på den gamle slettingen ba studenten uttrykkelig «får du fjernet denne». Metadata viste én eldre uavklart filreferanse og ingen tilsvarende Storage-post. Appdata ble slettet i én målrettet låst transaksjon etter at tekniske referanser var DPAPI-kryptert og gjenlest under normal operatør i C:\StudyBuddy-Backup. Innholdsfrie tombstones og uavklart slettemarkør ble beholdt. Etterkontroll viste null appdokument/kilde/læringspakke/fremdrift for målet. Dette er administrativ innholdsfjerning, ikke falsk bekreftelse av fysisk blob-/backupsletting eller en endring av slettingsprotokollen. [Detaljer og fortsatt åpen filopprydding](../.docs/implementation-artifacts/live-walkthrough-2026-11-19.md).
+
+Dette er dokumenterte fakta og avgrensninger; studentens egne refleksjoner er ikke lagt til.
+
 ## Mal for neste hendelse
 
 

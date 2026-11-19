@@ -7,6 +7,17 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
 ## Ferdig kontrollert
 
+- [x] Veiledet manuell **tekstflyt i live-modus**19.11: innlogging/tomtilstand,
+  tre syntetiske kildeavsnitt, én ekte generering, ett svar mot kildereferanse,
+  privat lagring, kort2/quiz1 bevart ved gjenåpning med skjult svar, sletting av
+  Fjord-testen og utlogging er brukerbekreftet. Journal10→11 forsøk og
+  USD0,50→0,55 reservert av5; ingen ytterligere modellkall observert.
+  [Resultater og avgrensninger](live-walkthrough-2026-11-19.md).
+  Gammel123-oppføring er separat fjernet administrativt etter uttrykkelig
+  instruks; teknisk filrest er fortsatt uavklart og bevart kryptert lokalt.
+  Dette er ikke PDF-/full feilflyt-/full tilgjengelighets- eller fysisk
+  retensjonsakseptanse.
+
 - [x] Sensorveiledning del1 (s.1–7) og oppgavealternativet i studentens lokale
   mappe er lest19.11. [Krav, eksisterende evidens og prioritert restliste](sensor-guidance-check-2026-11-19.md).
   Del1 teller70%, refleksjonsrapport30%; offentlig hosting/automatisk backup
@@ -69,7 +80,9 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
    [Kort live-gjennomgang](live-walkthrough-2026-11-19.md) er klargjort;
    innlogget tomtilstand, kildevisning med tre syntetiske avsnitt, én ekte
    generering og ett kontrollert svar/kilde med privat lagring er brukerbekreftet.
-   Én uavklart ventende sletting står urørt. Fremdrift/gjenåpning avventes.
+   Fremdrift/gjenåpning, sletting av Fjord-testen og utlogging er også bekreftet.
+   Den gamle ventende appoppføringen ble fjernet etter uttrykkelig instruks;
+   uavklart fysisk filrest beholdes i operatørjournal.
    Demo-statusfeilen og manuell skjermleserkontroll av demoen er fulgt opp.
    Innlogget arbeidsområde/PDF-/feilflyt og andre hjelpemiddel-/nettlesergrenser
    er ikke dekket av denne demotesten. Oppsummer resterende
