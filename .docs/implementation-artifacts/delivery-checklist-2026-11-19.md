@@ -67,7 +67,9 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
    tastatur/skjermleser og tydelige feilmeldinger. Gjenbruk eksisterende
    innholds-/tilgangsevidens; kjør bare nye tester for faktiske hull/endringer.
    [Kort live-gjennomgang](live-walkthrough-2026-11-19.md) er klargjort;
-   første brukerobservasjon av innlogging/dokumentliste avventes.
+   innlogget tomtilstand og kildevisning med tre syntetiske avsnitt er
+   brukerbekreftet. Én uavklart ventende sletting står urørt; resultat av ett
+   nødvendig manuelt genereringssteg avventes før lagring/gjenåpning.
    Demo-statusfeilen og manuell skjermleserkontroll av demoen er fulgt opp.
    Innlogget arbeidsområde/PDF-/feilflyt og andre hjelpemiddel-/nettlesergrenser
    er ikke dekket av denne demotesten. Oppsummer resterende

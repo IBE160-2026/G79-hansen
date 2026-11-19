@@ -50,8 +50,17 @@ fortsatt skal slettes. Det lar vi stå; ingen retry eller sletting er utført.
 
 Neste steg er kildekontroll uten modellkall: studenten er bedt om å lime inn
 tre syntetiske avsnitt om studiegruppen Fjord og velge «Kontroller materiale».
-Forventningen er tre avsnitt i forhåndsvisningen. Resultat avventes; teksten
-er laget for denne gjennomgangen og inneholder ingen private data.
+Studenten bekreftet «Ja, teksten vises som tre avsnitt». Dette er brukerbekreftet
+kildevisning, ikke direkte agentobservasjon eller en PDF-kontroll. Teksten er
+laget for denne gjennomgangen og inneholder ingen private data.
+
+Lokal budsjettinspeksjon viste10 forsøk, USD0,50 reservert av USD5,00,
+USD0,05 reservasjon per kall, `blocked=false` og fire tidligere live-smokekontroller.
+Studenten er deretter bedt om å trykke «Lag læringsmateriale» én gang på den
+syntetiske teksten, informert om modellbruk/reservasjon og om å unngå retry ved
+feil. Dette er et nødvendig manuelt genereringssteg, ikke ny automatisert smoke.
+Genereringsresultat avventes. Ingen budsjettgrense, nøkkel eller journal er endret
+av agenten; inspeksjonskommandoen var `scripts.model_budget status`.
 
 Se [kravavstemming](sensor-guidance-check-2026-11-19.md) og
 [leveransesjekkliste](delivery-checklist-2026-11-19.md).
