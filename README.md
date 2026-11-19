@@ -89,6 +89,20 @@ complete plaintext bundle is limited to 64 MiB and exists only in memory while
 packing. Each fresh Fernet key is protected with Windows DPAPI CurrentUser,
 normally binding recovery to the same account/profile/PC.
 
+For the separate credential preparation, manually run
+`.\scripts\save-backup-password.ps1` in an interactive PowerShell window and enter
+the existing database password only at its masked local prompt. It exclusively
+creates `C:\StudyBuddy-Backup\.database-password.dpapi` under the already private
+operator/SYSTEM/Administrators directory; it never overwrites or changes a
+database password. The UTF-8 password is protected with DPAPI CurrentUser and
+must be read by the same Windows account/profile. Keep it out of chat, clipboard,
+command arguments and logs. After capture, explicitly run
+`uv run --locked --no-env-file python -m scripts.check_backup_connection` for a
+bounded read-only check of the fixed Paris session pooler with verified TLS.
+It sends the password through stdin to the existing local PostgreSQL client and
+prints only `connection-ok` or a safe failure category. This check establishes
+neither an export nor a complete backup; live verification remains pending.
+
 See [the exact source contract, commands and recovery limits](.docs/implementation-artifacts/backup-local-4-1.md).
 Coverage is **prepared export only**. Live exports/administrative access,
 consistent snapshot capture, daily scheduling, actual PostgreSQL/Storage import,

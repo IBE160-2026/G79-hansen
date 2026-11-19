@@ -24,6 +24,90 @@ No real export or real state should be placed in the repository. The ignored
 are a fallback against accidental commits, not access control. Synthetic tests
 use their own temporary directories and never the actual backup root.
 
+### Confirmed session-pooler parameters — 19 November
+
+The student copied these non-secret parameters from the existing project's
+Connect dialog: host `aws-0-eu-west-3.pooler.supabase.com`, port `5432`, database
+`postgres`, user `postgres.fssrvicgmijksgozgfoj`. The user suffix matches the
+app's configured project `fssrvicgmijksgozgfoj`; this is session pooling, not the
+transaction endpoint on 6543. No password was supplied, stored or reset. Connect
+displays how to use an existing database password; it does not create one.
+Export authentication, verified TLS configuration and privileged Storage access
+remain pending. Firefox URL-policy enforcement is unsupported by the available
+UI tool, so dashboard details are being supplied manually by the student.
+TCP port5432 was reachable in a read-only socket check on19 November; the
+sandbox initially blocked it and the authorized non-sandbox check succeeded.
+This was not a TLS, password, SQL or export validation.
+
+The student subsequently reported changing the database password manually.
+Do not request another reset. Capture and read-only checker helpers have passed48
+synthetic checks and a focused review. The first interactive capture launch exited
+without saving its credential file; the student's observed outcome is pending.
+No password has been received in chat, stored locally or used for authentication
+by the agent. Real connection/backup remain unverified.
+
+### Manual masked credential capture and read-only check
+
+The local helpers are prepared; actual capture and authenticated live verification
+remain pending until the operator explicitly performs these steps. These helpers
+do not change/reset the password, initialize application state, restart the app or
+container, access Storage, perform exports or activate public access.
+
+Use an interactive Windows PowerShell 5 window under the same Windows account
+that will run the checker. Enter the existing password manually at the masked
+prompt; never put it in chat, clipboard, shell arguments, environment setup or
+logs:
+
+```powershell
+.\scripts\save-backup-password.ps1
+uv run --locked --no-env-file python -m scripts.check_backup_connection
+```
+
+Capture writes only DPAPI CurrentUser-protected binary UTF-8 data, exclusively
+creating `C:\StudyBuddy-Backup\.database-password.dpapi`. The private parent must
+already exist, restricted to the operator, SYSTEM and Administrators, without
+concurrent untrusted writers; the helper does not create directories or audit
+ACLs. The destination and its ancestors may not be reparse points. Relative,
+traversal, alternate-stream and UNC destinations are rejected. An existing file
+is never overwritten; a failed/cancelled capture never reports success. Input
+must be nonempty, at most 1,024 UTF-8 bytes and contain no CR, LF or NUL. The
+script clears mutable plaintext buffers and its BSTR on a best-effort basis.
+`-Destination 'C:\AnotherPrivateParent\new.dpapi'` supports a separate synthetic
+destination under an existing private parent. Copying ciphertext alone does not
+make it portable: decryption normally requires the same Windows account/profile
+and PC as capture. Preserve that scope as with bundle keys.
+
+The Python checker bounds and validates a regular, single-link credential read
+before DPAPI decryption. `--credential 'C:\AnotherPrivateParent\new.dpapi'`
+selects an explicit local file; importing the module does not connect. Production
+uses the existing `SUREUbuntu` WSL distro and running
+`supabase_db_studybuddy-save-local` container's PostgreSQL 17 client, without
+setup, restart or reconfiguration. A fixed subprocess argument list sends the
+password as one UTF-8 stdin line; the constant shell script reads it literally
+and exports `PGPASSWORD` only inside that client process. The password is never
+interpolated into shell code or placed in command arguments.
+
+The exact host, port, database and routed username remain those above. The
+checker uses `PGSSLMODE=verify-full`, `PGSSLROOTCERT=system`, an eight-second
+connection timeout and a 20-second subprocess deadline, with no TLS downgrade
+or automatic retry. Incidental service/passfile/options overrides are cleared.
+`psql -X -w -qAt` executes only
+`BEGIN READ ONLY; SELECT current_database(), current_user; ROLLBACK;`.
+Expected database and actual PostgreSQL role are both `postgres`; the project
+suffix is pooler routing in the connection username. Output must match exactly.
+No SQL results, decrypted bytes or client diagnostics are printed; native stderr
+is discarded. A successful checker prints `studybuddy-backup: connection-ok`.
+Failures print only `credential-invalid`, `arguments-invalid`,
+`connection-timeout`, `connection-result-invalid` or `connection-failed` after
+that fixed prefix and exit nonzero. TLS, wrong-password and other client errors
+share `connection-failed` so raw diagnostics never escape.
+
+This limited probe establishes authenticated access to that endpoint only. It
+does not establish privileged export completeness, roles/schema/data capture,
+snapshot consistency, Storage coverage, an actual backup or successful restore.
+All remaining live export, consistency, Storage, restore and scheduling gates
+below remain in force.
+
 ## Exact prepared-source contract
 
 An operator must first create a consistent, private source copy. The tool only
@@ -197,3 +281,13 @@ manifest implying more than 4,096 directories being rejected before staging.
 The real empty `C:\StudyBuddy-Backup` folder has separately been restricted to
 the operator, SYSTEM and Administrators. No real backup, credentials or runtime
 state was placed there. Actual exports, scheduling and database restore remain pending.
+
+Credential helper checks use only synthetic temporary data and shadow
+`Read-Host` in the test process; they never read actual credentials or invoke
+WSL/provider operations. Run
+`uv run --locked pytest -q tests/test_backup_connection.py`, including the
+PowerShell AST parse, and a scoped whitespace check. The focused suite verifies
+actual Windows DPAPI capture/Python unwrap, exclusive writes, sanitized failures,
+literal path parsing, exact command/stdin/TLS/read-only settings, bounded reads,
+timeouts, client failure and unexpected query output. Live credential capture
+and authenticated connection verification remain separate pending operator steps.

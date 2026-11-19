@@ -72,3 +72,6 @@ Thumbs.db
 .backup-quarantine/
 *.sbb
 *.sbb.partial
+
+# Local Windows-protected credentials
+*.dpapi
