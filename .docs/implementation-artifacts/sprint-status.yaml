@@ -89,7 +89,10 @@ development_status:
   3-4-delete-saved-material-completely: review
   epic-3-retrospective: optional
 
-  epic-4: backlog
+  epic-4: in-progress
+  # 19 Nov accepted scope: local submission first; public hosting/two-physical-device acceptance optional/deferred.
+  # Story4.2 no longer depends on4.1. Preserve safety and existing Supabase features; synthetic data only.
+  # Targets: working core1 Dec, full submission package8 Dec, hard deadline15 Dec2026.
   # 18 Nov: Story 4.1 hosting plan/spec drafted. Student requires zero new hosting fees
   # and an ordinary public link for assessor; proposes existing Windows PC + Tailscale Funnel.
   # PC/Free-Paris/same-PC backup selected; assessor gets own account, email deferred.
@@ -99,8 +102,11 @@ development_status:
   # Local encrypted prepared-bundle/rotation/quarantine component done: 62 tests, private root ACL; no real backup.
   # Student changed DB password; local capture/auth check explicitly deferred. No real backup.
   # Retention job installed19 Nov; actual run13:35 result0, next20 Nov03:00. No daily export yet.
+  # Private .env.hosted prepared19 Nov; state validated, final preflight stops port-busy (PID25940).
+  # Existing state unchanged; no restart/public activation. Email remains disabled.
   # Live consistent capture, daily backup scheduling and actual DB/Storage restore remain open.
   # Public activation incomplete; no public deployment.
   4-1-reach-the-app-securely-from-two-devices: backlog
-  4-2-verify-the-full-release-and-assessor-setup: backlog
+  # Local delivery verification started19 Nov: key-free demo11 browser scenarios passed; checklist open.
+  4-2-verify-the-full-release-and-assessor-setup: in-progress
   epic-4-retrospective: optional

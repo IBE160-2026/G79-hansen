@@ -637,6 +637,30 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Studentens styring og kontroll:** Etter «vi kan gå videre» ble den ferdige, passorduavhengige oppryddingsjobben installert. Faktisk oppsett ble lest tilbake: skjult pythonw, begrenset interaktiv operatør, daglig kl.03 og ved innlogging. Én faktisk kjøring kl.13:35 ga Oppgaveplanlegging-resultat0, neste kjøring20.11 kl.03. Dette verifiserer jobbkjøringen, ikke komplett backup eller gjenoppretting. Ingen nye tester/modellkall, passordsjekk, appstart eller publisering. Tegn som ble erstattet med spørsmålstegn ved forrige PowerShell/Python-dokumentskriving ble rettet; videre skriving må bevare Unicode. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 19.11.2026 – Privat hosted-konfigurasjon klargjort
+
+**Studentens styring:** Fortsett neste steg, men passordsjekken må vente. Agenten klargjorde derfor lokal `.env.hosted` med eksisterende nøkkel-/budsjettfiler og kandidatadressen på port10000. Ingen konto eller e-post ble opprettet/sendt.
+
+**KI-feil og korrigering:** Agenten antok først at gjeldende sandkassekonto var den virkelige Windows-operatøren. Den tomme filen fikk derfor feil kontoeier/ACL, og normal bruker kunne ikke skrive. Sammenligning av identitetene viste forskjellen; operatoren fredr fikk eierskap/tilgang, og sandkassekontoen ble fjernet før hemmeligheter ble skrevet. Set-Acl krevde et privilegium som prosessen manglet; målrettet icacls virket. Et unødvendig forsøk på å importere dotenv feilet fordi pakken ikke er installert; eksisterende streng konfigurasjonsleser ble gjenbrukt. Disse feilene og godkjenningsventing gjorde økten lengre enn ønsket.
+
+**Kontroll og grense:** Faktisk lokal konfigurasjons-/tilstandskontroll bestod fram til portkontrollen, som avviste8000 i bruk av eksisterende StudyBuddy PID25940. Ingen prosess ble erstattet. `.env`, modellbudsjett, signeringsnøkkel og blokkertmarkør var uendret. Ingen modell-/provider-/e-postkall eller testpakke ble kjørt; passordsjekk og full backup/restore står åpne. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
+### 19.11.2026 – Studenten ber om mindre omfang
+
+**Studentens korrigering:** «jeg synes det har blitt omfattende, kanskje reevaluere noen ting for å redusere hvor omfattende det er». Agenten erkjente at hosting/backup-arbeidet tok for stor plass og leste faglærerens faktiske tilbakemelding. Den vektlegger enkel arkitektur, lokal kjørbarhet, kvalitetskontroll og README; full oppgavetekst/sensorveiledning er ikke funnet og kan ikke erstattes av dette dokumentet.
+
+**KI-forslag:** Prioriter lokal skoleleveranse, behold allerede implementert Supabase-lagring/innlogging og gjør offentlig lenke valgfri dersom studenten velger det. Utsett videre driftsautomatisering ved syntetiske data; behold dokumenterte begrensninger. [Kort forslag](../.docs/implementation-artifacts/leveranseavgrensning-2026-11-19.md) er skrevet. Ingen funksjonskrav er fjernet eller markert ferdig; studentens valg av offentlig lenke som krav/tillegg avventes. Dette er KI-dokumentasjon, ikke studentens egen refleksjon.
+
+### 19.11.2026 – Fast innleveringsfrist og buffer
+
+**Studentens presisering:** «alt må være ferdig15.12.26, da er det innlevering av oppgaven, må gjerne være klar litt før så vi er sikker». Fristen gjelder hele leveransen, også rapport/dokumentasjon. KI foreslo fungerende kjerne innen1.12 og samlet innleveringsklar pakke innen8.12, med9.–14.12 som buffer. Dette er arbeidsmål, ikke lovnad om ferdigstillelse eller godkjenning av redusert funksjonsomfang. Ingen nye kode-/driftsendringer eller tester ble gjort som følge av denne presiseringen.
+
+### 19.11.2026 – Lokal leveranse prioritert og nøkkelfri demo kontrollert
+
+**Studentens valg:** Studenten svarte «høres bra ut» og «vi kan gå videre» etter forslaget om lokal skoleleveranse først. Offentlig lenke og videre driftsautomatisering ble avgrenset som valgfritt/utsatt; eksisterende Supabase-funksjoner beholdes. PRD/arkitektur/Epic4 har en datert endring. Utsatte krav er ikke markert levert, og sikkerhetsgrenser gjelder fortsatt ved eventuell senere offentlig bruk/reelle private data.
+
+**Kontroll og videre prioritet:** En separat nøkkelfri demoserver, med appvariabler fjernet bare fra kontrollprosessens miljø, bestod11 eksisterende nettleserscenarier.21 forespørsler brukte faste demosvar; ingen modell-/provider-/e-postkall. Eksisterende server/nøkler/budsjett/ruter er urørt. Epic4/Story4.2 er startet for lokal leveranse, mens4.1 forblir utsatt/ufullført. En kort sjekkliste prioriterer faktisk oppgavetekst, README/ren installasjon, manuell brukbarhet og rapport innen8.12-målet. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

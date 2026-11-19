@@ -263,9 +263,16 @@ As a student, I want named deletion confirmation, so that unwanted saved materia
 
 ## Epic 4: Use and assess the finished app reliably
 
-Users can reach live private content from multiple devices and assessors can reproduce the demo. Depends on completed live Epics 2/3; this is a user availability/acceptance increment, not infrastructure-only work.
+Assessors can reproduce the local demo and evaluate the existing live features.
+Delivery revision19 November2026: local submission first; public hosting and
+two-physical-device acceptance are optional/deferred. Preserve Epics2/3 features
+and safety checks; use synthetic data. Story4.2 no longer depends on4.1.
 
 ### Story 4.1: Reach the app securely from two devices
+
+**Optional/deferred as of19 November2026 by student choice.** Existing local
+preparation remains available; public hosting and its acceptance are not done.
+Resume only if time permits and existing safety/access/approval gates are met.
 
 As a student, I want a hosted browser address, so that my PC and phone can reach the same private library.
 
@@ -281,7 +288,7 @@ As a student, I want a hosted browser address, so that my PC and phone can reach
 
 As an assessor, I want reproducible instructions and evidence, so that I can evaluate the real scope and limitations.
 
-**Scope:** README, browser/API/ownership tests, acceptance/evaluation reports and fixes. Depends on 4.1. All FRs/NFRs; UX-DR1–10.
+**Scope:** README, browser/API/ownership tests, acceptance/evaluation reports and fixes. Depends on Epics1–3, not optional4.1. Apply the19 November delivery revision: physical two-device checks/public-operation evidence are deferred; existing session/persistence/ownership and core quality checks remain. All retained FRs/NFRs; UX-DR1–10.
 
 **Acceptance Criteria:**
 

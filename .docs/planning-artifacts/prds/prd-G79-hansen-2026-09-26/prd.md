@@ -108,6 +108,21 @@ The 2026-11-10 storage/login scope change has been reconciled with the 2026-11-1
 
 ## Completion and terminology
 
+**Delivery revision19 November2026, accepted by the student:** Prioritize the
+locally runnable school submission. Public hosting/Funnel and acceptance on two
+physical devices are optional/deferred, not completed release claims. Retain
+implemented Supabase login, Save/library/progress/deletion, persistence and owner
+isolation; do not rewrite storage. Multi-device checks below remain the target
+for any later hosted delivery. For this local submission verify separate
+sessions, persistence, stale-update handling and cross-user access using existing
+evidence plus focused checks where needed. Continue with synthetic test data;
+complete backup/restore and public-operation gates remain prerequisites for
+real private data/public deployment, not claims established by the demo.
+Story4.2 assessor setup can proceed without Story4.1. No new optional features.
+Working-core target1 December; submission package target8 December; hard deadline
+15 December2026, including report/README. See
+[accepted delivery scope](../../../implementation-artifacts/leveranseavgrensning-2026-11-19.md).
+
 V1 is complete when all required FR/NFR acceptance checks pass, including the three-document live-generation quality evaluation and startup from README in key-free demo mode. Record observed results and corrections in the development/test log. EXT-1 is optional and cannot compensate for failed core checks.
 
 A source is the single active pasted text or uploaded file. A PDF page means its original physical position, including blank pages. A source reference identifies a supporting paragraph for text or physical page for PDF. A session is an authenticated interaction; active workspace state is distinct from owner-scoped saved documents and results. Demo mode uses fixed example material/responses; live mode generates from the student's active source using the selected provider.

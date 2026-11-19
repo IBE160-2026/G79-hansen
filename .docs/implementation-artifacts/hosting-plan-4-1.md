@@ -1,5 +1,11 @@
 # Hostingplan – Story 4.1
 
+**Leveransevalg19.11.2026:** Lokal skoleleveranse prioriteres; offentlig lenke
+og videre hosting-/backupautomatisering er valgfritt/utsatt. Tidligere plan og
+evidens under beholdes som forberedelse, ikke krav om videre aktivering nå.
+Se [avtalt avgrensning](leveranseavgrensning-2026-11-19.md) og
+[leveransesjekkliste](delivery-checklist-2026-11-19.md).
+
 18.11.2026. **Utkast, ingen publisering godkjent eller utført.** IBE160, Høgskolen i Molde; innlevering 15.12.2026.
 
 Studenten ønsker gratis hosting på denne PC-en og en vanlig lenke som også foreleser kan åpne. Betalt Render er derfor tatt ut av forslaget.
@@ -34,3 +40,5 @@ Kilder kontrollert 18.11.2026: [Funnel og begrensninger](https://tailscale.com/d
 **Retensjon klargjort 19.11:** Installer med ren `-Plan`, begrenset skjult operatørjobb kl.03/ved innlogging og opprydding før hosted-appstart er implementert lokalt;75 fokuserte offline-tester bestod. Ingen jobb er registrert, ingen ekte backup er laget. Dette gjelder utløpte kopier; daglig eksport/oppretting av backup er fortsatt uferdig. Passordinnlesing/autentisering er uttrykkelig utsatt av brukeren.
 
 **Installed19 November2026:** StudyBuddy-Backup-Rotation is now registered for the current operator. Actual run13:35 completed with Scheduler result0; next daily run20 November03:00 local. This is expiry only; password verification and full daily export remain pending. No public activation.
+
+**Privat hosted-konfigurasjon 19.11:** Git-ignorert `.env.hosted` er klargjort for kandidatadressen på port10000 med eksisterende nøkler/budsjett og deaktivert signup/recovery-e-post. ACL/eier er fredr, SYSTEM og administratorer. Faktisk lokal kontroll validerte konfigurasjon/tilstand, men fullførte ikke fordi eksisterende StudyBuddy PID25940 bruker8000. Ingen omstart eller publisering; `.env`, budsjett og signeringsnøkkel er byteuendret. Passordsjekk, komplett backup/restore, foreleseradresse og offentlig godkjenning gjenstår.

@@ -1,5 +1,11 @@
 # Story 4.1 — local preparation
 
+**Delivery revision19 November2026:** Public hosting and further operational
+automation are optional/deferred. Prioritize local assessor delivery; keep the
+evidence below without resuming deployment/password work. See the accepted
+[scope](leveranseavgrensning-2026-11-19.md) and
+[delivery checklist](delivery-checklist-2026-11-19.md).
+
 18 November 2026. IBE160, Molde University College. Submission: 15 December 2026.
 This is a preparation record, not an activation package. No public activation requested.
 
@@ -65,3 +71,31 @@ Subsequently installed after the student requested continuation: exact task
 action/settings/triggers confirmed. One real run at13:35 finished with result0;
 next daily run20 November03:00 local. No daily backup/export, app restart,
 credential check, provider call or route/public change occurred.
+
+## Private hosted configuration prepared — 19 November
+
+Ignored `.env.hosted` now exists with candidate origin
+`https://fredriklaptop.tail55f8dd.ts.net:10000`, Secure cookies enabled and
+loopback HTTP disabled, existing model/save features and absolute paths to the existing
+budget/signing state. Signup/recovery email remains explicitly disabled; no
+journal was initialized. This URL is not published or confirmed reachable.
+
+Owner and protected ACL were verified as `FredrikLaptop\fredr`, with access
+only for that operator, SYSTEM and Administrators. The initially empty file
+was incorrectly assigned to CodexSandboxOffline; this was corrected before
+writing any credentials. Set-Acl failed on a privilege requirement; targeted
+icacls changes completed the correction. No secret was printed.
+
+Actual offline preflight under the normal operator validated configuration and
+existing state, then refused with `port-busy`. Read-only inspection confirmed
+StudyBuddy PID25940 on127.0.0.1:8000. No process was stopped/restarted. `.env`,
+budget, signing key and any blocked-marker existence/bytes were unchanged.
+There were no provider/model/email calls or new test-suite runs.
+
+The tool environment inherits app variables, so this check cleared recognized
+variables only inside its child process before loading `.env.hosted`.
+`start-hosted.ps1` intentionally allows ambient overrides: use a normal operator
+terminal without conflicting app variables at eventual launch. The sandbox
+cannot read the private signing key/configuration. Final full preflight and
+startup remain pending until the current listener is deliberately replaced,
+after backup/access and separate public-activation approval are ready.

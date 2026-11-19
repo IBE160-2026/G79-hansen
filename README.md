@@ -4,23 +4,34 @@ Gruppeprosjekt i **IBE160 Programmering med KI** ved Høgskolen i Molde, høsten
 
 Repoet inneholder gruppens applikasjon og dokumentasjon av utvikling, testing og kvalitetssikring med KI.
 
+**Leveranseplan19.11:** Lokal kjørbarhet, eksisterende kjernefunksjoner og
+Supabase-lagring prioriteres. Offentlig lenke er et valgfritt tillegg; videre
+hosting-/backupautomatisering utsettes. Vi bruker syntetiske testdata og hevder
+ikke ferdig produksjonsdrift. Mål: fungerende kjerne1.12, innleveringsklar
+applikasjon, README og rapport8.12, fast innlevering15.12.2026.
+Se [avtalt avgrensning](.docs/implementation-artifacts/leveranseavgrensning-2026-11-19.md).
+
 ## Kjør studiedemoen lokalt
 
 Demoen er én FastAPI-applikasjon med vanlig HTML, CSS og JavaScript. Ingen API-nøkler, kontoer eller skytjenester er nødvendige. Installer [uv](https://docs.astral.sh/uv/getting-started/installation/) først. Kjør fra repoets rot:
 
 ```powershell
 uv sync --locked
-uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
+uv run --no-env-file uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 Åpne [http://127.0.0.1:8000](http://127.0.0.1:8000). `uv` bruker Python 3.13.7 fra `.python-version` og kan installere denne hvis den mangler. Python-avhengighetene er låst i `uv.lock`. Første oppsett krever internettilgang; selve demoen kjører lokalt uten nettverkstjenester. Stopp serveren med Ctrl+C.
+
+Kjør demoen fra en terminal uten eksporterte appvariabler. `--no-env-file`
+hindrer innlesing av lokal `.env`; eventuelle miljøvariabler i terminalen har
+fortsatt virkning. Live-innlogging/generering/lagring er separat konfigurasjon.
 
 1. Les det faste eksempelet «Hukommelse og aktiv gjenhenting» og trykk **Lag læringsmateriale**.
 2. Bytt mellom Sammendrag, Begreper, Flashcards og Quiz. Svar og kildehenvisning vises sammen når du trykker Vis svar / Vis fasit.
 3. Bruk Forrige/Neste. Kort og quiz beholder hver sin posisjon og hvilke svar du har vist når du bytter fane.
 4. Vis/rediger åpner materialet uten å endre fremdriften. Ny økt tømmer arbeidsflaten; velg eksempelet på nytt for å starte igjen.
 
-## Prepared Windows hosted launcher (Story 4.1)
+## Optional Windows hosted launcher (deferred Story 4.1)
 
 `scripts/start-hosted.ps1` prepares the existing one-process application for a
 separately approved HTTPS proxy. Real startup and proxy activation remain separate
@@ -542,3 +553,12 @@ Real hosted startup now completes expiry before app import, or refuses startup;
 `--check` stays read-only. Password capture/authentication is deferred at the
 student's request. One actual rotation run completed with Task Scheduler result0;
 next daily run is20 November at03:00 local. No real backup or public link was created.
+
+Private ignored `.env.hosted` is prepared for the candidate HTTPS origin on
+port10000, with existing model/save state and email dispatch disabled. Its ACL
+is restricted to the actual operator, SYSTEM and Administrators. Offline
+preflight validated configuration/state, then stopped with `port-busy` because
+the existing StudyBuddy PID25940 still uses8000. Nothing was restarted or
+published. Eventual launch must use the normal operator/profile and avoid
+conflicting ambient app variables; final preflight/start and backup/access
+acceptance are still pending.

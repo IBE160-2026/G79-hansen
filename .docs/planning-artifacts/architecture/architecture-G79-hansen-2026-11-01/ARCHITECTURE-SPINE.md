@@ -130,6 +130,14 @@ Serve private files only through a FastAPI download endpoint that rechecks owner
 
 ### AD-9 — Live deployment and local demo [ADOPTED; hosting vendor deferred]
 
+**Delivery revision19 November2026:** Student selected local school delivery
+first; public hosting and two-physical-device acceptance are optional/deferred.
+Keep implemented Supabase persistence/ownership and the key-free fixed demo.
+Do not migrate storage or remove safety controls. The hosted rule below applies
+if public deployment resumes; it is not an unconditional submission requirement.
+Existing backup/restore/real-data gates remain open. See
+[accepted scope](../../../implementation-artifacts/leveranseavgrensning-2026-11-19.md).
+
 - **Binds:** NFR-3, NFR-4, runtime and operational setup.
 - **Prevents:** a live app depending on one student's running PC or demo requiring private cloud credentials.
 - **Rule:** Live mode uses a hosted HTTPS FastAPI service plus Supabase Auth/Postgres/private Storage, with no dependency on host-local document files. Keep local fixed-data demo runnable from README without Supabase/model credentials. Demo must not read/write real cloud content. Use a separate fixed-fixture adapter/route with synthetic data; demo account/library actions may illustrate browser-memory state only. Never accept live private content through a demo authentication bypass, or claim persistence/cross-device synchronization from the demo. Arbitrary source submission must be rejected as unsupported in fixed demo mode; the UI explains how to load the documented example. Keep dev/test accounts and synthetic fixtures separate from real student content; test migrations on disposable data first. Configuration, migrations and example environment files are versioned; secrets and database/file dumps are not.
