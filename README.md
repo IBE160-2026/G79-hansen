@@ -530,7 +530,7 @@ for executed evidence, seven-day content-free retry retention and the remaining
 backup/physical-retention gates before real files.
 
 
-Local backup retention is prepared, **not installed**. Preview the exact task with
+Local backup retention was **installed on19 November2026**. Preview its configuration with
 `./scripts/install-backup-retention.ps1 -Plan`; later install with
 `./scripts/install-backup-retention.ps1` under the same Windows operator.
 The installer refuses an existing `StudyBuddy-Backup-Rotation` task and query
@@ -540,4 +540,5 @@ to be logged on, does not wake the PC and cannot delete files while powered off.
 This schedules expiry only; daily full database/Storage backup is still pending.
 Real hosted startup now completes expiry before app import, or refuses startup;
 `--check` stays read-only. Password capture/authentication is deferred at the
-student's request. No task, real backup or public link was created in preparation.
+student's request. One actual rotation run completed with Task Scheduler result0;
+next daily run is20 November at03:00 local. No real backup or public link was created.

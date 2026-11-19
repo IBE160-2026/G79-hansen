@@ -98,7 +98,7 @@ development_status:
   # Local startup launcher/preflight done/reviewed: 99 focused tests; actual runtime config/startup unexecuted.
   # Local encrypted prepared-bundle/rotation/quarantine component done: 62 tests, private root ACL; no real backup.
   # Student changed DB password; local capture/auth check explicitly deferred. No real backup.
-  # Retention scheduler installer + expiry before hosted startup prepared; no task registered.
+  # Retention job installed19 Nov; actual run13:35 result0, next20 Nov03:00. No daily export yet.
   # Live consistent capture, daily backup scheduling and actual DB/Storage restore remain open.
   # Public activation incomplete; no public deployment.
   4-1-reach-the-app-securely-from-two-devices: backlog

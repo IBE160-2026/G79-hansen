@@ -59,3 +59,9 @@ The student reports manually changing the database password. Masked local DPAPI 
 ## Retention preparation — 19 November
 
 The installer now prepares a current-user, limited interactive task for daily03:00 and logon expiry, with catchup when available, no wake/network requirement and a hidden pythonw action. `-Plan` does not contact Scheduler or the private backup root; installation refuses existing exact-name tasks and query errors. No task has been registered. A real hosted start now reuses expiry before importing the app and refuses startup on failure; `--check` stays read-only. Focused offline checks:75 passed. This prepares deletion of expired archives, not creation of daily backups.
+
+Subsequently installed after the student requested continuation: exact task
+`\StudyBuddy-Backup-Rotation`, current operator Interactive/Limited, actual
+action/settings/triggers confirmed. One real run at13:35 finished with result0;
+next daily run20 November03:00 local. No daily backup/export, app restart,
+credential check, provider call or route/public change occurred.

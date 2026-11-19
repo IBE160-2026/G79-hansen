@@ -633,6 +633,10 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **KI-bidrag og kontroll:** En installer for skjult opprydding kl.03 og ved innlogging, med begrenset operatørtilgang og ren forhåndsvisning, samt utløpskontroll før hosted-appimport ble klargjort. Feil i oppryddingen stopper oppstart; kontrollmodus endrer ingen backupfiler.75 fokuserte offline-tester bestod (32,71s), med simulerte Windows-jobber. Sandkassen blokkerte uv-bufferen; den avgrensede kontrollen ble kjørt med normal brukerprofil. Ingen jobb er faktisk registrert, og ingen ekte backup/passordsjekk eller publisering er utført. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
 
+### 19.11.2026 – Lokal oppryddingsjobb aktivert
+
+**Studentens styring og kontroll:** Etter «vi kan gå videre» ble den ferdige, passorduavhengige oppryddingsjobben installert. Faktisk oppsett ble lest tilbake: skjult pythonw, begrenset interaktiv operatør, daglig kl.03 og ved innlogging. Én faktisk kjøring kl.13:35 ga Oppgaveplanlegging-resultat0, neste kjøring20.11 kl.03. Dette verifiserer jobbkjøringen, ikke komplett backup eller gjenoppretting. Ingen nye tester/modellkall, passordsjekk, appstart eller publisering. Tegn som ble erstattet med spørsmålstegn ved forrige PowerShell/Python-dokumentskriving ble rettet; videre skriving må bevare Unicode. Dette er KI-dokumenterte fakta, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 ### DD.MM.ÅÅÅÅ – Kort tittel

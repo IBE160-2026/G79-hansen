@@ -308,7 +308,9 @@ The PC cannot expire files while off; expiry also runs after successful hosted
 preflight, before app import. An expiry error blocks startup with a safe category;
 `--check` never performs expiry.
 
-**No task has been registered.** This prepares seven-day deletion, not daily
+**Installed19 November2026.** One actual run finished at13:35 with Scheduler
+result0 and state Ready; next daily trigger20 November03:00 local. This provides
+seven-day deletion when the PC/operator is available, not daily
 backup creation. Full export/consistency/isolated import remain pending. The
 student explicitly deferred checking password capture/authentication; do not
 reopen its prompt or request another reset.75 focused offline scheduler/startup
