@@ -66,6 +66,8 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 3. **Brukbarhet og gjenværende feil:** Gjør én samlet manuell hovedflyt, med
    tastatur/skjermleser og tydelige feilmeldinger. Gjenbruk eksisterende
    innholds-/tilgangsevidens; kjør bare nye tester for faktiske hull/endringer.
+   [Kort live-gjennomgang](live-walkthrough-2026-11-19.md) er klargjort;
+   første brukerobservasjon av innlogging/dokumentliste avventes.
    Demo-statusfeilen og manuell skjermleserkontroll av demoen er fulgt opp.
    Innlogget arbeidsområde/PDF-/feilflyt og andre hjelpemiddel-/nettlesergrenser
    er ikke dekket av denne demotesten. Oppsummer resterende

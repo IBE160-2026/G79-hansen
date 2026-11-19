@@ -1,0 +1,42 @@
+# Kort manuell live-gjennomgang – 19.11.2026
+
+**Status: klargjort, avventer studentens første observasjon.**
+Dette er en plan og løpende resultatlogg, ikke en bestått kontroll.
+Bruk eksisterende autorisert testkonto og bare kjent syntetisk materiale.
+Ingen nye kontoer, e-poster, offentlige lenker eller brede testkjøringer inngår.
+
+## Første del uten modellkall
+
+| Steg | Handling og forventning | Observert resultat |
+| --- | --- | --- |
+| 1 | Åpne `http://127.0.0.1:8000/workspace`, logg inn og velg Mine dokumenter. Listen eller en forståelig tomtilstand vises. | Avventer student. |
+| 2 | Åpne et kjent syntetisk testdokument. Kilde og læringsdeler gjenfinnes; svar er skjult til de avdekkes. Bruk tastatur til faner og svar/kildereferanse. | Ikke gjennomført. |
+| 3 | Noter kort-/quizposisjon, flytt én posisjon der det finnes flere, og vent til fremdriften er bekreftet. | Ikke gjennomført. |
+| 4 | Velg Ny økt og åpne samme dokument igjen. Bekreft gjenfunnet kort-/quizposisjon og skjulte svar; hent eventuelt siste fremdrift ved eksplisitt konflikt. | Ikke gjennomført. |
+| 5 | Logg ut. Privat innhold skal forsvinne og privat arbeidsområde kreve innlogging. | Ikke gjennomført. |
+
+Ingen titler, passord, tokens eller dokumentinnhold må gjengis i chat/logg.
+Hvis listen er tom eller feiler, registrer det faktiske utfallet før neste steg.
+Et eksisterende dokument slettes ikke som del av denne første gjennomgangen.
+
+## Resten av hovedflyten
+
+Ny kilde/PDF, ekte generering, ny eksplisitt lagring og sletting av et nytt,
+avgrenset testdokument er **ikke dekket** av gjenåpning alene. Disse punktene
+planlegges etter første observasjon og tidligere evidens, slik at eventuell
+generering begrenses til et konkret nødvendig kall innen eksisterende budsjett
+og autorisasjon. Tidligere automatisert modell-smoke-ramme er brukt opp;
+den gjenbrukes ikke som fullmakt til nye automatiserte modellkall.
+
+## Lokal klargjøring
+
+Kl.18:18 svarte `/` og `/workspace` HTTP200. `/health` svarte200 med
+`status=ok, mode=demo`. Feltet `mode` er statisk i dagens helserute og beviser
+ikke at live-generering, innlogging eller lagring er aktivt/verifisert.
+En første forespørsel mot `/api/health` ga404; eksisterende helserute er `/health`.
+Ingen server ble startet eller restartet. Agenten har ikke logget inn eller
+observert privat brukergrensesnitt i denne økten. Brukerobservasjon av første
+steg er etterspurt; ikke merk den som fullført før svar foreligger.
+
+Se [kravavstemming](sensor-guidance-check-2026-11-19.md) og
+[leveransesjekkliste](delivery-checklist-2026-11-19.md).
