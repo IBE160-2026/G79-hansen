@@ -69,6 +69,7 @@ som ferdig produksjonsdrift.
 Videre dokumentasjon:
 
 - [Leveransesjekkliste og gjenværende arbeid](.docs/implementation-artifacts/delivery-checklist-2026-11-19.md)
+- [Leveransen mot sensorveiledningens sju kriterier](.docs/implementation-artifacts/sensor-guidance-check-2026-11-19.md)
 - [Refleksjonsnotater som grunnlag for studentens rapport](.reflection-doc/refleksjonsnotater.md)
 - [Krav og avgrensning](.docs/planning-artifacts/prds/prd-G79-hansen-2026-09-26/prd.md)
 

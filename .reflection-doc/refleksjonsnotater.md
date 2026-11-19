@@ -703,6 +703,14 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Grenser og avslutning:** Agenten hørte ikke lyden; resultatene er studentrapporterte for de konkrete spørsmålene, ikke ordrett transkripsjon eller full WCAG-/live-flyt-akseptanse. Ingen private kontoer/filer eller ekte modellkall inngikk. Etter studentens spørsmål om å slå av ble det veiledet om Caps Lock+Esc; senere prosesskontroll viste Narrator stoppet. Ingen appkode, server eller innstillinger ble endret. Full oppgavetekst/sensorveiledning er etterspurt med filsti/lenke; mer personlig rapporttenking står fortsatt åpen.
 
+### 19.11.2026 – Leveranse mot faktisk sensorveiledning
+
+**Kilde og kontroll:** Studenten viste til C:\IBE160\Oppgave. Del1-veiledningens sju sider og skjermbildet av oppgavealternativet ble lest mot eksisterende leveransedokumentasjon. Del1 teller70%, rapporten30%; prosess/KI-styring er største kriterium innen del1 (30%). Sensor skal følge README og prøve kjerneflytene mot godkjent proposal. Ingen nye funksjonstester eller modellkall ble kjørt.
+
+**KI-bidrag og avgrensning:** Agenten laget en kort evidensoversikt for de sju kriteriene og prioriterte live-hovedflyt, prosessleserute, praktisk sensortilgang og rapport/sluttkontroll. Tilgjengelige kilder krever ikke eksplisitt offentlig hosting/automatisk backup; dette støtter tidligere valgt forenkling, men er ingen garanti om karakter eller erstatning for overordnede krav. Fast demo ble uttrykkelig skilt fra full live-funksjonalitet. Overordnet veiledning/fullstendige del2-krav mangler fortsatt. Dette er dokumenterte fakta og KI-tolkning, ikke studentens egen refleksjon.
+
+**Dokumentasjon:** [Kravavstemming](../.docs/implementation-artifacts/sensor-guidance-check-2026-11-19.md), oppdatert leveransesjekkliste og inngang fra README.
+
 ## Mal for neste hendelse
 
 

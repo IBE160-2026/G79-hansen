@@ -7,6 +7,13 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
 ## Ferdig kontrollert
 
+- [x] Sensorveiledning del1 (s.1–7) og oppgavealternativet i studentens lokale
+  mappe er lest19.11. [Krav, eksisterende evidens og prioritert restliste](sensor-guidance-check-2026-11-19.md).
+  Del1 teller70%, refleksjonsrapport30%; offentlig hosting/automatisk backup
+  er ikke eksplisitte krav i disse kildene. Overordnet veiledning og fullstendige
+  del2-/innleveringskrav er fortsatt ikke kontrollert. Fast demo alene er ikke
+  bevis for hele live-kjerneflyten.
+
 - [x] Veiledet manuell Narrator-kontroll av den faste demoen19.11: studenten
   bekreftet knapp/resultat, tastaturfaner, avdekket svar/kilde, riktig quiz uten
   skjult fasit lest og Ny økt/eksempelvelger. Firefox160.0/Narrator10.0.26100.9949.
@@ -48,9 +55,10 @@ Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
 ## Neste konkrete leveransearbeid
 
-1. **Oppgavekrav:** Finn/sammenhold faktisk oppgavetekst og sensorveiledning med
-   denne leveransen. PRD-tilbakemeldingen12.11 er gjennomgått og rettet lokalt;
-   den er fortsatt ikke full vurderingsveiledning.
+1. **Oppgavekrav:** Del1-veiledning og oppgavealternativ er sammenholdt med
+   leveransen; følg den korte restlisten i kravoversikten. Overordnet veiledning
+   og fullstendige rapport-/innleveringskrav gjenstår; formativ PRD-tilbakemelding
+   erstatter ikke disse.
 2. **README og oppsett:** Ren kopi/nytt virtuelt miljø og demooppstart er
    kontrollert på Windows. README har kort oppskrift, portalternativ og tydelig
    demo/live-skille; tekniske detaljer er sammenleggbare. Eventuell kontroll på
