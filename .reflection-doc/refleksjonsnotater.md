@@ -711,6 +711,12 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 **Dokumentasjon:** [Kravavstemming](../.docs/implementation-artifacts/sensor-guidance-check-2026-11-19.md), oppdatert leveransesjekkliste og inngang fra README.
 
+### 19.11.2026 – Manuell live-kontroll startet
+
+**Faktiske observasjoner:** Studenten bekreftet innlogget tom dokumentliste og kildevisning av tre syntetiske avsnitt om studiegruppen Fjord. Listen viste også en ufullført sletting; studenten er usikker på hva den gjelder, så ingen retry ble utført. Etter informasjon om modellbruk og eksisterende ramme ble ett manuelt genereringssteg gjennomført. Studenten bekreftet læringsdeler uten feil og deretter ett svar mot kilden samt privat lagring som «Fjord-test 19.11.2026». Lokal journal gikk fra10 til11 forsøk og USD0,50 til0,55 reservert av USD5; reservasjon er ikke faktisk fakturert pris. Fire tidligere automatiserte live-smokekontroller forble uendret. Fremdrift/gjenåpning avventes; ingen full akseptanse hevdes. Agenten har ikke observert privat nettleserinnhold eller endret kode, nøkler, tjenester eller budsjettgrenser. Dette er faktagrunnlag, ikke studentens egen refleksjon.
+
+**Kilde:** [Løpende resultatlogg](../.docs/implementation-artifacts/live-walkthrough-2026-11-19.md).
+
 ## Mal for neste hendelse
 
 
