@@ -31,9 +31,10 @@ Faktisk kontroll20.11:
 
 Studenten valgte nedlasting av Storage-filene via dashboardet og bekreftet alle
 fem i privat mottaksmappe. Én [faktisk kryptert appkopi og isolert import-/filprøve](backup-local-4-1.md)
-er deretter fullført20.11. Ingen ny eksportnøkkel ble opprettet. Midlertidig
-ukryptert klargjøringsmappe må ryddes manuelt etter policyavvist opprydding;
-studentens bekreftelse avventes. Backupens begrensning til appdata og manglende
+er deretter fullført20.11. Ingen ny eksportnøkkel ble opprettet. Studenten
+slettet den midlertidige Prepared-mappen manuelt etter policyavvist opprydding;
+kontroll20.11 kl.12:11 bekreftet banen borte og arkivets SHA256 uendret.
+Backupens begrensning til appdata og manglende
 live gjenopprettings-/rolleakseptanse er dokumentert i resultatnotatet.
 Foreleserkontoens e-post er fortsatt utsatt etter studentens ønske.
 Før publisering gjenstår ferdig tilgang og samlet avstemming av de åpne portene;

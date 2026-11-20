@@ -43,8 +43,10 @@ wiring for routine reuse; this export used the controlled project-CA adapter.
 **Temporary plaintext:** source/download/restore files were created only under
 private `C:\StudyBuddy-Backup-Prepared`. Automatic approval review rejected
 both recursive cleanup and a narrowed known-file cleanup (`blocked by policy`).
-The student was asked to remove that temporary directory in File Explorer,
-retaining `C:\StudyBuddy-Backup`. Confirmation is pending.
+The student removed that temporary directory in File Explorer, retaining
+`C:\StudyBuddy-Backup`. On20 November12:11 local, direct filesystem inspection
+confirmed the Prepared path absent and the encrypted archive present with the
+same SHA256 above. This verifies path removal, not physical disk erasure.
 
 The dated preparation notes below describe earlier stages and do not override
 this actual-copy result or its limits.

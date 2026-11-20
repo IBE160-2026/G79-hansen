@@ -739,7 +739,7 @@ Studenten valgte dashboard-nedlasting uten ny eksportnøkkel og bekreftet fem fi
 
 **KI-feil og retting:** Den første lokale arkivkontrollen feilet uten presis fase; en avgrenset diagnostisk gjentakelse viste feil i pg_restore-listingen. En liten lokal demonstrasjon bekreftet at bufret filposisjon og arvet operativsystemfilposisjon kunne avvike. Ubufret filinnlesing rettet kontrollen; tredje read-only eksport og både arkiv-/importprøven bestod. Ingen rå passord/diagnostikk ble vist og ingen modellkall ble brukt.
 
-**Opprydding:** Automatisk godkjenningskontroll avviste både rekursiv sletting og en snevrere kjent-fil-opprydding med «blocked by policy». Studenten ble derfor bedt om å fjerne den midlertidige ukrypterte Prepared-mappen manuelt, med den krypterte backupmappen beholdt. Bekreftelse avventes. Se [backupresultat og grenser](../.docs/implementation-artifacts/backup-local-4-1.md). Dette er faktagrunnlag, ikke studentens egen læringsrefleksjon.
+**Opprydding:** Automatisk godkjenningskontroll avviste både rekursiv sletting og en snevrere kjent-fil-opprydding med «blocked by policy». Studenten fjernet derfor Prepared-mappen manuelt. Kontroll20.11 kl.12:11 viste at banen var borte, mens det krypterte arkivet var beholdt med uendret SHA256. Dette er kontroll av bane/arkiv, ikke fysisk diskutsletting. Se [backupresultat og grenser](../.docs/implementation-artifacts/backup-local-4-1.md). Dette er faktagrunnlag, ikke studentens egen læringsrefleksjon.
 
 ## Mal for neste hendelse
 
