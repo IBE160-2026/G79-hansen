@@ -3,36 +3,38 @@ name: AI Study Buddy
 description: A clear study workspace with light surfaces, dark text and a discreet blue accent.
 status: final
 created: 2026-11-01
-updated: 2026-11-11
+updated: 2026-11-20
 sources:
   - ../../prds/prd-G79-hansen-2026-09-26/prd.md
   - ../../briefs/brief-G79-hansen-2026-09-26/brief.md
 colors:
-  background: '#F8FAFC'
+  background: '#F4F6FF'
   surface: '#FFFFFF'
-  text: '#172033'
+  text: '#1B2240'
   text-secondary: '#475569'
-  accent: '#315F91'
-  accent-text: '#234E7B'
+  accent: '#5A4AD0'
+  accent-text: '#4433B5'
   on-accent: '#FFFFFF'
-  border: '#CBD5E1'
+  border: '#DEE3F0'
   control-border: '#64748B'
-  note: '#EEF4FA'
+  note: '#EEECFC'
+  sidebar: '#171E38'
+  sidebar-text: '#C1CBE1'
   error: '#9B1C1C'
 typography:
-  title: {fontFamily: 'system-ui, sans-serif', fontSize: 28px, fontWeight: '700', lineHeight: '1.25'}
-  heading: {fontFamily: 'system-ui, sans-serif', fontSize: 20px, fontWeight: '600', lineHeight: '1.35'}
+  title: {fontFamily: 'system-ui, sans-serif', fontSize: 40px, fontWeight: '750', lineHeight: '1.2'}
+  heading: {fontFamily: 'system-ui, sans-serif', fontSize: 21px, fontWeight: '700', lineHeight: '1.35'}
   body: {fontFamily: 'system-ui, sans-serif', fontSize: 16px, fontWeight: '400', lineHeight: '1.6'}
   meta: {fontFamily: 'system-ui, sans-serif', fontSize: 14px, fontWeight: '400', lineHeight: '1.5'}
-rounded: {sm: 6px, md: 8px}
+rounded: {sm: 9px, md: 18px, mobile: 12px}
 spacing: {'1': 4px, '2': 8px, '3': 12px, '4': 16px, '5': 24px, '6': 32px}
 components:
-  material-panel: {background: '{colors.surface}', radius: '{rounded.md}', padding: '{spacing.4}'}
+  material-panel: {background: '{colors.surface}', radius: '{rounded.md}', padding: '{spacing.5}'}
   field: {background: '{colors.surface}', foreground: '{colors.text}', border: '{colors.control-border}'}
   primary-action: {background: '{colors.accent}', foreground: '{colors.on-accent}', radius: '{rounded.sm}'}
   secondary-action: {foreground: '{colors.text}', background: '{colors.surface}'}
   result-tabs: {active: '{colors.accent-text}', foreground: '{colors.text}'}
-  learning-panel: {background: '{colors.surface}', padding: '{spacing.5}'}
+  learning-panel: {background: '{colors.surface}', padding: 28px}
   source-reference: {foreground: '{colors.text-secondary}', background: '{colors.note}'}
   feedback: {foreground: '{colors.text}', error: '{colors.error}'}
 ---
@@ -41,15 +43,23 @@ components:
 
 ## Brand & Style
 
-Confirmed: simple and tidy, light background, dark text, discreet blue accent, clear headings and generous separation. Material entry, Generate and learning navigation must be easy to find. Avoid unnecessary animation and decoration. No UI framework is selected.
+**Student-selected revision20 November2026:** after finding the initial visual
+polish too basic, the student explicitly selected a modern study-app layout with
+a desktop sidebar, blue/purple accents and a clear light workspace. Use compact
+top navigation on mobile. This supersedes the older no-sidebar direction below;
+the structured palette/tokens above now describe the current design. Preserve readable contrast,
+visible focus, system fonts, real study controls and clear source/privacy text.
+No fabricated usage metrics, external assets or new application features.
+
+Current direction: a clear light study workspace with dark desktop navigation and blue/purple accents. Material entry, Generate and learning navigation must be easy to find. Avoid unnecessary animation and fabricated dashboard content. Use the existing HTML/CSS without a UI framework.
 
 Colors and readability were accepted in visual walkthrough. [ASSUMPTION: exact widths, spacing, radii and control dimensions remain implementation defaults, adjustable without changing the confirmed composition or reducing text size.]
 
 ## Colors
 
-Use {colors.background} around {colors.surface} panels, {colors.text} for content and {colors.text-secondary} for helper text. Blue accents identify primary action, focus and selected tabs. Use {colors.error} with explanatory words, never color alone. Decorative separators use {colors.border}; interactive fields use {colors.control-border}.
+Use {colors.background} around {colors.surface} panels, {colors.text} for content and {colors.text-secondary} for helper text. Purple/blue accents identify primary action, focus and selected tabs. Use {colors.error} with explanatory words, never color alone. Decorative separators use {colors.border}; interactive fields use {colors.control-border}.
 
-Target normal text contrast at least 4.5:1, large text and focus/control boundaries at least 3:1 against adjacent surfaces. Verify rendered states during implementation. Computed proposed-palette contrast: text/white 16.27:1, secondary/white 7.58:1, white/accent 6.61:1, accent/background 6.32:1. Error combinations still require verification; this is not a claim of completed browser accessibility testing.
+Target normal text contrast at least 4.5:1, large text and focus/control boundaries at least 3:1 against adjacent surfaces. Checked20 November: white/purple primary6.32:1, sidebar text/background10.08:1, light sidebar focus/background8.50:1, secondary text/canvas7.03:1. Selected navigation also has a light inset marker. These measured pairs do not claim completed browser/screen-reader accessibility acceptance.
 
 ## Typography
 
@@ -57,15 +67,15 @@ Use {typography.body.fontFamily}, without external font downloads. Title, headin
 
 ## Layout & Spacing
 
-Confirmed composition: compact material/settings area above result-tabs, with visible labels and a prominent Generate button. Tighten panel padding and spacing without reducing text sizes. Keep the entire material-panel expanded before generation and on errors. After successful generation collapse the entire panel to a compact heading row with a secondary "Vis/rediger" button. Expanding preserves material, settings, results and progress. Keep source text open inside the expanded panel. The user approved the proposed colors and readability during visual walkthrough; numerical spacing remains proposed. No sidebar. Use {spacing.5} between major regions and {spacing.4} within related groups.
+Current composition: desktop navigation sidebar and a light workspace. The demo places the picker/primary action beside the source preview, with compact fixed settings; mobile stacks these in reading order and uses visible top navigation. Keep the entire material-panel expanded before generation and on errors. After successful generation collapse the entire panel to a compact heading row with a secondary "Vis/rediger" button. Expanding preserves material, settings, results and progress. Keep source text open inside the expanded panel. The real source form retains visible privacy guidance and labelled controls. Use {spacing.5} between major regions and {spacing.4} within related groups.
 
-[ASSUMPTION: centered maximum width 960px, minimum side padding 16px and controls at least 44px high. Settings share a row where room permits and stack on narrow windows.]
+[Implementation defaults:244px desktop sidebar, content maximum1240px, compact top navigation at960px and below, minimum mobile side padding16px and controls at least44px high.]
 
 [Earlier before-generation reference](.working/key-input.html) (historical; superseded by the clickable prototype) shows the expanded source; [workspace mock after generation](.working/key-study.html) is the active clickable example-data prototype for input, loading, summary, concepts, flashcards, quiz, disclosure and reset. DESIGN.md and EXPERIENCE.md take precedence if a visual reference conflicts with them.
 
 ## Elevation & Depth
 
-Use whitespace, plain surfaces and subtle borders. No decorative gradients, animated elevation or ornamental shadows are needed.
+Use whitespace, subtle borders and modest card elevation on the light workspace. Keep the sidebar flat and dark. No animated elevation or decorative hero effects.
 
 ## Shapes
 

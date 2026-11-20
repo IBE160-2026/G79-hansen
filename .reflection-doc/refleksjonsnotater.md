@@ -805,6 +805,10 @@ Studenten valgte først annen reservekonto senere, men endret så til den foresl
 
 Studenten beskrev nettsiden som «veldig basic» og ønsket en oppdatering. Agenten avgrenset arbeidet til felles lys/blå stil, toppmeny, typografi, kort og skjemaer på demo-, konto- og materialsiden. Utdaterte kontotekster om at generering/lagring kommer senere ble rettet. Eksisterende knappnavn/ID-er, skjulte svar, personverntekst og backendflyt ble beholdt. Én uavhengig gjennomgang avdekket små layout-/tilgjengelighetsdetaljer som ble rettet, blant annet mobile faner, feltjustering, deaktiverte felt og varselkontrast.13 demosjekker bestod etter retting, og9 desktop-/mobilbilder med syntetisk innlogging/materiale/resultat ble kontrollert uten eksterne nettleserforespørsler eller ekte modell-/e-postkall. Dette er avgrenset visuell/teknisk kontroll, ikke ny full WCAG-akseptanse eller studentens egen refleksjon. Se [spesifikasjonen](../.docs/implementation-artifacts/spec-visual-polish-study-workspace.md).
 
+### 20.11.2026 – Studentstyrt endring til tydeligere studiedesign
+
+Studenten syntes det første designløftet fortsatt var «ganske basic» og valgte deretter «Moderne studieapp: sidepanel på PC, blå/lilla aksenter og tydelig arbeidsflate». Dette erstatter den eldre føringen om ingen sidemeny. Agenten innførte mørk desktopnavigasjon, lys arbeidsflate, lilla hovedhandlinger, lokale ikoner og en mer kompakt demoflate med kilde ved siden av innstillinger. Etter én uavhengig gjennomgang ble hovedhandlingen flyttet nærmere eksempelvelgeren, mobilmenyen gjort kompakt og outputoversikten mer tydelig beskrivende. Designmetadata ble oppdatert til valgt retning.13 faste demoscenarier og10 syntetiske desktop-/mobilbilder bestod etter retting; ingen ekte modell-/e-postkall eller backend-/hostingendring. Dette dokumenterer studentens estetiske korrigering og kontrollfunn, ikke egne læringsrefleksjoner. Se [spesifikasjon og triage](../.docs/implementation-artifacts/spec-modern-study-app-layout.md).
+
 ## Mal for neste hendelse
 
 
