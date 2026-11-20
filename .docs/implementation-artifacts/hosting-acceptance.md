@@ -26,10 +26,15 @@ anonym `/api/v1/auth/status` (available=true, authenticated=false, no-store).
 fra vertsmaskinen og beviser ikke alene tilgang fra mobilnett.
 Ingen generering, e-post, nye kontoer eller endring av private data.
 
+## 20.11.2026 kl.17:11 – brukerbekreftet mobilnettprøve
+
+På instruksen om å bruke telefon med Wi-Fi/Tailscale av, eksisterende konto,
+Mine dokumenter og utlogging svarte studenten «fungerer». Dette registreres som
+brukerbekreftet ekstern tilgang i den forespurte mobilprøven. Ingen separat
+instrumentering eller detaljert bekreftelse av hvert delsteg foreligger.
+
 ## Gjenstående kontroll
 
-- Telefon via mobilnett med Wi-Fi/Tailscale av: eksisterende konto, Mine dokumenter,
-  utlogging og krav om ny innlogging etter omlasting. Studenten er spurt; svar avventes.
 - Full fysisk to-enhetsfremdrift, isolasjons-/restartakseptanse og privat
   overlevering av reservekonto ved innlevering. Story4.1 er fortsatt åpen.
 - Eksisterende fysisk filrest, CA-rutine og full gjenoppretting/avstemming står
