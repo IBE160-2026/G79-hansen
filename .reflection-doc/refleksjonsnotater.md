@@ -797,6 +797,10 @@ Etter korrigert Google-konto/app-passord ble ett testalias brukt innen den ledig
 
 Studenten ba om å gå videre med backupen. Agenten pauset bare identifisert StudyBuddy og tok en fersk read-only databaseeksport. De fem filene fra tidligere kryptert kopi ble kontrollert mot kontrollsummene i faktisk gjenopprettet fersk database. Den nye krypterte kopien inkluderer4 Auth-brukere, den nye bekreftede testkontoen og e-postjournalens2 reservasjoner. Gjenoppretting i nettverksløs/tmpfs-beholder og bytekontroll bestod; beholderen ble fjernet. Arbeidet holdt ukryptert eksport/kontroll i minnet, uten ny plaintextmappe. Budsjett/signering/journal og ruter var uendret, og privat HTTPS svarte normalt etter omstart. Den gamle kopien beholdes med eksisterende utløpsregel; full plattform-/live-tilgangsrestore er fortsatt ikke verifisert. Ingen modellkall eller publisering. Dette er kontrollfakta, ikke studentens egne refleksjoner. Se [backupresultat](../.docs/implementation-artifacts/backup-local-4-1.md).
 
+### 20.11.2026 – Testkonto valgt som reserve for sensor
+
+Studenten valgte først annen reservekonto senere, men endret så til den foreslåtte eksisterende kontoen. Siste valg er å bruke den nye +test1-kontoen som vanlig reserve ved siden av selvregistrering. Kun-lesende kontroll viste én bekreftet authenticated-bruker og0 lagrede dokumenter. Kontoen er allerede i oppdatert kryptert backup. Overleveringsplanen deler bare testadressen og eget StudyBuddy-passord privat; den gir ingen Gmail-/Supabase-administrasjon. En kort tilgangstekst er skrevet som lokalt, usendt utkast. Ingen ny konto, e-post, passord- eller rolleendring eller publisering. Dette er studentens oppgitte beslutning og kontrollfakta, ikke egne læringsrefleksjoner.
+
 ## Mal for neste hendelse
 
 

@@ -5,6 +5,14 @@ offentlig lenke og videre hosting-/backupautomatisering utsettes.
 Kjerne senest1.12; samlet applikasjon, README og rapport klar8.12; siste uke buffer.
 Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
+**Tilgangsoppdatering20.11:** Privat HTTPS-registrering/e-postbekreftelse,
+utlogging og vanlig passordinnlogging er brukerbekreftet. Studenten har valgt
+selvregistrering og den eksisterende bekreftede `+test1`-kontoen som reserve;
+kontrollen fant0 lagrede dokumenter. Faktisk testadresse/StudyBuddy-passord
+overleveres privat, uten passord i repoet. Oppdatert kryptert appbackup inkluderer
+konto og e-postjournal. Dette er ikke offentlig aktivering eller ferdig
+innlevering; [gjeldende plan og usendt tilgangstekst](hosting-plan-4-1.md).
+
 ## Ferdig kontrollert
 
 - [x] Veiledet manuell **tekstflyt i live-modus**19.11: innlogging/tomtilstand,

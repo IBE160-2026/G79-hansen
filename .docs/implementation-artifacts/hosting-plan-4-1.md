@@ -1,5 +1,32 @@
 # Hostingplan – Story 4.1
 
+## Sensortilgang20.11 kl.16:15 – eksisterende testkonto valgt som reserve
+
+Studenten valgte først en annen reservekonto senere, men presiserte deretter
+«eller vi kan bruke den kontoen du foreslo». Siste valg gjelder: den nye
+`+test1`-kontoen brukes som ferdig reservekonto, i tillegg til selvregistrering.
+Kun-lesende kontroll fant nøyaktig én slik bekreftet bruker med ordinær
+`authenticated`-rolle og0 lagrede dokumenter. Kontoen er med i den oppdaterte
+krypterte kopien; ingen ny konto, rolle, passordendring eller e-post trengs nå.
+
+Studenten beholder den konkrete testadressen og kontoens eget StudyBuddy-passord
+privat og overleverer disse til faglærer/sensor sammen med oppgaven i en privat
+kanal. Ingen passord eller innloggingsvedlegg legges i repoet. Google-app-passordet
+brukes bare av e-postsenderen og inngår ikke i sensorens innlogging.
+Selve overleveringen er ikke utført; mottaker/innleveringskanal avklares ved behov.
+
+**Utkast til tilgangstekst etter separat publiseringsgodkjenning:**
+
+> StudyBuddy: https://fredriklaptop.tail55f8dd.ts.net:10000/account
+> Du kan opprette egen konto og bekrefte den via e-post. En ferdig testkonto
+> leveres også privat som reserve. Bruk bare eget, ikke-sensitivt testmateriale.
+> Den lokale demoen og oppstartsinstruksen finnes i README dersom nettsiden er
+> utilgjengelig. Nettutgaven avhenger av at studentens PC og app kjører.
+
+Dette er et lokalt utkast, ikke en sendt melding eller offentlig lenke.
+Funnel er fortsatt av. Tilgangsopplegget er konkretisert; tidligere åpne
+sikkerhets-/akseptanseporter må avstemmes før det endelige publiseringsforslaget.
+
 ## Backup oppdatert20.11 kl.16:10
 
 Ny kryptert appkopi på520630 byte er opprettet og kontrollert:
