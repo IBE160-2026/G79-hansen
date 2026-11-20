@@ -787,6 +787,12 @@ Studenten rapporterte rejected. Agenten tolket dette først for bastant som en b
 
 Studenten oppga at et nytt app-passord var opprettet på riktig konto. Den nye lokale AUTH-kontrollen ga accepted, både brukerbekreftet og lest fra statusfil15:49:31. Ingen e-post eller credentiallagring. Dette verifiserer Google-innlogging fra PC-en, mens samme innlegging i Supabase og senere faktisk registrering/e-postretur fortsatt gjenstår. Mottakerkvoten ble bevart. Dette er kontrollfakta og studentens oppgitte korrigering, ikke egne læringsrefleksjoner.
 
+### 20.11.2026 – Bekreftelsesmail og privat HTTPS-retur bestod
+
+Etter korrigert Google-konto/app-passord ble ett testalias brukt innen den ledige globale kvoten. Studenten bekreftet at e-posten kom og at lenken i samme nettleser/profil førte tilbake til StudyBuddy med innlogget status. Kun-lesende SQL-opptelling bekreftet én ny, bekreftet +test1-bruker uten å hente ut adressen. Journalen har2 reservasjoner; ingen reset eller økte kvoter. Dette er en avgrenset faktisk registrerings-/e-post-/HTTPS-returkontroll, ikke full e-post-/offentlig tilgangsakseptanse. Ny konto og e-postjournal må inkluderes i neste manuelle backup. Dette er dokumenterte kontrollfunn, ikke studentens egne refleksjoner.
+
+**Tillegg16:02:** Studenten bekreftet også at utlogging/omlasting krever ny innlogging og at vanlig passordinnlogging med samme testadresse fungerer. Ingen ny registrering eller e-post trengtes til denne kontrollen.
+
 ## Mal for neste hendelse
 
 

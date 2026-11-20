@@ -1,5 +1,26 @@
 # Hostingplan – Story 4.1
 
+## Registrering bekreftet20.11 kl.16:00 – e-post og HTTPS-retur fungerer
+
+Etter korrigert Gmail-konto/app-passord og brukerbekreftet lagring i Supabase
+rapporterte studenten mottatt bekreftelsesmail. Studenten bekreftet deretter
+retur via lenken i samme PC-nettleser/profil og «Du er logget inn» på StudyBuddy.
+Kun-lesende SQL-opptelling viste én ny Auth-bruker siste15min, én bekreftet,
+én med +test1@gmail.com-suffiks. Ingen adresse/passord/token er hentet ut.
+Studenten bekreftet også at utlogging og omlasting krever ny innlogging, og at
+vanlig passordinnlogging med samme testadresse deretter fungerer. Dette er en
+avgrenset faktisk brukskontroll, ikke ny full isolasjons-/sikkerhetsakseptanse.
+Dette verifiserer denne manuelle aliasregistreringen, e-postbekreftelsen og
+privat HTTPS/PKCE-retur; ikke alle e-postleverandører, passordgjenoppretting
+eller offentlig tilgang. En siste manuell ut-/passordinnlogging er spurt om.
+
+Journalen er gyldig med2 reservasjoner; ingen kvote er økt eller nullstilt.
+SMTP-avsenderen beholder vanlig Gmail-adresse. Aliaset er en egen vanlig
+StudyBuddy-testkonto og gir ikke Supabase-prosjektrolle eller Gmail-tilgang.
+Kryptert backup fra før opprettingen mangler både ny Auth-bruker og e-postjournal;
+oppdatert manuelt startet backup må klargjøres før eventuell publisering.
+Ingen modellkall eller offentlig Funnel er aktivert under kontrollen.
+
 ## SMTP-status15:49 – ny innlogging godtas av Google
 
 Studenten oppga at nytt app-passord er opprettet på riktig Gmail-konto.

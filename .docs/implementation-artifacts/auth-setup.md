@@ -17,6 +17,14 @@ Frankfurt requirement for this project only. Offline adapters live only in
 
 ## Approved manual setup
 
+**Latest private HTTPS acceptance,20 November2026:** Gmail SMTP and the durable
+email journal are configured. The student confirmed receiving the signup email,
+returning through the HTTPS confirmation link into an authenticated session,
+logout/reload requiring login, and subsequent password login. Read-only SQL found
+one new confirmed test-alias user. Public Funnel activation, recovery-email
+acceptance and an updated backup including this user/journal remain pending.
+See [current hosting status](hosting-plan-4-1.md); the older setup below is historical.
+
 **Assessor-access choice20 November2026:** the student chose both self-registration
 and a pre-created ordinary app account as fallback. This does not authorize a
 Supabase organization/project membership for the assessor. Read-only Auth settings
