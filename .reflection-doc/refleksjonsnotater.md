@@ -801,6 +801,10 @@ Studenten ba om å gå videre med backupen. Agenten pauset bare identifisert Stu
 
 Studenten valgte først annen reservekonto senere, men endret så til den foreslåtte eksisterende kontoen. Siste valg er å bruke den nye +test1-kontoen som vanlig reserve ved siden av selvregistrering. Kun-lesende kontroll viste én bekreftet authenticated-bruker og0 lagrede dokumenter. Kontoen er allerede i oppdatert kryptert backup. Overleveringsplanen deler bare testadressen og eget StudyBuddy-passord privat; den gir ingen Gmail-/Supabase-administrasjon. En kort tilgangstekst er skrevet som lokalt, usendt utkast. Ingen ny konto, e-post, passord- eller rolleendring eller publisering. Dette er studentens oppgitte beslutning og kontrollfakta, ikke egne læringsrefleksjoner.
 
+### 20.11.2026 – Visuelt løft av de eksisterende sidene
+
+Studenten beskrev nettsiden som «veldig basic» og ønsket en oppdatering. Agenten avgrenset arbeidet til felles lys/blå stil, toppmeny, typografi, kort og skjemaer på demo-, konto- og materialsiden. Utdaterte kontotekster om at generering/lagring kommer senere ble rettet. Eksisterende knappnavn/ID-er, skjulte svar, personverntekst og backendflyt ble beholdt. Én uavhengig gjennomgang avdekket små layout-/tilgjengelighetsdetaljer som ble rettet, blant annet mobile faner, feltjustering, deaktiverte felt og varselkontrast.13 demosjekker bestod etter retting, og9 desktop-/mobilbilder med syntetisk innlogging/materiale/resultat ble kontrollert uten eksterne nettleserforespørsler eller ekte modell-/e-postkall. Dette er avgrenset visuell/teknisk kontroll, ikke ny full WCAG-akseptanse eller studentens egen refleksjon. Se [spesifikasjonen](../.docs/implementation-artifacts/spec-visual-polish-study-workspace.md).
+
 ## Mal for neste hendelse
 
 
