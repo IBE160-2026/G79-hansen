@@ -1,5 +1,17 @@
 # Hostingplan – Story 4.1
 
+## SMTP-status15:49 – ny innlogging godtas av Google
+
+Studenten oppga at nytt app-passord er opprettet på riktig Gmail-konto.
+Én ny lokal AUTH-only-kontroll ga `accepted`, bekreftet av studenten og
+statusfilen sist endret15:49:31. `email_sent=false`, `credentials_saved=false`.
+Google godtar altså den nye kombinasjonen på PC-en. Dette beviser ikke at
+Supabase har fått samme verdier eller at bekreftelsesmail/HTTPS-retur fungerer.
+Neste manuelle steg er å lagre den samme Gmail-adressen som Sender email/Username
+og det nye app-passordet direkte i Supabase Password. Ingen lokal omstart trengs.
+Behold providergrense2/time. Ny registrering mot samme mottaker tidligst16:31;
+journalens faktiske adgangstid er16:30:12 og kvoten er ikke endret/nullstilt.
+
 ## Ny registreringsprøve15:30 – SMTP-avvisning bekreftet lokalt15:40
 
 Korrigert lokal kontroll15:40 ga `smtp_auth=rejected`, `smtp_status=535`,

@@ -783,6 +783,10 @@ Etter korrigert SMTP-innlegging og naturlig utløpt sperre fikk studenten en gen
 
 Studenten rapporterte rejected. Agenten tolket dette først for bastant som en bekreftet passordavvisning, mens den lokale statusfilen faktisk viste en generell forbindelsesfeil. En separat SMTP/TLS-kontroll uten AUTH bestod. Kontrollhjelperen ble derfor avgrenset til ett AUTH PLAIN-forsøk og direkte lukking, med ufølsom statuskode uten rå feiltekst. Ny brukerinnlesing bekreftet535/bad_credentials; ingen e-post ble sendt og ingen innloggingsopplysninger ble lagret. Neste steg er et nytt app-passord opprettet med riktig Gmail-konto valgt. Dette er dokumenterte kontrollfunn og KI-korrigering, ikke studentens egne refleksjoner.
 
+### 20.11.2026 – Nytt app-passord på riktig konto godtatt av Google
+
+Studenten oppga at et nytt app-passord var opprettet på riktig konto. Den nye lokale AUTH-kontrollen ga accepted, både brukerbekreftet og lest fra statusfil15:49:31. Ingen e-post eller credentiallagring. Dette verifiserer Google-innlogging fra PC-en, mens samme innlegging i Supabase og senere faktisk registrering/e-postretur fortsatt gjenstår. Mottakerkvoten ble bevart. Dette er kontrollfakta og studentens oppgitte korrigering, ikke egne læringsrefleksjoner.
+
 ## Mal for neste hendelse
 
 
