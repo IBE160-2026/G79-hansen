@@ -1,5 +1,16 @@
 # Hostingplan – Story 4.1
 
+## Privat HTTPS-kontroll20.11, kl.12:20
+
+Etter studentens «gjør det» er faktisk hosted-oppstart og en egen **privat**
+Serve-rute på10000 gjennomført. Worker22936 erstatter gammel25940 på loopback8000;
+443/8765 og8443/3000 er bevart. Ingen offentlig Funnel-rute er aktivert.
+TLS, anonym status/cookieflagg, feil HTTP-origin og avviste konfigurasjonsfiler
+er kontrollert; budsjett/kapabilitet er byteuendret. Studenten bekreftet faktisk
+innlogging, dokumentliste og utlogging etter omlasting på HTTPS-adressen.
+Se [detaljert privat kontroll og stopp/omstart](hosting-local-preparation-4-1.md).
+Foreleserens adresse/egen konto og separat offentlig godkjenning er fortsatt åpne.
+
 ## Oppdatert20.11.2026 – lokal klargjøring gjenopptatt
 
 Studenten ønsker igjen faktisk tilgang fra telefon og sensorens PC via egen

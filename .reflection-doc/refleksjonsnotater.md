@@ -741,6 +741,12 @@ Studenten valgte dashboard-nedlasting uten ny eksportnøkkel og bekreftet fem fi
 
 **Opprydding:** Automatisk godkjenningskontroll avviste både rekursiv sletting og en snevrere kjent-fil-opprydding med «blocked by policy». Studenten fjernet derfor Prepared-mappen manuelt. Kontroll20.11 kl.12:11 viste at banen var borte, mens det krypterte arkivet var beholdt med uendret SHA256. Dette er kontroll av bane/arkiv, ikke fysisk diskutsletting. Se [backupresultat og grenser](../.docs/implementation-artifacts/backup-local-4-1.md). Dette er faktagrunnlag, ikke studentens egen læringsrefleksjon.
 
+### 20.11.2026 – Privat HTTPS-kontroll før eventuell publisering
+
+Studenten godkjente den foreslåtte private kontrollen med «gjør det». Etter identitetskontroll ble bare gammel StudyBuddy-worker25940 stoppet; eksisterende hosted-launcher startet worker22936 på loopback8000. En separat privat Serve-proxy på10000 ble lagt til, mens rutene til fotball/SURE ble sammenlignet med førbildet og bevart. Ingen offentlig Funnel ble aktivert. Faktiske HTTPS-prober bestod sertifikatvalidering, anonym auth-status, Secure/HttpOnly/SameSite-cookie, no-store,404 på konfigurasjonsfiler og403 for gammel HTTP-origin. Budsjett og kapabilitet var byteidentiske med før omstart og den krypterte kopien. Ingen modell-/e-postkall eller kontoendring. Studenten er bedt om en kort innloggings-/utloggingskontroll; observasjon avventes. Dette er dokumenterte fakta, ikke egne studentrefleksjoner. [Kontroll og gjenværende grenser](../.docs/implementation-artifacts/hosting-local-preparation-4-1.md).
+
+**Brukerbekreftelse20.11:** På spørsmål om faktisk HTTPS-innlogging, Mine dokumenter, utlogging og omlasting med krav om ny innlogging svarte studenten «Ja, innlogging/dokumentliste og utlogging fungerer». Dette supplerer HTTP-probene med en avgrenset faktisk brukskontroll; ikke en ny full isolasjons-/tilgjengelighetsakseptanse. Offentlig aktivering er fortsatt ikke utført.
+
 ## Mal for neste hendelse
 
 

@@ -11,6 +11,52 @@ app-data copy and isolated database/file check have passed. See
 [scope and remaining restore/cleanup limits](backup-local-4-1.md).
 The dated19 November deferral below is historical.
 
+## Private HTTPS operation — 20 November2026
+
+The student explicitly authorized the private HTTPS check and its controlled
+StudyBuddy restart. Only the identified old StudyBuddy worker25940 was stopped
+after rechecking its command line and loopback listener. The existing hosted
+launcher is now running as hidden wrapper23408 with worker22936 on127.0.0.1:8000,
+one worker, no reload and no access log. Both original and hosted configuration
+were checked beforehand; a local rollback environment was prepared but not used.
+Existing budget and signing capability remained byte-identical, also checked
+against the pre-restart encrypted backup. No model/email call or account change.
+
+`tailscale serve --bg --https=10000 http://127.0.0.1:8000` added only a private
+HTTPS proxy at `https://fredriklaptop.tail55f8dd.ts.net:10000`.
+The existing443/8765 and8443/3000 settings matched the saved pre-change config.
+All three routes were labelled **tailnet only**, with no true `AllowFunnel` flag.
+No Funnel activation, global reset, router change or repository-file serving.
+
+Actual targeted checks on the private HTTPS endpoint passed:
+
+- Default TLS certificate/hostname validation; no insecure verification bypass.
+- `/api/v1/auth/status`:200, available but unauthenticated, `Cache-Control: no-store`.
+- Anonymous browser cookie: Secure, HttpOnly, SameSite=Lax. Authenticated-session
+  cookie flags use the same existing cookie helper; no new direct browser-cookie
+  inspection or full session/ownership matrix is claimed here.
+- `/account` and `/workspace`:200.
+- `/.env`, `/.env.hosted` and `/.git/config`:404; no file contents printed.
+- Auth status through old `http://127.0.0.1:8000`:403 for the wrong configured origin.
+
+The student logged in using the private HTTPS address, opened their document
+list, logged out and reloaded as instructed. The response was
+«Ja, innlogging/dokumentliste og utlogging fungerer» to the question asking
+whether fresh login is required after reload. This is a user-reported check,
+not direct agent browser observation or a new two-account isolation matrix. No new
+generation or paid operation was part of this check. Existing open access,
+recovery-email, physical-retention and restore limits still apply.
+
+The private proxy persists in Tailscale's background configuration, but the app
+process has no newly installed automatic startup task. After reboot, run the
+existing hosted launcher under the normal operator. Password login uses the
+HTTPS address; old local HTTP login is intentionally rejected by hosted config.
+To remove only this preview proxy: `tailscale serve --https=10000 off`.
+Do not reset or remove the other two mappings. Public activation remains separate.
+
+Evidence helpers/reports are local ignored `test-results/private-https-*` files.
+No app code or production configuration file was edited for this operation.
+
 **Delivery revision19 November2026:** Public hosting and further operational
 automation are optional/deferred. Prioritize local assessor delivery; keep the
 evidence below without resuming deployment/password work. See the accepted
