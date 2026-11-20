@@ -767,6 +767,10 @@ Studenten bekreftet konto/2FA, app-passord og deretter lagring av Gmail SMTP og2
 
 Studenten rapporterte «URL can't contain backslashes» da agentens HTTPS-returmønster med `\?` ble lagt inn i Supabase-dashboardet. Agenten hadde brukt dokumentert glob-escaping uten å kontrollere dashboardets strengere URL-validering. Instruksjonene er rettet til tegnklassen `[?]` for bokstavelig spørsmålstegn. Glob-syntaksen er kontrollert i primærkilde; lokal WHATWG-parsing godtar begge korrigerte URL-er. Lagring og faktisk e-postretur er fortsatt ikke verifisert. Ingen konto, utsending, appkonfigurasjon eller offentlig tilgang er endret. Dette er dokumentert KI-feil og avgrenset retting, ikke studentens egen refleksjon.
 
+### 20.11.2026 – E-postjournal aktivert på privat HTTPS
+
+Studenten bekreftet lagring etter rettede redirect-mønstre. Agenten koblet den eksisterende private journalen til hosted-konfigurasjonen og erstattet bare identitetskontrollert StudyBuddy-worker via den eksisterende launcheren. Faktisk HTTPS auth-status/cookie/TLS-kontroll bestod; ruter, budsjett, signeringsnøkkel og journalinnhold var uendret. Ingen e-post, reservasjon, modellkall eller offentlig Funnel. Studenten er spurt om en manuell registreringsprøve; SMTP-levering/retur er fortsatt uverifisert og journalen må med i neste manuelle backup. Dette er dokumenterte kontrollfakta, ikke studentens egen refleksjon. Se [hostingplan](../.docs/implementation-artifacts/hosting-plan-4-1.md).
+
 ## Mal for neste hendelse
 
 

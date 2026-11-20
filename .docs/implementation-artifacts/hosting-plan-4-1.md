@@ -1,6 +1,6 @@
 # Hostingplan – Story 4.1
 
-## E-postklargjøring20.11 – SMTP lagret, lokal journal klar
+## E-postklargjøring20.11 – SMTP lagret, journal aktiv privat
 
 Studenten bekreftet «lagret» etter Gmail custom SMTP-oppsett og providergrense
 på2 e-poster/time. Dette er brukerbekreftet; SMTP-levering er ikke prøvd og
@@ -13,12 +13,20 @@ Journalen må bevares og inkluderes som email_journal i neste manuelle backup;
 kopien fra før opprettingen inneholder den ikke. Ikke gjenopprett eldre tom
 kvotetilstand over senere reservasjoner.
 
-`.env.hosted` og aktiv server er uendret; appens e-postutsending er fortsatt av.
-Neste manuelle dashboardsteg er Site URL
-`https://fredriklaptop.tail55f8dd.ts.net:10000/account` og de to snevre
-HTTPS-returmønstrene nedenfor. Dette er instruks, ikke bekreftet endring.
-Etter bekreftelsen kobles journalen til konfigurasjonen før kontrollert omstart
-og en særskilt autorisert e-postprøve. Offentlig Funnel er fortsatt ikke aktivert.
+Studenten bekreftet nå at Site URL
+`https://fredriklaptop.tail55f8dd.ts.net:10000/account` og de to rettede
+HTTPS-returmønstrene med `[?]` nedenfor er lagret. Faktisk e-postretur er ikke prøvd.
+Kun `AUTH_EMAIL_ADMISSION_PATH` er endret i den private `.env.hosted` til
+journalstien ovenfor. Eksisterende worker22936 ble identitetskontrollert og
+erstattet via eksisterende launcher: ny worker25820, hidden wrapper32896,
+fortsatt én worker/loopback8000. Preflight bestod etter portfrigivelse.
+Faktisk privat HTTPS auth-status ga200/available/ikke innlogget, no-store og
+Secure/HttpOnly/SameSite=Lax browser-cookie. Standard TLS-validering bestod.
+Tailscale-konfigurasjonen er strukturelt uendret; ingen offentlig Funnel.
+Budsjett, signeringsnøkkel og journal var byteuendret før/etter; ingen reservasjon,
+utsending eller modellkall. Tilkoblingen aktiverer appens eksisterende e-postvern,
+men beviser ikke SMTP-levering. Studenten er spurt om én manuell registreringsprøve
+med den nye Gmail-adressen; passord skrives bare i nettleseren, ikke i chat.
 
 ## Sensortilgang20.11 – begge alternativer valgt
 
