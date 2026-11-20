@@ -793,6 +793,10 @@ Etter korrigert Google-konto/app-passord ble ett testalias brukt innen den ledig
 
 **Tillegg16:02:** Studenten bekreftet også at utlogging/omlasting krever ny innlogging og at vanlig passordinnlogging med samme testadresse fungerer. Ingen ny registrering eller e-post trengtes til denne kontrollen.
 
+### 20.11.2026 – Oppdatert backup med ny konto og e-postjournal
+
+Studenten ba om å gå videre med backupen. Agenten pauset bare identifisert StudyBuddy og tok en fersk read-only databaseeksport. De fem filene fra tidligere kryptert kopi ble kontrollert mot kontrollsummene i faktisk gjenopprettet fersk database. Den nye krypterte kopien inkluderer4 Auth-brukere, den nye bekreftede testkontoen og e-postjournalens2 reservasjoner. Gjenoppretting i nettverksløs/tmpfs-beholder og bytekontroll bestod; beholderen ble fjernet. Arbeidet holdt ukryptert eksport/kontroll i minnet, uten ny plaintextmappe. Budsjett/signering/journal og ruter var uendret, og privat HTTPS svarte normalt etter omstart. Den gamle kopien beholdes med eksisterende utløpsregel; full plattform-/live-tilgangsrestore er fortsatt ikke verifisert. Ingen modellkall eller publisering. Dette er kontrollfakta, ikke studentens egne refleksjoner. Se [backupresultat](../.docs/implementation-artifacts/backup-local-4-1.md).
+
 ## Mal for neste hendelse
 
 

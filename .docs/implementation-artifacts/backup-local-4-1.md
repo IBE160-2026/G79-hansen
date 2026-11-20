@@ -1,5 +1,42 @@
 # Local prepared-export backup bundles (Story 4.1 component)
 
+## Refreshed manual application backup — 20 November2026,16:10 local
+
+New archive:
+`C:\StudyBuddy-Backup\studybuddy-20261120T150948Z-a98e54990bf74736b5a838856f33b1b2.sbb`
+(520630 bytes, SHA256 `3c2463c62803e4320f67b47250627f288cbef1bf7ad150b22e04fea0cb0cf0dd`).
+The earlier archive is retained under the existing seven-day expiry policy.
+
+- StudyBuddy alone was identity-checked and paused for a consistent capture.
+  The existing read-only/project-CA export produced a fresh366032-byte custom
+  dump of the same five schemas. The database now includes4 Auth users,
+  including the new confirmed test alias,9 documents and5 Storage objects.
+- The five Storage files were recovered from the earlier authenticated archive,
+  not downloaded again. Every object path, size and SHA256 matched descriptors
+  queried from the **restored fresh database dump**. No new Storage admin key.
+- The current email journal is included, valid with2 reservations. Current
+  budget/signing state, CA and legacy reconciliation journal are also retained.
+  Budget, signing key, email state and hosted configuration were unchanged;
+  after restart all three live state files also matched their archived bytes.
+- Existing manifest/Fernet/CurrentUser-DPAPI primitives authenticated the whole
+  bundle and verified exact decrypted bytes before exclusive publication.
+  Dump, source files and verification were held in memory; no new plaintext
+  staging/quarantine directory was written to disk.
+- Actual pg_restore from the decrypted bundle passed in a disposable cached
+  PostgreSQL17.11 container: network none, Unix socket, tmpfs and no host ports.
+  The new confirmed alias and all five file hashes were verified there. The
+  SQLite journal was also checked in memory. The container was removed.
+- The normal operator and private archive ACL were checked. Existing rotation
+  ran; old archive remains. No production restore or ledger reset occurred.
+  Hosted worker24992/wrapper33016 resumed; private HTTPS auth-status200 passed
+  with normal TLS validation. Tailscale configuration is unchanged, no Funnel.
+
+The earlier limits below still apply: no managed SMTP/platform export or custom
+role passwords, no proof of restored live Auth/grants/Storage service, no later
+deletion/budget reconciliation or cross-PC recovery. The legacy physical-file
+uncertainty remains open. The ignored operator helper/result in test-results is
+not a shipped routine exporter. No model call or public activation occurred.
+
 ## Actual manual application backup — 20 November2026
 
 The student selected manual triggering instead of daily automated export and

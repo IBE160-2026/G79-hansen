@@ -1,5 +1,23 @@
 # Hostingplan – Story 4.1
 
+## Backup oppdatert20.11 kl.16:10
+
+Ny kryptert appkopi på520630 byte er opprettet og kontrollert:
+`C:\StudyBuddy-Backup\studybuddy-20261120T150948Z-a98e54990bf74736b5a838856f33b1b2.sbb`.
+Fersk databaseeksport og faktisk isolert import bekreftet4 Auth-brukere,
+inkludert den nye bekreftede testkontoen. Alle fem gjenbrukte Storage-filer
+matchet den gjenopprettede ferske databasens kontrollsummer. E-postjournalens
+2 reservasjoner og eksisterende budsjett/signering er inkludert uten reset.
+Ingen ukryptert stagingmappe ble opprettet. Den gamle kopien beholdes med
+eksisterende7-dagers utløpskontroll. Se [backupresultat og grenser](backup-local-4-1.md).
+
+StudyBuddy ble pauset kort og startet igjen med eksisterende launcher:
+worker24992/hidden wrapper33016 på loopback8000. Privat HTTPS auth-status200
+bestod, konfigurasjon/ruter og de tre tilstandsfilene er uendret. Ny innlogging
+kreves etter omstarten. Ingen modellkall, e-post eller offentlig Funnel.
+Praktisk reservekonto/overlevering og tidligere åpne akseptanseporter må fortsatt
+avklares før et konkret publiseringsforslag og separat godkjenning.
+
 ## Registrering bekreftet20.11 kl.16:00 – e-post og HTTPS-retur fungerer
 
 Etter korrigert Gmail-konto/app-passord og brukerbekreftet lagring i Supabase
@@ -12,7 +30,7 @@ vanlig passordinnlogging med samme testadresse deretter fungerer. Dette er en
 avgrenset faktisk brukskontroll, ikke ny full isolasjons-/sikkerhetsakseptanse.
 Dette verifiserer denne manuelle aliasregistreringen, e-postbekreftelsen og
 privat HTTPS/PKCE-retur; ikke alle e-postleverandører, passordgjenoppretting
-eller offentlig tilgang. En siste manuell ut-/passordinnlogging er spurt om.
+eller offentlig tilgang. Den manuelle ut-/passordinnloggingen er brukerbekreftet.
 
 Journalen er gyldig med2 reservasjoner; ingen kvote er økt eller nullstilt.
 SMTP-avsenderen beholder vanlig Gmail-adresse. Aliaset er en egen vanlig
