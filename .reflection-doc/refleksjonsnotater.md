@@ -822,6 +822,17 @@ restoreakseptanse forblir åpne; fungerende kopi/lenke beviser ikke disse.
 
 **Studentens egen refleksjon:** Ikke innhentet i denne kontrollen.
 
+## 20.11.2026 – separat godkjent offentlig aktivering
+
+**Dokumenterte fakta:** Studenten svarte «ok» på konkret spørsmål om publisering
+med avtalte begrensninger. Bare StudyBuddy10000 ble aktivert med Funnel mot8000.
+Før-/etterkontroll viste identiske TCP-/Web-ruter og kun10000 offentlig.
+HTTPS-sidene svarte200 og hemmelige filstier404. Ingen modell-/e-postkall eller
+serveromstart. Mobilnettprøve med eksisterende konto er etterspurt; ikke bekreftet
+ved aktiveringen. Se [akseptansenotat](../.docs/implementation-artifacts/hosting-acceptance.md).
+
+**Studentens egen refleksjon:** Ikke innhentet i denne aktiveringen.
+
 ## Mal for neste hendelse
 
 

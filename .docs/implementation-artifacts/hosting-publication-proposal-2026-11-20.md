@@ -1,6 +1,8 @@
 # Konkret publiseringsforslag – 20.11.2026
 
-**Status: klargjort, venter på separat brukergodkjenning. Funnel er av.**
+**Status: separat godkjent med «ok» og aktivert20.11 kl.17:07.**
+Se [aktivering og gjenstående akseptanse](hosting-acceptance.md).
+Teksten nedenfor dokumenterer det konkrete forslaget som ble godkjent.
 Forslaget gjelder avgrenset offentlig skoleutprøving med syntetisk eller annet
 ikke-sensitivt testmateriale. Det avslutter ikke Story4.1 eller full releaseakseptanse.
 

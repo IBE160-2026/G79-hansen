@@ -1,5 +1,16 @@
 # Hostingplan – Story 4.1
 
+## Offentlig aktivering20.11 kl.17:07 – separat godkjent
+
+Studenten svarte «ok» på det konkrete publiseringsforslaget. Funnel10000 er nå
+aktiv mot8000. Kun denne vert/port har AllowFunnel=true; TCP-/Web-rutene er
+identiske før/etter, og443/8765 samt8443/3000 forblir private. Ingen omstart,
+provider-/redirect-/policyendring, e-post eller modellkall.
+HTTPS konto/arbeidsflate/auth-status svarte200 og hemmelige filstier404.
+[Akseptansenotatet](hosting-acceptance.md) skiller vertsmaskinkontrollen fra
+telefonens mobilnettkontroll, som avventer studentens svar. Tidligere seksjoner
+nedenfor er historikk; Story4.1 og de avtalte test-/retensjonsgrensene består.
+
 ## Sluttkontroll20.11 kl.17:03 – konkret forslag klart for separat godkjenning
 
 [Publiseringsforslaget](hosting-publication-proposal-2026-11-20.md) angir eksakt
