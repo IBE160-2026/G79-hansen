@@ -755,6 +755,10 @@ Studenten spurte om vurderingsgrunnlaget krever ferdig sensorkonto eller at sens
 
 Studenten svarte «vi kan vel gjøre begge deler» etter avklaringen om konto. Planen er selvregistrering og en vanlig ferdig testkonto som reserve, uten Supabase-prosjektmedlemskap for sensor. Agenten gjenbruker eksisterende registreringskode og e-postvern. Kun-lesende providerflagg viser signup/e-post på og autoconfirm av, mens appens mailutsending er av. Standard-SMTPs team-/kvotebegrensning ble kontrollert i offisiell dokumentasjon; faktisk custom SMTP er ikke avklart gjennom disse flaggene. Studenten er spurt om eksisterende sender eller en gratis løsning. Ingen konto, e-post, nøkkel, innstilling, server eller rute er endret. Dette er studentens oppgitte tilgangsvalg og faktagrunnlag, ikke egne læringsrefleksjoner.
 
+### 20.11.2026 – Tidligere registrering avklart mot faktisk e-postoppsett
+
+Studenten husket at registrering hadde fungert før. Loggen fra13.11 bekrefter registrering/e-postbekreftelse med egen autorisert teamadresse; dette er ikke bevis for levering til vilkårlige sensoradresser. Studenten kontrollerte dashboardet og svarte «Nei, Custom SMTP er deaktivert». Agenten undersøkte Brevo Free, men fant krav om separat aktivering og anbefalt eget autentisert avsenderdomene. Ingen leverandør er valgt eller innstilling endret. Studenten er spurt om eget domene finnes, slik at gratisoppsettets omfang kan avklares før videre arbeid. Dette er dokumenterte kontrollfunn, ikke studentens egne læringsrefleksjoner. Se [hostingplan](../.docs/implementation-artifacts/hosting-plan-4-1.md).
+
 ## Mal for neste hendelse
 
 

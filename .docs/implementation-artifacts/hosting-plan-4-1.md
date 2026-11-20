@@ -14,7 +14,17 @@ Disse offentlige flaggene viser ikke om custom SMTP er satt opp.
 Supabases [standard-SMTP](https://supabase.com/docs/guides/auth/auth-smtp) sender
 bare til teamadresser og er begrenset til to meldinger/time. En egnet sender må
 derfor avklares før selvregistrering loves til sensorens vanlige e-postadresse.
-Studenten er spurt om eksisterende SMTP-tjeneste eller behov for en gratis løsning.
+Studenten bekreftet20.11 at «Enable custom SMTP» er deaktivert i dashboardet.
+Tidligere vellykket registrering13.11 brukte egen autorisert teamadresse;
+den testen dokumenterer ikke levering til sensorens vanlige adresse.
+
+Gratis sender er undersøkt, men ikke valgt: [Brevo Free](https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan)
+har300 utsendinger/dag. [Transaksjonsutsending krever separat aktivering](https://help.brevo.com/hc/en-us/articles/115000188150-Troubleshooting-Issues-with-Brevo-SMTP).
+Brevo anbefaler [autentisert eget avsenderdomene](https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email);
+gratis e-postdomener kan ikke autentiseres. Gratis tjeneste er derfor ikke
+det samme som et ferdig, pålitelig oppsett uten eget domene. Studenten er
+spurt om et slikt domene allerede finnes før videre valg. Ingen ny tjeneste,
+domene, nøkkel, konto eller utsending er opprettet.
 
 Før aktivering av registreringsflyten: kontroller sender og mottakeradgang,
 sett riktig HTTPS Site URL og snevre callback-regler, klargjør eksisterende
