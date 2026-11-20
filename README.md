@@ -66,6 +66,43 @@ inngår ikke. Modellens svar må kontrolleres mot kildehenvisningene. Offentlig
 lenke og komplett automatisert backup er utsatt; løsningen er ikke dokumentert
 som ferdig produksjonsdrift.
 
+## Leserute for sensor
+
+Etter demoen ovenfor kan utviklingsprosessen følges i denne rekkefølgen:
+
+1. **Fra idé til valgt omfang.** [Product brief](.docs/planning-artifacts/briefs/brief-G79-hansen-2026-09-26/brief.md)
+   beskriver studiebehovet; [PRD](.docs/planning-artifacts/prds/prd-G79-hansen-2026-09-26/prd.md)
+   gir brukerreise, prioriteringer og testbare krav. Studenten ba om å redusere
+   omfanget. [Beslutningen19.11](.docs/implementation-artifacts/leveranseavgrensning-2026-11-19.md)
+   prioriterer eksisterende kjerne og lokal kjørbarhet, og utsetter offentlig
+   hosting og videre driftsautomatisering. [PRD-oppfølgingen](.docs/implementation-artifacts/prd-feedback-followup-2026-11-19.md)
+   viser hvordan faglærerens kritikk ble behandlet.
+
+2. **Et konkret eksempel på kontroll og retting av KI-assistert kode.**
+   [Brukskontrollen19.11, funn B1](.docs/implementation-artifacts/usability-check-2026-11-19.md)
+   avdekket at status fortsatt beskrev flashcard2 etter bytte til Quiz1.
+   Studenten ba «rett denne». Commit `2494ce9` oppdaterte `announceSection()` i
+   [app.js](app/static/app.js); [nettlesertesten](tests/browser-demo.cjs)
+   kontrollerer riktig status, fokus, bevarte posisjoner/svar og ingen ekstra
+   generering ved fanebytte. De13 scenariene bestod19.11.
+
+3. **Følg ett krav til kode og tester.** PRD-kravene om kildebaserte læringsdeler
+   er konkretisert i [Story2.5](.docs/implementation-artifacts/spec-2-5-generate-all-learning-parts-from-the-source.md).
+   Les deretter [genereringstjenesten](app/services/generation.py),
+   [Python-testene](tests/test_generation.py) og
+   [akseptansenotatet](.docs/implementation-artifacts/generation-acceptance.md).
+   Notatet skiller syntetiske tester fra tidligere ekte modellkall og åpne grenser.
+
+4. **Sammenhold automatiske og manuelle resultater.**
+   [Live-tekstflyten19.11](.docs/implementation-artifacts/live-walkthrough-2026-11-19.md)
+   dokumenterer studentens bekreftelser fra kildevisning til lagring, gjenåpning,
+   fremdrift, sletting av nytt testmateriale og utlogging, med ett modellkall.
+   [Narrator-kontrollen](.docs/implementation-artifacts/screen-reader-check-2026-11-19.md)
+   gjelder den faste demoen. Disse avgrensede kontrollene dekker ikke full
+   PDF-/feilflyt, tilgjengelighet eller fysisk filretensjon. Testkommandoene står
+   under **Verifisering** i de tekniske detaljene nedenfor; resultatene er datert
+   evidens, ikke en ny test av siste innleveringsversjon.
+
 Videre dokumentasjon:
 
 - [Leveransesjekkliste og gjenværende arbeid](.docs/implementation-artifacts/delivery-checklist-2026-11-19.md)

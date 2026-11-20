@@ -725,6 +725,10 @@ Kilder: [Streamlit Session State](https://docs.streamlit.io/develop/concepts/arc
 
 Dette er dokumenterte fakta og avgrensninger; studentens egne refleksjoner er ikke lagt til.
 
+### 20.11.2026 – Kort leserute for sensor
+
+Studenten ba om leseruten i README og mer tid til egne rapportrefleksjoner. README kobler omfangsvalget og PRD-oppfølgingen, statusfeilen B1 med studentens rettingsinstruks, kode/tester og de daterte manuelle kontrollene.13 lokale lenkemål og whitespace er kontrollert som dokumentasjonsarbeid; ingen funksjonstester eller modellkall inngår. Rapportutkastet er ikke endret, og ingen egne erfaringer er lagt til.
+
 ## Mal for neste hendelse
 
 
