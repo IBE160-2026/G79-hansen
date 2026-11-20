@@ -1,5 +1,24 @@
 # Hostingplan – Story 4.1
 
+## Ny registreringsprøve15:30 – årsak foreløpig uavklart
+
+Etter brukerbekreftet ny SMTP-innlegging og naturlig kvoteutløp ga ny manuell
+registrering den generiske meldingen om utilgjengelig innlogging. Studenten
+bekreftet at ingen e-post kom. Journalen har én ny reservasjon; ingen nullstilling.
+Faktisk HTTPS auth-status svarer200/available=true. Prosjektet er ACTIVE_HEALTHY,
+og0 nye Auth-brukere ble funnet siste15min ved kontroll15:31.
+Nyeste loggutvalg hadde ingen Auth-feil fra dette forsøket; dette beviser ikke
+at SMTP-innlogging er rettet eller at ingen request nådde leverandøren.
+GET Auth-settings med vanlig TLS og samme transport som appen ga200 på under
+ett sekund. Én avgrenset offline SDK-probe konstruerte signup/PKCE med
+MockTransport, uten nettverkskall. Ingen av disse kontrollene sender e-post.
+
+En lokal, interaktiv SMTP AUTH-kontroll er åpnet for studenten under test-results.
+Den bruker smtp.gmail.com:587 med verifisert STARTTLS, maskert app-passord,
+ingen SEND MAIL/DATA og ingen lagring av adresse/passord. Bare statuskode/resultat
+lagres. Resultatet avventes; dette skiller mulig Gmail-innloggingsfeil fra den
+foreløpig uavklarte registreringsfeilen. Appens server, kode og kvoter er uendret.
+
 ## Registreringsprøve20.11 – Google avviser SMTP-innlogging
 
 Studenten autoriserte én manuell registrering og rapporterte deretter

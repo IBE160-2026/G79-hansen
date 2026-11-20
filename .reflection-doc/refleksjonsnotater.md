@@ -775,6 +775,10 @@ Studenten bekreftet lagring etter rettede redirect-mønstre. Agenten koblet den 
 
 Studenten meldte kapasitetsfeil og ingen bekreftelsesmail, og spurte om grensen kunne endres. Journalen hadde én reservasjon; Supabases Auth-logg klassifisert uten rå person-/hemmelighetsdata viste at Google avviste SMTP-innloggingen. Første forsøk feilet dermed før vellykket levering, mens bevarte reservasjoner sperrer nye forsøk til én time er gått. Den generiske kapasitetsmeldingen gir utilstrekkelig forklaring i denne situasjonen. Agenten anbefalte å korrigere riktig Gmail-brukernavn/app-passord før nytt forsøk og beholdt kvoten/journalen. Ingen ny utsending eller modellkall. Dette er dokumenterte hendelser og kontrollfunn, ikke studentens egne refleksjoner.
 
+### 20.11.2026 – Ny registreringsfeil krever egen diagnose
+
+Etter korrigert SMTP-innlegging og naturlig utløpt sperre fikk studenten en generell utilgjengelighetsmelding og ingen e-post. Serveren/Supabase var tilgjengelige, men nyeste Auth-loggutvalg forklarte ikke dette forsøket. Agenten skilte derfor den tidligere påviste passordfeilen fra den nye uavklarte feilen. Kun-lesende forbindelseskontroller bestod; en enkelt offline SDK-probe viste at request/PKCE kunne konstrueres uten ekte nettverkskall. Neste avgrensede kontroll er lokal SMTP-innlogging med maskert app-passord og uten e-postutsending/credentiallagring; brukerresultatet avventes. Ingen kvote ble nullstilt eller økt. Dette er dokumenterte fakta og avgrensninger, ikke studentens egne refleksjoner.
+
 ## Mal for neste hendelse
 
 
