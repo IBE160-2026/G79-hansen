@@ -751,6 +751,10 @@ Studenten godkjente den foreslåtte private kontrollen med «gjør det». Etter 
 
 Studenten spurte om vurderingsgrunnlaget krever ferdig sensorkonto eller at sensor kan opprette konto selv. Del1-veiledningen s.5 ber om testdata/testbrukere ved behov, uten å bestemme opprettingsmåte. Agentens tidligere krav om foreleserens e-post som neste steg var en for sterk antakelse om forhåndsoppretting; «egen foreleserkonto» avklarer ikke hvem som oppretter den. Hostingplanen presiserer dette, og at fungerende selvregistrering ville kreve videre klargjøring fordi hosted-e-post er deaktivert. Ingen konto eller innstilling er endret. Dette er dokumentert KI-korrigering, ikke studentens egen refleksjon.
 
+### 20.11.2026 – Selvregistrering og reservekonto valgt
+
+Studenten svarte «vi kan vel gjøre begge deler» etter avklaringen om konto. Planen er selvregistrering og en vanlig ferdig testkonto som reserve, uten Supabase-prosjektmedlemskap for sensor. Agenten gjenbruker eksisterende registreringskode og e-postvern. Kun-lesende providerflagg viser signup/e-post på og autoconfirm av, mens appens mailutsending er av. Standard-SMTPs team-/kvotebegrensning ble kontrollert i offisiell dokumentasjon; faktisk custom SMTP er ikke avklart gjennom disse flaggene. Studenten er spurt om eksisterende sender eller en gratis løsning. Ingen konto, e-post, nøkkel, innstilling, server eller rute er endret. Dette er studentens oppgitte tilgangsvalg og faktagrunnlag, ikke egne læringsrefleksjoner.
+
 ## Mal for neste hendelse
 
 

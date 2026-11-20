@@ -17,6 +17,17 @@ Frankfurt requirement for this project only. Offline adapters live only in
 
 ## Approved manual setup
 
+**Assessor-access choice20 November2026:** the student chose both self-registration
+and a pre-created ordinary app account as fallback. This does not authorize a
+Supabase organization/project membership for the assessor. Read-only Auth settings
+confirmed email provider enabled, signup not disabled and email autoconfirm false.
+Application mail dispatch remains disabled; these public settings do not reveal
+custom SMTP configuration. A sender, current HTTPS callbacks, durable admission
+state and an explicitly authorized email/confirmation check still need preparation.
+No account, email, auth setting or runtime state changed during this inspection.
+See the latest [hosting plan](hosting-plan-4-1.md); the original local URLs below
+are historical setup, not the intended HTTPS activation settings.
+
 1. In Supabase, choose **Create an organization** first. Name it **Study Buddy**
    and select **Free**. Do not add a paid subscription or add-ons.
 2. Use the existing **studybuddy-test** in **Paris (`eu-west-3`)**, explicitly

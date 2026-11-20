@@ -1,12 +1,41 @@
 # Hostingplan – Story 4.1
 
+## Sensortilgang20.11 – begge alternativer valgt
+
+Studenten valgte både selvregistrering og en ferdig testkonto som reserve.
+Registrering/bekreftelse finnes i appen; ingen ny autentiseringsplattform trengs.
+Reservekontoen skal være en vanlig appkonto, uten prosjekt-/administratortilgang
+i Supabase. Konto, e-postadresse og sikker overlevering av innlogging klargjøres
+når de konkrete opplysningene foreligger. Ingen konto eller e-post er opprettet/sendt.
+
+Kun-lesende Auth-settings20.11: e-postleverandør på, signup tillatt og
+automatisk e-postbekreftelse av. Appens utsending er fortsatt deaktivert.
+Disse offentlige flaggene viser ikke om custom SMTP er satt opp.
+Supabases [standard-SMTP](https://supabase.com/docs/guides/auth/auth-smtp) sender
+bare til teamadresser og er begrenset til to meldinger/time. En egnet sender må
+derfor avklares før selvregistrering loves til sensorens vanlige e-postadresse.
+Studenten er spurt om eksisterende SMTP-tjeneste eller behov for en gratis løsning.
+
+Før aktivering av registreringsflyten: kontroller sender og mottakeradgang,
+sett riktig HTTPS Site URL og snevre callback-regler, klargjør eksisterende
+varige e-postvern og gjør en uttrykkelig autorisert e-post-/bekreftelsesprøve.
+Behold bekreftelseskrav og tidligere nettleserbinding; ingen kvoter/journaler
+nullstilles. Eksakte regler fra det eksisterende lokale oppsettet flyttes til
+HTTPS-origin, med bare state-verdien som wildcard:
+
+- `https://fredriklaptop.tail55f8dd.ts.net:10000/api/v1/auth/callback\?state=*`
+- `https://fredriklaptop.tail55f8dd.ts.net:10000/api/v1/auth/recovery/callback\?state=*`
+
+Dette er klargjøringspunkter, ikke utførte providerendringer. Foreløpig privat
+HTTPS/password-login beholdes, og offentlig Funnel krever fortsatt separat godkjenning.
+
 **Tilgangspresisering20.11:** Del1-sensorveiledningen s.5 ber om testdata eller
 testbrukere ved behov og tydelig README, men angir ikke om sensor skal få en
 ferdig konto eller registrere seg selv. Studentens valg «egen foreleserkonto»
 fastsetter ikke opprettingsmåten. Tidligere omtale av foreleserens e-post som
 nødvendig neste steg var vår antakelse om forhåndsoppretting, ikke et oppgavekrav.
-Tilgangsmåten må avklares; ingen konto opprettes eller registreringsløsning endres
-på grunnlag av denne presiseringen. Hosted-e-post er fortsatt deaktivert, så
+Begge tilgangsmåter er nå valgt som beskrevet ovenfor; selve klargjøringen
+gjenstår. Hosted-e-post er fortsatt deaktivert, så
 selvregistrering er ikke klargjort for sensor nå.
 
 ## Privat HTTPS-kontroll20.11, kl.12:20
