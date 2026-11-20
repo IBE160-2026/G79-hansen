@@ -1,5 +1,25 @@
 # Hostingplan – Story 4.1
 
+## Registreringsprøve20.11 – Google avviser SMTP-innlogging
+
+Studenten autoriserte én manuell registrering og rapporterte deretter
+«For mange pågående forsøk» og ingen mottatt e-post. Kun-lesende kontroll fant
+én journalreservasjon fra13:56:08 lokal tid, med mottakergrense én/time.
+Supabase-loggspørring for tidsrommet fra12:50UTC fant én Auth-feil500 /
+unexpected_failure; server-side klassifisering av feilteksten ga
+`smtp_bad_credentials` («Username and Password not accepted»).
+Ingen rå loggtekst, adresser, passord, tokens eller IP-er ble hentet ut.
+Kun-lesende opptelling fant0 nye Auth-brukere siste30 minutter.
+
+Første SMTP-forsøk feilet altså ved avsenderinnlogging, mens senere forsøk kan
+treffe den bevarte mottakerkvoten. Den generiske meldingen skiller ikke disse
+årsakene. Studenten spurte om å endre grensen; anbefalingen er å rette Gmail-
+brukernavn/app-passord først. Ingen kvote/journal er endret eller nullstilt.
+Tidligste nye forsøk mot den samme mottakeren er etter14:56:09 lokal tid;
+bruk14:57 som praktisk margin og bare etter korrigert SMTP-oppsett.
+Ny app-passordinnlegging må skje direkte i dashboardet med riktig Google-konto.
+Ingen ny utsending er utført av agenten.
+
 ## E-postklargjøring20.11 – SMTP lagret, journal aktiv privat
 
 Studenten bekreftet «lagret» etter Gmail custom SMTP-oppsett og providergrense

@@ -771,6 +771,10 @@ Studenten rapporterte «URL can't contain backslashes» da agentens HTTPS-returm
 
 Studenten bekreftet lagring etter rettede redirect-mønstre. Agenten koblet den eksisterende private journalen til hosted-konfigurasjonen og erstattet bare identitetskontrollert StudyBuddy-worker via den eksisterende launcheren. Faktisk HTTPS auth-status/cookie/TLS-kontroll bestod; ruter, budsjett, signeringsnøkkel og journalinnhold var uendret. Ingen e-post, reservasjon, modellkall eller offentlig Funnel. Studenten er spurt om en manuell registreringsprøve; SMTP-levering/retur er fortsatt uverifisert og journalen må med i neste manuelle backup. Dette er dokumenterte kontrollfakta, ikke studentens egen refleksjon. Se [hostingplan](../.docs/implementation-artifacts/hosting-plan-4-1.md).
 
+### 20.11.2026 – Første SMTP-prøve feilet, kvote skjulte årsaken ved nye forsøk
+
+Studenten meldte kapasitetsfeil og ingen bekreftelsesmail, og spurte om grensen kunne endres. Journalen hadde én reservasjon; Supabases Auth-logg klassifisert uten rå person-/hemmelighetsdata viste at Google avviste SMTP-innloggingen. Første forsøk feilet dermed før vellykket levering, mens bevarte reservasjoner sperrer nye forsøk til én time er gått. Den generiske kapasitetsmeldingen gir utilstrekkelig forklaring i denne situasjonen. Agenten anbefalte å korrigere riktig Gmail-brukernavn/app-passord før nytt forsøk og beholdt kvoten/journalen. Ingen ny utsending eller modellkall. Dette er dokumenterte hendelser og kontrollfunn, ikke studentens egne refleksjoner.
+
 ## Mal for neste hendelse
 
 
