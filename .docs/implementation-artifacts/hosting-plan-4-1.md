@@ -1,5 +1,45 @@
 # Hostingplan – Story 4.1
 
+## Oppdatert20.11.2026 – lokal klargjøring gjenopptatt
+
+Studenten ønsker igjen faktisk tilgang fra telefon og sensorens PC via egen
+Windows-PC/Funnel. Offentlig aktivering krever fortsatt separat godkjenning.
+Studenten valgte **manuelt startet kryptert backup** fram til innlevering,
+med eget ansvar for å starte kopien. Eksisterende7-dagers rotasjon beholdes;
+daglig automatisk eksport bygges ikke videre nå. Kopien skal omfatte database
+og Storage, og ha en kontrollert gjenopprettingsprøve før den regnes som klar.
+Dette erstatter tidligere plan om daglig automatisk eksport.
+
+Faktisk kontroll20.11:
+
+- Hosted-preflight validerte konfigurasjon og tilstand, så avviste den opptatt
+  port8000. Eksisterende StudyBuddy PID25940 på127.0.0.1:8000 er bevart.
+  Ingen Windows-lytter ble funnet på10000; dette er ikke en rutekonfigurasjon.
+- Effektive flagg fra separat hosted-fil: innlogging, generering og lagring på;
+  Secure-cookies på, loopback-HTTP av, signup/recovery-e-post av.
+  Ingen konfigurasjonsverdier eller nøkler ble skrevet ut.
+- Supabase er `ACTIVE_HEALTHY` i Paris. Security-advisors rapporterte kun
+  det tidligere kjente Auth-varselet om deaktivert lekket-passordvern.
+  Storage har én privat bucket, ingen offentlige buckets og fem registrerte
+  objekter. Dette er metadata, ikke en ny full sikkerhets-/retensjonsakseptanse.
+- Backupmappen har to DPAPI-filer og et CA-sertifikat, **ingen .sbb-backup**.
+  Rotasjonsjobbens siste kjøring20.11 kl.05:30 ga resultat0; neste21.11 kl.03:00.
+  Det beviser utløpsjobb, ikke opprettelse av sikkerhetskopi.
+- Databasepassord/TLS ble allerede verifisert19.11 med prosjekt-CA.
+  Gjenbrukbar standardhelper bruker fortsatt systemrøtter; vellykket tidligere
+  kontroll brukte en eksplisitt CA-adapter.
+
+Neste avklaring er hvordan de private Storage-filene skal eksporteres:
+manuell nedlasting i dashboardet eller separat lokal eksportnøkkel. Studenten
+er spurt; ingen ny nøkkel er opprettet eller etterspurt som tekst i chatten.
+Foreleserkontoens e-post er fortsatt utsatt etter studentens ønske.
+Før publisering gjenstår komplett backup/gjenopprettingsprøve og ferdig tilgang;
+deretter konkret aktiveringsforslag og separat godkjenning, fulgt av reell
+mobil-/ekstern-PC-kontroll. Server, eksisterende ruter og providerinnstillinger
+er ikke endret. Ingen modell-/e-postkall eller testsuite er kjørt.
+
+## Tidligere plan og kontroller18.–19.11
+
 **Leveransevalg19.11.2026:** Lokal skoleleveranse prioriteres; offentlig lenke
 og videre hosting-/backupautomatisering er valgfritt/utsatt. Tidligere plan og
 evidens under beholdes som forberedelse, ikke krav om videre aktivering nå.

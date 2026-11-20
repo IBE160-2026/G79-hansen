@@ -1,5 +1,14 @@
 # Story 4.1 — local preparation
 
+**Resumed20 November2026:** The student requested PC-hosted access for their
+phone and the assessor's ordinary browser. Local preparation is authorized;
+public activation still needs separate approval. Manual encrypted backup was
+selected instead of daily automatic export, retaining seven-day rotation and
+database/Storage coverage plus an isolated restore check. See the latest
+[hosting status](hosting-plan-4-1.md) for actual preflight, private-storage and
+rotation results. Storage export method is awaiting the student's answer.
+The dated19 November deferral below is historical.
+
 **Delivery revision19 November2026:** Public hosting and further operational
 automation are optional/deferred. Prioritize local assessor delivery; keep the
 evidence below without resuming deployment/password work. See the accepted

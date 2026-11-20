@@ -729,6 +729,10 @@ Dette er dokumenterte fakta og avgrensninger; studentens egne refleksjoner er ik
 
 Studenten ba om leseruten i README og mer tid til egne rapportrefleksjoner. README kobler omfangsvalget og PRD-oppfølgingen, statusfeilen B1 med studentens rettingsinstruks, kode/tester og de daterte manuelle kontrollene.13 lokale lenkemål og whitespace er kontrollert som dokumentasjonsarbeid; ingen funksjonstester eller modellkall inngår. Rapportutkastet er ikke endret, og ingen egne erfaringer er lagt til.
 
+### 20.11.2026 – Hosting gjenopptatt med manuelt startet backup
+
+Studenten ba om å fortsette mot PC-hosting og valgte manuelt startet kryptert backup framfor daglig automatisk eksport, med eget ansvar for kjøring. Database/Storage,7-dagers rotasjon og kontrollert gjenoppretting beholdes. Faktisk preflight validerte hosted-tilstand før port-busy på eksisterende8000; ingen server ble erstattet. Sikkerhetsflagg og Supabase-metadata ble kontrollert uten hemmelighetsutskrift eller modellkall. Ingen ekte backup finnes ennå; rotasjonsjobben ga resultat0 ved siste kjøring20.11 kl.05:30. Studenten er spurt om nedlasting av fem private Storage-objekter via dashboard eller lokal eksportnøkkel. Dette er faktagrunnlag og studentens oppgitte scopevalg, ikke egne læringsrefleksjoner. Se [oppdatert hostingplan](../.docs/implementation-artifacts/hosting-plan-4-1.md).
+
 ## Mal for neste hendelse
 
 
