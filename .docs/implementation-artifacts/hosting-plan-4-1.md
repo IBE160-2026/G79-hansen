@@ -22,9 +22,19 @@ Gratis sender er undersøkt, men ikke valgt: [Brevo Free](https://help.brevo.com
 har300 utsendinger/dag. [Transaksjonsutsending krever separat aktivering](https://help.brevo.com/hc/en-us/articles/115000188150-Troubleshooting-Issues-with-Brevo-SMTP).
 Brevo anbefaler [autentisert eget avsenderdomene](https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email);
 gratis e-postdomener kan ikke autentiseres. Gratis tjeneste er derfor ikke
-det samme som et ferdig, pålitelig oppsett uten eget domene. Studenten er
-spurt om et slikt domene allerede finnes før videre valg. Ingen ny tjeneste,
-domene, nøkkel, konto eller utsending er opprettet.
+det samme som et ferdig, pålitelig oppsett uten eget domene. Studenten bekreftet
+20.11 at eget domene ikke finnes. Ingen ny tjeneste, domene, nøkkel, konto eller
+utsending er opprettet.
+
+Neste avgrensede kandidat er eksisterende Gmail som avsender via
+[`smtp.gmail.com`](https://developers.google.com/workspace/gmail/imap/imap-smtp),
+med [totrinnsbekreftelse/app-passord](https://support.google.com/accounts/answer/185833?hl=no).
+App-passord er ikke tilgjengelig for alle kontoer; dette må avklares før oppsett.
+Supabases [Google-SMTP-eksempel](https://supabase.com/kb/troubleshooting/using-google-smtp-with-supabase-custom-smtp-ZZzU4Y)
+er prøvd med Workspace og er ikke vår verifikasjon av en privat Gmail-konto.
+Studenten er spurt om en egnet konto finnes og ønskes brukt; avsenderadressen
+blir synlig for mottakerne. Ingen Gmail-/Supabase-innstillinger er endret, og
+ingen e-post er sendt. Begge tilgangsmåter er fortsatt valgt inntil annet avtales.
 
 Før aktivering av registreringsflyten: kontroller sender og mottakeradgang,
 sett riktig HTTPS Site URL og snevre callback-regler, klargjør eksisterende
