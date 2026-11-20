@@ -1,5 +1,25 @@
 # Hostingplan – Story 4.1
 
+## E-postklargjøring20.11 – SMTP lagret, lokal journal klar
+
+Studenten bekreftet «lagret» etter Gmail custom SMTP-oppsett og providergrense
+på2 e-poster/time. Dette er brukerbekreftet; SMTP-levering er ikke prøvd og
+faktisk avsenderadresse er ikke oppgitt. Passordet er ikke mottatt av agenten.
+Eksisterende init-kommando opprettet
+`C:\StudyBuddy-State\auth-email-admission.sqlite3` som normal operatør fredr.
+Mappen har beskyttet ACL for operatøren, SYSTEM og Administrators.
+Read-only `inspect_ready()` bestod,0 reservasjoner; ingen utsending/reservering.
+Journalen må bevares og inkluderes som email_journal i neste manuelle backup;
+kopien fra før opprettingen inneholder den ikke. Ikke gjenopprett eldre tom
+kvotetilstand over senere reservasjoner.
+
+`.env.hosted` og aktiv server er uendret; appens e-postutsending er fortsatt av.
+Neste manuelle dashboardsteg er Site URL
+`https://fredriklaptop.tail55f8dd.ts.net:10000/account` og de to snevre
+HTTPS-returmønstrene nedenfor. Dette er instruks, ikke bekreftet endring.
+Etter bekreftelsen kobles journalen til konfigurasjonen før kontrollert omstart
+og en særskilt autorisert e-postprøve. Offentlig Funnel er fortsatt ikke aktivert.
+
 ## Sensortilgang20.11 – begge alternativer valgt
 
 Studenten valgte både selvregistrering og en ferdig testkonto som reserve.

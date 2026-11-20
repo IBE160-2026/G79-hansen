@@ -759,6 +759,10 @@ Studenten svarte «vi kan vel gjøre begge deler» etter avklaringen om konto. P
 
 Studenten husket at registrering hadde fungert før. Loggen fra13.11 bekrefter registrering/e-postbekreftelse med egen autorisert teamadresse; dette er ikke bevis for levering til vilkårlige sensoradresser. Studenten kontrollerte dashboardet og svarte «Nei, Custom SMTP er deaktivert». Agenten undersøkte Brevo Free, men fant krav om separat aktivering og anbefalt eget autentisert avsenderdomene. Ingen leverandør er valgt eller innstilling endret. Studenten er spurt om eget domene finnes, slik at gratisoppsettets omfang kan avklares før videre arbeid. Dette er dokumenterte kontrollfunn, ikke studentens egne læringsrefleksjoner. Se [hostingplan](../.docs/implementation-artifacts/hosting-plan-4-1.md).
 
+### 20.11.2026 – Gmail-oppsett og varig e-postvern
+
+Studenten bekreftet konto/2FA, app-passord og deretter lagring av Gmail SMTP og2/time-grense i dashboardet. Dette er brukerbekreftelser; faktisk e-postlevering er ikke verifisert. Agenten opprettet den eksisterende e-postjournalen i ny privat mappe under normal Windows-operatør og kontrollerte beskyttet ACL, gyldig tilstand og0 reservasjoner uten utsending. Aktiv app/konfigurasjon er uendret og e-post er fortsatt deaktivert. HTTPS-returadresser, tilkobling av journal, omstart og autorisert e-postprøve gjenstår. Den nye journalen må med i neste manuelle backup. Dette er kontrollfakta, ikke studentens egne refleksjoner. Se [hostingplan](../.docs/implementation-artifacts/hosting-plan-4-1.md).
+
 ## Mal for neste hendelse
 
 
