@@ -779,6 +779,10 @@ Studenten meldte kapasitetsfeil og ingen bekreftelsesmail, og spurte om grensen 
 
 Etter korrigert SMTP-innlegging og naturlig utløpt sperre fikk studenten en generell utilgjengelighetsmelding og ingen e-post. Serveren/Supabase var tilgjengelige, men nyeste Auth-loggutvalg forklarte ikke dette forsøket. Agenten skilte derfor den tidligere påviste passordfeilen fra den nye uavklarte feilen. Kun-lesende forbindelseskontroller bestod; en enkelt offline SDK-probe viste at request/PKCE kunne konstrueres uten ekte nettverkskall. Neste avgrensede kontroll er lokal SMTP-innlogging med maskert app-passord og uten e-postutsending/credentiallagring; brukerresultatet avventes. Ingen kvote ble nullstilt eller økt. Dette er dokumenterte fakta og avgrensninger, ikke studentens egne refleksjoner.
 
+### 20.11.2026 – Presis SMTP-kontroll bekreftet avviste innloggingsopplysninger
+
+Studenten rapporterte rejected. Agenten tolket dette først for bastant som en bekreftet passordavvisning, mens den lokale statusfilen faktisk viste en generell forbindelsesfeil. En separat SMTP/TLS-kontroll uten AUTH bestod. Kontrollhjelperen ble derfor avgrenset til ett AUTH PLAIN-forsøk og direkte lukking, med ufølsom statuskode uten rå feiltekst. Ny brukerinnlesing bekreftet535/bad_credentials; ingen e-post ble sendt og ingen innloggingsopplysninger ble lagret. Neste steg er et nytt app-passord opprettet med riktig Gmail-konto valgt. Dette er dokumenterte kontrollfunn og KI-korrigering, ikke studentens egne refleksjoner.
+
 ## Mal for neste hendelse
 
 

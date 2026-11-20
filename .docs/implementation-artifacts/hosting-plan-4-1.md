@@ -1,6 +1,13 @@
 # Hostingplan – Story 4.1
 
-## Ny registreringsprøve15:30 – årsak foreløpig uavklart
+## Ny registreringsprøve15:30 – SMTP-avvisning bekreftet lokalt15:40
+
+Korrigert lokal kontroll15:40 ga `smtp_auth=rejected`, `smtp_status=535`,
+`reason=bad_credentials`, `email_sent=false`, `credentials_saved=false`.
+Google godtar altså ikke kombinasjonen som ble skrevet inn i kontrollvinduet.
+Studenten skal velge riktig ny Gmail-konto i Google, opprette et nytt app-passord
+og bruke samme adresse i kontrollen og Supabase. Ingen Google-kontopassord skal
+endres eller deles. Korrigert innlegging/ny vellykket AUTH-prøve avventes.
 
 Etter brukerbekreftet ny SMTP-innlegging og naturlig kvoteutløp ga ny manuell
 registrering den generiske meldingen om utilgjengelig innlogging. Studenten
@@ -16,8 +23,11 @@ MockTransport, uten nettverkskall. Ingen av disse kontrollene sender e-post.
 En lokal, interaktiv SMTP AUTH-kontroll er åpnet for studenten under test-results.
 Den bruker smtp.gmail.com:587 med verifisert STARTTLS, maskert app-passord,
 ingen SEND MAIL/DATA og ingen lagring av adresse/passord. Bare statuskode/resultat
-lagres. Resultatet avventes; dette skiller mulig Gmail-innloggingsfeil fra den
-foreløpig uavklarte registreringsfeilen. Appens server, kode og kvoter er uendret.
+lagres. Første statusfil viste uspesifikk forbindelsesfeil selv om studenten
+rapporterte rejected. En separat SMTP/TLS-kontroll uten AUTH bestod. Hjelperen
+ble rettet til én AUTH PLAIN uten mekanisme-retry og direkte close, slik at
+avslutningsfeil ikke kan overskrive AUTH-resultatet. Ny brukerinnlesing ga
+den presise535-statusen ovenfor. Appens server, produktkode og kvoter er uendret.
 
 ## Registreringsprøve20.11 – Google avviser SMTP-innlogging
 
