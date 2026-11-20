@@ -39,15 +39,17 @@ are historical setup, not the intended HTTPS activation settings.
    cannot silently become optional.
 4. Under Authentication → URL Configuration set Site URL to
    `http://127.0.0.1:8000/account`. For this local test, add the redirect allowlist
-   pattern `http://127.0.0.1:8000/api/v1/auth/callback\?state=*`.
-   The escaped question mark is literal; the wildcard covers only the random
+   pattern `http://127.0.0.1:8000/api/v1/auth/callback[?]state=*`.
+   The `[?]` character class is literal; the wildcard covers only the random
    state. Use the exact same scheme, host and port in the browser and APP_ORIGIN.
    The adapter supplies `email_redirect_to` with that callback and a new random
    state for each attempt. Do not allow arbitrary hosts or external return URLs.
    Supabase documents these pattern rules in its
    [redirect URL guide](https://supabase.com/docs/guides/auth/redirect-urls).
    For password recovery, also add the separate pattern
-   `http://127.0.0.1:8000/api/v1/auth/recovery/callback\?state=*`.
+   `http://127.0.0.1:8000/api/v1/auth/recovery/callback[?]state=*`.
+   On 20 November the dashboard rejected the earlier backslash escape. Use
+   `[?]` for new dashboard entries; the old dated evidence below is historical.
    Keep the reset-password email's standard `{{ .ConfirmationURL }}` link so
    Supabase verifies it and returns an authorization code to the backend.
    This additional allowlist entry and template inspection have **not** been

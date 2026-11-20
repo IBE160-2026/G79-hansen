@@ -763,6 +763,10 @@ Studenten husket at registrering hadde fungert før. Loggen fra13.11 bekrefter r
 
 Studenten bekreftet konto/2FA, app-passord og deretter lagring av Gmail SMTP og2/time-grense i dashboardet. Dette er brukerbekreftelser; faktisk e-postlevering er ikke verifisert. Agenten opprettet den eksisterende e-postjournalen i ny privat mappe under normal Windows-operatør og kontrollerte beskyttet ACL, gyldig tilstand og0 reservasjoner uten utsending. Aktiv app/konfigurasjon er uendret og e-post er fortsatt deaktivert. HTTPS-returadresser, tilkobling av journal, omstart og autorisert e-postprøve gjenstår. Den nye journalen må med i neste manuelle backup. Dette er kontrollfakta, ikke studentens egne refleksjoner. Se [hostingplan](../.docs/implementation-artifacts/hosting-plan-4-1.md).
 
+### 20.11.2026 – Retting etter avvist returadresse
+
+Studenten rapporterte «URL can't contain backslashes» da agentens HTTPS-returmønster med `\?` ble lagt inn i Supabase-dashboardet. Agenten hadde brukt dokumentert glob-escaping uten å kontrollere dashboardets strengere URL-validering. Instruksjonene er rettet til tegnklassen `[?]` for bokstavelig spørsmålstegn. Glob-syntaksen er kontrollert i primærkilde; lokal WHATWG-parsing godtar begge korrigerte URL-er. Lagring og faktisk e-postretur er fortsatt ikke verifisert. Ingen konto, utsending, appkonfigurasjon eller offentlig tilgang er endret. Dette er dokumentert KI-feil og avgrenset retting, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 

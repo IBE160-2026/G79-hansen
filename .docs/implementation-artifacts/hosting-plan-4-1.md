@@ -63,8 +63,14 @@ Behold bekreftelseskrav og tidligere nettleserbinding; ingen kvoter/journaler
 nullstilles. Eksakte regler fra det eksisterende lokale oppsettet flyttes til
 HTTPS-origin, med bare state-verdien som wildcard:
 
-- `https://fredriklaptop.tail55f8dd.ts.net:10000/api/v1/auth/callback\?state=*`
-- `https://fredriklaptop.tail55f8dd.ts.net:10000/api/v1/auth/recovery/callback\?state=*`
+- `https://fredriklaptop.tail55f8dd.ts.net:10000/api/v1/auth/callback[?]state=*`
+- `https://fredriklaptop.tail55f8dd.ts.net:10000/api/v1/auth/recovery/callback[?]state=*`
+
+**Rettet20.11:** Studenten fikk «URL can't contain backslashes» i dashboardet
+med agentens tidligere `\?`-instruks. Bruk `[?]` som bokstavelig spørsmålstegn
+i [glob-syntaksen](https://github.com/gobwas/glob/blob/master/glob.go).
+Begge strengene består lokal WHATWG URL-parsing uten bakstrek. Dashboardlagring
+og faktisk returflyt er fortsatt ikke bekreftet; dette er ingen leveringsprøve.
 
 Dette er klargjøringspunkter, ikke utførte providerendringer. Foreløpig privat
 HTTPS/password-login beholdes, og offentlig Funnel krever fortsatt separat godkjenning.
