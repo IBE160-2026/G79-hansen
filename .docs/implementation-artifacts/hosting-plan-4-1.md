@@ -1,5 +1,18 @@
 # Hostingplan – Story 4.1
 
+## Sluttkontroll20.11 kl.17:03 – konkret forslag klart for separat godkjenning
+
+[Publiseringsforslaget](hosting-publication-proposal-2026-11-20.md) angir eksakt
+offentlig URL, hele appflaten, bare port10000, uendrede redirects, kontotilgang,
+aktivering/tilbaketrekking og kontroll etter aktivering. Kun-lesende kontroll fant
+gyldig lokal konfigurasjon/tilstand, normal TLS og404 på hemmelige filstier,
+uendret kryptert kopi, fungerende rotasjonsjobb og private ruter. Supabase er
+ACTIVE_HEALTHY i Paris; eneste sikkerhetsvarsel gjelder betalt lekket-passordvern.
+Eksisterende fysisk-retensjons-/full-restore-/endelig akseptansegrenser består;
+forslaget er avgrenset til offentlig skoleutprøving med testmateriale.
+Ingen app-/provider-/ruteendring, tester, e-post eller modellkall ble utført.
+Funnel er fortsatt av. Brukeren må godkjenne dette konkrete forslaget separat.
+
 ## Sensortilgang20.11 kl.16:15 – eksisterende testkonto valgt som reserve
 
 Studenten valgte først en annen reservekonto senere, men presiserte deretter

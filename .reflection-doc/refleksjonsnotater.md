@@ -809,6 +809,19 @@ Studenten beskrev nettsiden som «veldig basic» og ønsket en oppdatering. Agen
 
 Studenten syntes det første designløftet fortsatt var «ganske basic» og valgte deretter «Moderne studieapp: sidepanel på PC, blå/lilla aksenter og tydelig arbeidsflate». Dette erstatter den eldre føringen om ingen sidemeny. Agenten innførte mørk desktopnavigasjon, lys arbeidsflate, lilla hovedhandlinger, lokale ikoner og en mer kompakt demoflate med kilde ved siden av innstillinger. Etter én uavhengig gjennomgang ble hovedhandlingen flyttet nærmere eksempelvelgeren, mobilmenyen gjort kompakt og outputoversikten mer tydelig beskrivende. Designmetadata ble oppdatert til valgt retning.13 faste demoscenarier og10 syntetiske desktop-/mobilbilder bestod etter retting; ingen ekte modell-/e-postkall eller backend-/hostingendring. Dette dokumenterer studentens estetiske korrigering og kontrollfunn, ikke egne læringsrefleksjoner. Se [spesifikasjon og triage](../.docs/implementation-artifacts/spec-modern-study-app-layout.md).
 
+## 20.11.2026 – avgrenset forslag om offentlig skoleutprøving
+
+**Dokumenterte fakta:** Etter studentens «vi går videre» ble runtime, HTTPS,
+hemmelige filstier, ruter, backuphash, rotasjonsjobb og Supabase-rådgiver kontrollert
+kun lesende. Lokal oppstartskontroll nådde forventet port-busy fra eksisterende
+worker. Ett Supabase-varsel gjelder lekket-passordvern som krever betalt plan.
+Konkret URL/port/aktivering/rollback og grensene for testbruk er samlet i
+[publiseringsforslaget](../.docs/implementation-artifacts/hosting-publication-proposal-2026-11-20.md).
+Ingen offentlig aktivering eller nye modell-/e-postkall. Fysisk filrest og full
+restoreakseptanse forblir åpne; fungerende kopi/lenke beviser ikke disse.
+
+**Studentens egen refleksjon:** Ikke innhentet i denne kontrollen.
+
 ## Mal for neste hendelse
 
 
