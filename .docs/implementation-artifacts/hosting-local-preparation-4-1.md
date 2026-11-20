@@ -6,7 +6,9 @@ public activation still needs separate approval. Manual encrypted backup was
 selected instead of daily automatic export, retaining seven-day rotation and
 database/Storage coverage plus an isolated restore check. See the latest
 [hosting status](hosting-plan-4-1.md) for actual preflight, private-storage and
-rotation results. Storage export method is awaiting the student's answer.
+rotation results. The student selected dashboard download; an actual encrypted
+app-data copy and isolated database/file check have passed. See
+[scope and remaining restore/cleanup limits](backup-local-4-1.md).
 The dated19 November deferral below is historical.
 
 **Delivery revision19 November2026:** Public hosting and further operational

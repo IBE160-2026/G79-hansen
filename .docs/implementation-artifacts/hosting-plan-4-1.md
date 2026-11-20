@@ -22,21 +22,25 @@ Faktisk kontroll20.11:
   det tidligere kjente Auth-varselet om deaktivert lekket-passordvern.
   Storage har én privat bucket, ingen offentlige buckets og fem registrerte
   objekter. Dette er metadata, ikke en ny full sikkerhets-/retensjonsakseptanse.
-- Backupmappen har to DPAPI-filer og et CA-sertifikat, **ingen .sbb-backup**.
+- Før eksport hadde backupmappen to DPAPI-filer og et CA-sertifikat, ingen .sbb-kopi.
   Rotasjonsjobbens siste kjøring20.11 kl.05:30 ga resultat0; neste21.11 kl.03:00.
   Det beviser utløpsjobb, ikke opprettelse av sikkerhetskopi.
 - Databasepassord/TLS ble allerede verifisert19.11 med prosjekt-CA.
   Gjenbrukbar standardhelper bruker fortsatt systemrøtter; vellykket tidligere
   kontroll brukte en eksplisitt CA-adapter.
 
-Neste avklaring er hvordan de private Storage-filene skal eksporteres:
-manuell nedlasting i dashboardet eller separat lokal eksportnøkkel. Studenten
-er spurt; ingen ny nøkkel er opprettet eller etterspurt som tekst i chatten.
+Studenten valgte nedlasting av Storage-filene via dashboardet og bekreftet alle
+fem i privat mottaksmappe. Én [faktisk kryptert appkopi og isolert import-/filprøve](backup-local-4-1.md)
+er deretter fullført20.11. Ingen ny eksportnøkkel ble opprettet. Midlertidig
+ukryptert klargjøringsmappe må ryddes manuelt etter policyavvist opprydding;
+studentens bekreftelse avventes. Backupens begrensning til appdata og manglende
+live gjenopprettings-/rolleakseptanse er dokumentert i resultatnotatet.
 Foreleserkontoens e-post er fortsatt utsatt etter studentens ønske.
-Før publisering gjenstår komplett backup/gjenopprettingsprøve og ferdig tilgang;
+Før publisering gjenstår ferdig tilgang og samlet avstemming av de åpne portene;
 deretter konkret aktiveringsforslag og separat godkjenning, fulgt av reell
 mobil-/ekstern-PC-kontroll. Server, eksisterende ruter og providerinnstillinger
-er ikke endret. Ingen modell-/e-postkall eller testsuite er kjørt.
+er ikke endret. Ingen modell-/e-postkall eller bred testsuite er kjørt;
+den nødvendige faktiske backup-/importprøven ovenfor er gjennomført.
 
 ## Tidligere plan og kontroller18.–19.11
 

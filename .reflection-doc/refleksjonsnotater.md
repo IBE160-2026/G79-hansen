@@ -733,6 +733,14 @@ Studenten ba om leseruten i README og mer tid til egne rapportrefleksjoner. READ
 
 Studenten ba om å fortsette mot PC-hosting og valgte manuelt startet kryptert backup framfor daglig automatisk eksport, med eget ansvar for kjøring. Database/Storage,7-dagers rotasjon og kontrollert gjenoppretting beholdes. Faktisk preflight validerte hosted-tilstand før port-busy på eksisterende8000; ingen server ble erstattet. Sikkerhetsflagg og Supabase-metadata ble kontrollert uten hemmelighetsutskrift eller modellkall. Ingen ekte backup finnes ennå; rotasjonsjobben ga resultat0 ved siste kjøring20.11 kl.05:30. Studenten er spurt om nedlasting av fem private Storage-objekter via dashboard eller lokal eksportnøkkel. Dette er faktagrunnlag og studentens oppgitte scopevalg, ikke egne læringsrefleksjoner. Se [oppdatert hostingplan](../.docs/implementation-artifacts/hosting-plan-4-1.md).
 
+### 20.11.2026 – Første faktiske manuelle appbackup og lokal gjenoppretting
+
+Studenten valgte dashboard-nedlasting uten ny eksportnøkkel og bekreftet fem filer i privat mottaksmappe. Agenten eksporterte appskjemaene med eksisterende DPAPI-passord og verify-full/prosjekt-CA. Alle fem filene samsvarte med databasekontrollsummene. En faktisk Fernet-/DPAPI-kryptert .sbb-kopi på497546 byte ble opprettet; dekryptering til karantene ga identiske filer. En nettverksløs midlertidig PostgreSQL-beholder med Unix-socket/tmpfs/noen lokale NOLOGIN-testroller importerte kopien, og alle fem filer matchet kontrollsummene lest fra den gjenopprettede databasen. Beholderen ble fjernet. Aktiv app/hosted-data/budsjett ble ikke gjenopprettet eller endret. Kopien er avgrenset til appdata, ikke full Supabase-plattformkonfigurasjon/rollegjenoppretting eller live tilgangsakseptanse.
+
+**KI-feil og retting:** Den første lokale arkivkontrollen feilet uten presis fase; en avgrenset diagnostisk gjentakelse viste feil i pg_restore-listingen. En liten lokal demonstrasjon bekreftet at bufret filposisjon og arvet operativsystemfilposisjon kunne avvike. Ubufret filinnlesing rettet kontrollen; tredje read-only eksport og både arkiv-/importprøven bestod. Ingen rå passord/diagnostikk ble vist og ingen modellkall ble brukt.
+
+**Opprydding:** Automatisk godkjenningskontroll avviste både rekursiv sletting og en snevrere kjent-fil-opprydding med «blocked by policy». Studenten ble derfor bedt om å fjerne den midlertidige ukrypterte Prepared-mappen manuelt, med den krypterte backupmappen beholdt. Bekreftelse avventes. Se [backupresultat og grenser](../.docs/implementation-artifacts/backup-local-4-1.md). Dette er faktagrunnlag, ikke studentens egen læringsrefleksjon.
+
 ## Mal for neste hendelse
 
 

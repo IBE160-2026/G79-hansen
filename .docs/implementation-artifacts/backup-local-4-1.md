@@ -1,5 +1,54 @@
 # Local prepared-export backup bundles (Story 4.1 component)
 
+## Actual manual application backup — 20 November2026
+
+The student selected manual triggering instead of daily automated export and
+downloaded the five private Storage files through the dashboard. The existing
+component produced `C:\StudyBuddy-Backup\studybuddy-20261120T053549Z-16e97f96541d44ef8b4df42243657e47.sbb`
+(497546 bytes, SHA256 `c59be2542e0882322bcecce1f4b304d26bd289e884aeb635008ce54f8fd56b24`).
+This is an actual encrypted application-data copy, not just a synthetic bundle.
+
+- A read-only, verify-full/project-CA export captured `auth`, `public`, `storage`,
+  `studybuddy` and `supabase_migrations`. Custom archive:365439 bytes,
+  SHA256 `5169215dc40faec353fe71bbd52223beb566a24921a8e1d741a898909e337964`.
+- All five downloaded files matched the database's size/SHA256 descriptors.
+  The package also includes the existing budget, signing capability, public CA,
+  export-scope metadata and the encrypted legacy-reconciliation journal.
+  DPAPI CurrentUser ran as the normal Windows operator; staging was private.
+- Authenticated decryption/extraction produced identical files in quarantine.
+  Actual `pg_restore` import then passed in a disposable PostgreSQL17.11
+  container using the cached Supabase image, `--network none`, Unix sockets
+  only, tmpfs data and no host ports. The container was removed afterward.
+- Restored data:9 documents,6 sources/bundles/progress records,3 Auth users,
+  5 Storage objects and1 unresolved deletion marker. All five restored file
+  hashes matched descriptors read from the restored database snapshot itself.
+  This verifies the included database/file correspondence.
+- The current budget remained11 attempts/USD0.55 reserved; no model call,
+  ledger reset or live-state restoration occurred. Live worker25940 was retained.
+
+**Limits:** managed Supabase platform configuration and custom PostgreSQL roles
+are not exported. The isolated import used local NOLOGIN test roles, required
+extensions, and `--no-owner --no-acl`; it does not prove restored live Auth,
+grants, Storage-service access or post-snapshot deletion/budget reconciliation.
+Keep the committed migrations and private operator configuration for a real
+recovery. The legacy physical-file uncertainty remains open. Do not replace
+current budget, block markers or keys with quarantined values.
+
+The seven-day archive expiry job remains active. Future copies are manually
+triggered; no daily export was installed. The one-off export/restore helpers
+and metadata report are local ignored `test-results` files, not a shipped
+one-command exporter. The ordinary connection checker still needs explicit CA
+wiring for routine reuse; this export used the controlled project-CA adapter.
+
+**Temporary plaintext:** source/download/restore files were created only under
+private `C:\StudyBuddy-Backup-Prepared`. Automatic approval review rejected
+both recursive cleanup and a narrowed known-file cleanup (`blocked by policy`).
+The student was asked to remove that temporary directory in File Explorer,
+retaining `C:\StudyBuddy-Backup`. Confirmation is pending.
+
+The dated preparation notes below describe earlier stages and do not override
+this actual-copy result or its limits.
+
 **Access update19 November2026, completed15:25:** Student resumed the deferred
 password step, entered it in the local masked window under normal Windows
 operator fredr and confirmed `password-saved`. The DPAPI credential exists at
