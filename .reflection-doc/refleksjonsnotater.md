@@ -747,6 +747,10 @@ Studenten godkjente den foreslåtte private kontrollen med «gjør det». Etter 
 
 **Brukerbekreftelse20.11:** På spørsmål om faktisk HTTPS-innlogging, Mine dokumenter, utlogging og omlasting med krav om ny innlogging svarte studenten «Ja, innlogging/dokumentliste og utlogging fungerer». Dette supplerer HTTP-probene med en avgrenset faktisk brukskontroll; ikke en ny full isolasjons-/tilgjengelighetsakseptanse. Offentlig aktivering er fortsatt ikke utført.
 
+### 20.11.2026 – Skille kontoantakelse fra vurderingskrav
+
+Studenten spurte om vurderingsgrunnlaget krever ferdig sensorkonto eller at sensor kan opprette konto selv. Del1-veiledningen s.5 ber om testdata/testbrukere ved behov, uten å bestemme opprettingsmåte. Agentens tidligere krav om foreleserens e-post som neste steg var en for sterk antakelse om forhåndsoppretting; «egen foreleserkonto» avklarer ikke hvem som oppretter den. Hostingplanen presiserer dette, og at fungerende selvregistrering ville kreve videre klargjøring fordi hosted-e-post er deaktivert. Ingen konto eller innstilling er endret. Dette er dokumentert KI-korrigering, ikke studentens egen refleksjon.
+
 ## Mal for neste hendelse
 
 

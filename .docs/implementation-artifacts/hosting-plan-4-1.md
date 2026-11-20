@@ -1,5 +1,14 @@
 # Hostingplan – Story 4.1
 
+**Tilgangspresisering20.11:** Del1-sensorveiledningen s.5 ber om testdata eller
+testbrukere ved behov og tydelig README, men angir ikke om sensor skal få en
+ferdig konto eller registrere seg selv. Studentens valg «egen foreleserkonto»
+fastsetter ikke opprettingsmåten. Tidligere omtale av foreleserens e-post som
+nødvendig neste steg var vår antakelse om forhåndsoppretting, ikke et oppgavekrav.
+Tilgangsmåten må avklares; ingen konto opprettes eller registreringsløsning endres
+på grunnlag av denne presiseringen. Hosted-e-post er fortsatt deaktivert, så
+selvregistrering er ikke klargjort for sensor nå.
+
 ## Privat HTTPS-kontroll20.11, kl.12:20
 
 Etter studentens «gjør det» er faktisk hosted-oppstart og en egen **privat**
