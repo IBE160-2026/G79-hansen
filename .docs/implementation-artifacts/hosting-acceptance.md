@@ -117,11 +117,32 @@ arvet advarsel. Ingen nye produksjonskodeendringer etter aktiveringen og ingen
 utsatte reviewfunn. Read-only kontroll11:34 viste fortsatt én aktiv reservasjon
 og én ledig global plass; samme journal/historikk, ingen ny e-post sendt.
 
+## 21.11.2026 kl.15:23 – brukerbekreftet listekontroll mellom ulike kontoer
+
+Etter økt forsøksgrense rapporterte studenten «fått laget konto og logget inn»
+om en ny konto på mobilen. På spørsmål om listen var tom svarte studenten først
+«nei», men presiserte deretter «ingenting» på spørsmålet om hva som faktisk ble
+vist. Dette tolkes som ingen dokumentoppføringer, ikke som en observert lekkasje.
+Studenten bekreftet deretter «ja vises» på at Synk-test21.11.2026 fortsatt
+finnes på PC under den opprinnelige kontoen.
+
+Det avgrensede utfallet er dermed brukerbekreftet: ingen dokumentoppføringer
+på den nye kontoen, mens originalkontoen fortsatt ser testdokumentet.
+Agenten innhentet ingen adresser, passord eller konto-ID-er. Dette er ikke en
+ny direkte HTTP-/SQL-/Storage-isolasjonsprøve. Tidligere avvisning av fremmed
+eier er dokumentert i [bibliotekakseptansen17.11](library-acceptance.md), med
+hosted25 og normalserver34 kontroller. Ingen nye tester eller endring av
+tilgangsregler ble utført ved denne registreringen av brukerobservasjonene.
+
+Sensorveiledningen er klargjort i [assessor-access.md](assessor-access.md).
+Den tidligere valgte reservekontoen er ikke byttet ut med den nye kontoen;
+privat overlevering av innloggingsopplysninger gjenstår ved innlevering.
+
 ## Gjenstående kontroll
 
-- Resterende eierisolasjon mellom ulike kontoer og privat overlevering av
-  reservekonto ved innlevering. Toveis fremdrift, uavhengig utlogging og
-  innlogging/gjenåpning etter omstart er brukerbekreftet; Story4.1 er fortsatt åpen.
+- Privat overlevering av reservekonto ved innlevering. Praktisk listekontroll
+  mellom ulike kontoer, toveis fremdrift, uavhengig utlogging og gjenåpning
+  etter omstart er brukerbekreftet med grensene over. Story4.1 er fortsatt åpen.
 - Eksisterende fysisk filrest, CA-rutine og full gjenoppretting/avstemming står
   fortsatt åpne. Reelt privat studiemateriale er utenfor godkjent utprøving.
 

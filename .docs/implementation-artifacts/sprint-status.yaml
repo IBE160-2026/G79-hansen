@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 21-11-2026 11:34
+last_updated: 21-11-2026 15:23
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -107,7 +107,9 @@ development_status:
   # Seven-day expiry task installed19 Nov; manual backup triggering selected, no daily export installed.
   # 21 Nov: physical PC -> mobile and mobile -> PC progress/reopen/hidden-answer state user-confirmed.
   # 21 Nov: independent mobile logout/continued PC access and fresh login/reopen after controlled restart user-confirmed.
-  # Worker24992 ->17108; config/budget/capability/email journal unchanged. Remaining cross-owner/physical-file gates open.
+  # Worker24992 ->17108; config/budget/capability/email journal unchanged in restart check.
+  # 21 Nov15:23: student confirmed new-account empty list/original-account retained Synk-test.
+  # This supplements dated direct API/DB ownership evidence; private assessor handover/physical-file gates remain open.
   # Post-snapshot deletion/budget reconciliation and full recovery remain open. Synthetic/nonsensitive test data only.
   4-1-reach-the-app-securely-from-two-devices: in-progress
   # Local delivery verification started19 Nov: key-free demo11 browser scenarios passed; checklist open.

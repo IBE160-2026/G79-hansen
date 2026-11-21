@@ -5,8 +5,9 @@
 [Kort sensorveiledning](assessor-access.md) samler den publiserte URL-en,
 innlogging/e-postgrenser, lokal demo ved driftsavbrudd og en avgrenset prøve.
 Den inneholder ingen innloggingsopplysninger. Eksisterende reservekonto er
-fortsatt valgt; privat overlevering gjenstår. Praktisk kontroll mellom kontoen
-som eier Synk-testen og en annen eksisterende konto pågår.
+fortsatt valgt; privat overlevering gjenstår. Praktisk listekontroll21.11 er
+brukerbekreftet mellom originalkontoen med Synk-test og en ny konto uten
+dokumentoppføringer; se [akseptansenotatet](hosting-acceptance.md).
 De daterte forslags-/aktiveringsnotatene nedenfor er historikk.
 
 ## Offentlig aktivering20.11 kl.17:07 – separat godkjent
@@ -20,8 +21,8 @@ HTTPS konto/arbeidsflate/auth-status svarte200 og hemmelige filstier404.
 telefonens mobilnettkontroll, som studenten bekreftet med «fungerer» kl.17:11.
 Toveis fysisk PC/mobil-fremdrift, uavhengig utlogging og ny innlogging/
 gjenåpning med bevart fremdrift etter appomstart er brukerbekreftet21.11.
-Resterende eierisolasjon mellom ulike kontoer og privat kontooverlevering
-gjenstår. Status er avstemt21.11 mot de daterte resultatene;
+Listekontroll mellom ulike kontoer er også brukerbekreftet21.11. Privat
+kontooverlevering gjenstår. Status er avstemt21.11 mot de daterte resultatene;
 tidligere seksjoner nedenfor er historikk. Story4.1 og de avtalte
 test-/retensjonsgrensene består.
 

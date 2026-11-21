@@ -87,7 +87,9 @@ samler innlogging, lokal demo ved driftsavbrudd og hovedflyten.
 
 Toveis fremdrift mellom PC og mobil, uavhengig utlogging og ny innlogging med
 bevart materiale/fremdrift etter appomstart er brukerbekreftet 21.11.
-Resterende eierisolasjon mellom ulike kontoer og privat kontooverlevering gjenstår.
+Praktisk listekontroll mellom ulike kontoer er også brukerbekreftet: den nye
+kontoen viste ingen dokumenter, mens originalkontoen beholdt Synk-testen.
+Dette supplerer tidligere API-/databasetester. Privat kontooverlevering gjenstår.
 Se [publisering og akseptansegrenser](.docs/implementation-artifacts/hosting-acceptance.md)
 og [dokumentert backup med gjenopprettingsgrenser](.docs/implementation-artifacts/backup-local-4-1.md).
 
@@ -704,7 +706,9 @@ user-confirmed at17:11. Operator startup must preserve existing state, use
 the same Windows profile and avoid conflicting ambient app variables.
 On21 November the student confirmed physical two-way PC/mobile progress,
 independent logout and fresh login/reopening after a controlled app restart.
-Remaining cross-owner acceptance and private assessor handover remain open;
+The student also confirmed an empty new-account library while the original
+account retained its test document; this supplements earlier API/DB isolation
+evidence. Private assessor handover remains open;
 see [the hosting record](.docs/implementation-artifacts/hosting-acceptance.md).
 
 </details>

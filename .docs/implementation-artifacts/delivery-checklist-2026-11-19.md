@@ -14,7 +14,8 @@ overleveres privat, uten passord i repoet. Oppdatert kryptert appbackup inkluder
 konto og e-postjournal. Offentlig Funnel10000 ble aktivert kl.17:07 og
 mobiltilgang brukerbekreftet kl.17:11. Toveis fysisk fremdrift, uavhengig
 utlogging og ny innlogging/bevart materiale etter appomstart er
-brukerbekreftet21.11. Resterende eierisolasjon og privat kontooverlevering gjenstår;
+brukerbekreftet21.11. Listekontroll mellom ulike kontoer er også brukerbekreftet;
+privat kontooverlevering gjenstår;
 se [publisering og kontrollgrenser](hosting-acceptance.md) og
 [gjeldende plan og usendt tilgangstekst](hosting-plan-4-1.md).
 
@@ -23,7 +24,12 @@ se [publisering og kontrollgrenser](hosting-acceptance.md) og
 - [x] Kort [sensorveiledning](assessor-access.md) klargjort21.11: offentlig
   URL, innlogging/e-postgrenser, lokal demo og en konkret hovedflyt. Ingen
   innloggingsopplysninger er skrevet eller sendt; privat reserveoverlevering
-  og den praktiske kontrollen med en annen eksisterende konto gjenstår.
+  gjenstår. Praktisk listekontroll mellom kontoer er brukerbekreftet nedenfor.
+
+- [x] Praktisk listekontroll21.11: studenten rapporterte ny konto/innlogging,
+  ingen dokumentoppføringer på den nye kontoen og fortsatt Synk-test på
+  originalkontoen på PC. [Observasjoner og avgrensning](hosting-acceptance.md)
+  skiller dette fra de tidligere direkte API-/databasekontrollene.
 
 - [x] Toveis fysisk PC/mobil-prøve21.11: samme lagrede Synk-test ble åpnet
   på mobilen med kort2/Quiz1 fra PC. Etter endring på mobilen ble kort1 med
@@ -31,7 +37,7 @@ se [publisering og kontrollgrenser](hosting-acceptance.md) og
   Uavhengig mobilutlogging lot PC-økten fortsette. Kontrollert appomstart
   krevde ny innlogging og bevarte dokumentet/kort1/Quiz1 med skjulte svar.
   [Brukerbekreftelser og grenser](hosting-acceptance.md). Dette gjelder samme
-  konto på to enheter; resterende eierisolasjon mellom ulike kontoer er separat.
+  konto på to enheter; kontroll mellom ulike kontoer er beskrevet separat over.
 
 - [x] Avgrenset lokal PDF-kontroll21.11 med sensorveiledningen: 7 sider /
   15 614 tegn, gjengitte sider visuelt sammenholdt med uttak, 28 eksisterende
@@ -151,8 +157,8 @@ se [publisering og kontrollgrenser](hosting-acceptance.md) og
 
 ## Åpent og utsatt arbeid
 
-- Resterende eierisolasjon mellom ulike kontoer og privat overlevering av
-  reservekonto til sensor. Toveis fysisk fremdrift, uavhengig utlogging og
+- Privat overlevering av reservekonto til sensor. Praktisk listekontroll mellom
+  ulike kontoer, toveis fysisk fremdrift, uavhengig utlogging og
   ny innlogging/gjenåpning etter appomstart er brukerbekreftet21.11.
 - Flere representative PDF-/lysbildeoppsett, full feilflyt, tilgjengelighet i innlogget arbeidsområde
   og resterende negative e-postlenke-/malkontroller.

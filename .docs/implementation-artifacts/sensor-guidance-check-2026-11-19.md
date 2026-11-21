@@ -56,7 +56,7 @@ ikke en påstand om at alle kriterier er ferdig oppfylt.
 | Kriterium | Vekt | Eksisterende grunnlag | Gjenstående leveransearbeid |
 | --- | --- | --- | --- |
 | Prosess og KI-styring | 30% | [Brief](../planning-artifacts/briefs/brief-G79-hansen-2026-09-26/brief.md), PRD, [arkitektur](../planning-artifacts/architecture/architecture-G79-hansen-2026-11-01/architecture-explained.md), Git-historikk og [beslutnings-/KI-notater](../../.reflection-doc/refleksjonsnotater.md). README har nå leserute fra krav til kode, kontroll og studentens korrigeringer. | Kontroller samsvar med godkjent proposal og endelig leveranse. |
-| Funksjonalitet og omfang | 20% | [Kilder/PDF](source-acceptance.md), [generering](generation-acceptance.md), [innholdskontroll](content-evaluation.md), [lagring](save-acceptance.md), [bibliotek](library-acceptance.md), [fremdrift](progress-acceptance.md) og [sletting](deletion-acceptance.md). Kort PDF-flyt, toveis fysisk fremdrift, uavhengig utlogging og gjenåpning etter omstart er brukerbekreftet21.11. | Fullfør gjenværende PDF-/feilflyt/eierisolasjon og overlever sensorens reservekonto privat. Behold dokumenterte avgrensninger/åpne tilgangsporter. |
+| Funksjonalitet og omfang | 20% | [Kilder/PDF](source-acceptance.md), [generering](generation-acceptance.md), [innholdskontroll](content-evaluation.md), [lagring](save-acceptance.md), [bibliotek](library-acceptance.md), [fremdrift](progress-acceptance.md) og [sletting](deletion-acceptance.md). Kort PDF-flyt, toveis fysisk fremdrift, uavhengig utlogging og gjenåpning etter omstart er brukerbekreftet21.11. | Fullfør gjenværende PDF-/feilflyt og overlever sensorens reservekonto privat. Praktisk listekontroll mellom kontoer er brukerbekreftet21.11. Behold dokumenterte avgrensninger/åpne tilgangsporter. |
 | Kvalitetssikring og testing | 15% | README har Python-/nettleserkommandoer; funksjonsnotatene skiller simulerte og reelle kontroller. Konkret statusfeil er rettet i `2494ce9`. | Sluttkontroll av relevante kommandoer og feilinput fra aktuell leveranseversjon. Gjenbruk eldre evidens med dato; ikke kall den en fersk full test. |
 | Design og brukeropplevelse | 10% | [Instrumentert brukskontroll](usability-check-2026-11-19.md), [brukerbekreftet Narrator-demo](screen-reader-check-2026-11-19.md) og UX-planlegging. | Kontroller tydelige feil og tastatur i innlogget hovedflyt. Den avgrensede demoen er ikke full tilgjengelighetsakseptanse. |
 | Kodekvalitet og arkitektur | 10% | Python/FastAPI, statiske klientfiler, låste avhengigheter, arkitektur og eksisterende gjennomganger. | Kort samsvarskontroll mellom faktisk struktur, konfigurasjon og dokumentasjon; beskriv Windows-begrensningen for PDF. Ingen ny arkitektur trengs for denne avstemmingen. |
@@ -65,10 +65,12 @@ ikke en påstand om at alle kriterier er ferdig oppfylt.
 
 ## Kort prioritert restliste
 
-1. Fullfør gjenværende PDF-/feilflyt, innlogget tilgjengelighet og eierisolasjon
+1. Fullfør gjenværende PDF-/feilflyt og innlogget tilgjengelighet
    med tillatte testdata. Kort PDF-hovedflyt og fysisk toveis fremdrift/
    uavhengig utlogging/gjenåpning etter omstart er brukerbekreftet21.11.
-   Test gjenværende hull med de eksisterende sikkerhetsgrensene.
+   Praktisk listekontroll mellom kontoer er også brukerbekreftet21.11 og
+   supplerer datert direkte API-/databaseevidens. Test gjenværende hull med
+   de eksisterende sikkerhetsgrensene.
 2. README har nå prosessleserute og offentlig tilgangsbeskrivelse. Selvregistrering
    er brukerbekreftet og reservekonto valgt; privat kontooverlevering gjenstår.
 3. Studentens egne refleksjoner og studentinfo, og avklaring av overordnet

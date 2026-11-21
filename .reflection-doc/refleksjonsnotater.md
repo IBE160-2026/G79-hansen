@@ -848,6 +848,12 @@ og [aktiveringsresultatet](../.docs/implementation-artifacts/hosting-acceptance.
 
 Endelig kontroll:319 tester bestod etter reviewoppfølgingen. Ingen utsatte funn.
 
+Etterpå rapporterte studenten vellykket ny kontoregistrering/innlogging.
+Praktisk listekontroll21.11: ny konto viste ingen oppføringer, mens original
+konto fortsatt viste Synk-testen. Dette er brukerbekreftelser, ikke nye direkte
+API-/databasekontroller. Første «nei» på tomliste-spørsmålet ble avklart med
+«ingenting»; ingen dokumentlekkasje eller feil er dermed etablert.
+
 **Studentens egen refleksjon:** Ikke innhentet her. Rapportutkastet er urørt.
 
 ## Mal for neste hendelse
