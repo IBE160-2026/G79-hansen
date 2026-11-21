@@ -2,6 +2,10 @@
 
 Oppdatert21.11.2026. Skoleutgave av G79-hansen i IBE160.
 
+Leveransen skjer via GitHub. Start i [README](../../README.md) for kode,
+lokal kjøring og prosessdokumentasjon. Nettappen har egen selvregistrering;
+sensor kan opprette sin egen konto uten innloggingsopplysninger fra repoet.
+
 ## Åpne appen
 
 [Åpne StudyBuddy](https://fredriklaptop.tail55f8dd.ts.net:10000/account)
@@ -50,6 +54,8 @@ og [PDF-prøven](pdf-acceptance-2026-11-21.md).
 ## Overleveringsstatus
 
 Selvregistrering og den valgte reservekontoen er dokumentert i
-[tilgangsplanen](hosting-plan-4-1.md). Studenten skal overlevere reservekontoens
-innloggingsopplysninger privat ved innlevering. Denne veiledningen inneholder
+[tilgangsplanen](hosting-plan-4-1.md). Selvregistrering er hovedveien for
+GitHub-innleveringen. Hvis reservekonto trengs, overleverer studenten dens
+innloggingsopplysninger separat i en privat kanal. Disse legges ikke i README,
+repoet, GitHub-issues eller andre repo-vedlegg. Denne veiledningen inneholder
 ingen passord; ingen melding er sendt til sensor som del av klargjøringen.

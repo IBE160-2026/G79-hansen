@@ -10,6 +10,12 @@ brukerbekreftet mellom originalkontoen med Synk-test og en ny konto uten
 dokumentoppføringer; se [akseptansenotatet](hosting-acceptance.md).
 De daterte forslags-/aktiveringsnotatene nedenfor er historikk.
 
+**Leveranseavklaring21.11:** Studenten opplyser at innleveringen skal lastes
+opp til GitHub. README er sensorens inngang til kode/demo/prosess og den
+publiserte appen. Sensor bruker selvregistrering med egen adresse som hovedvei;
+valgt reservekonto beholdes ved behov med separat privat overlevering. Ingen
+innloggingsopplysninger eller privat tilgangsvedlegg legges i repoet.
+
 ## Offentlig aktivering20.11 kl.17:07 – separat godkjent
 
 Studenten svarte «ok» på det konkrete publiseringsforslaget. Funnel10000 er nå

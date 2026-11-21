@@ -14,6 +14,20 @@ innleveringsklar applikasjon, README og rapport 8.12, fast innlevering 15.12.202
 Se [avtalt avgrensning](.docs/implementation-artifacts/leveranseavgrensning-2026-11-19.md)
 og [senere publisering og åpne kontroller](.docs/implementation-artifacts/hosting-acceptance.md).
 
+## Til sensor – innlevering via GitHub
+
+Dette repoet er inngangen til kode, kjøreoppskrift og prosessdokumentasjon.
+Åpne [StudyBuddy i nettleseren](https://fredriklaptop.tail55f8dd.ts.net:10000/account)
+og bruk **Opprett konto** med din egen e-postadresse. Ingen API-nøkkel eller
+prosjektadministratortilgang trengs for å prøve den konfigurerte nettutgaven.
+Følg [den korte sensorveiledningen](.docs/implementation-artifacts/assessor-access.md).
+
+Hvis nettutgaven er utilgjengelig, kjør den nøkkelfrie demoen nedenfor.
+[Leseruten for sensor](#leserute-for-sensor) viser veien fra krav og beslutninger
+til kode, tester og daterte kontrollresultater. Innloggingsopplysninger til
+eventuell reservekonto overleveres separat i en privat kanal ved behov.
+Refleksjonsrapporten er fortsatt et arbeidsutkast og ferdigstilles senere.
+
 ## Start demoen uten nøkler
 
 Demoen bruker **faste eksempeldata og ferdige svar**. Den viser studieflyten,
