@@ -1,5 +1,7 @@
 # Åpne punkter
 
+- [ ] 2026-11-21 [Utvid e-postforsøk uten å nullstille historikken](982-2026-11-21-10-54-33-epostforsok.md) - Faktisk journalforsøk10:34:51 utløper11:34:51, nytt forsøk11:35 med dagens regler. Utkast spec-expand-recipient-email-attempts.md foreslår2 per mottaker og fortsatt2 globalt/time; konkret policy/fortsettelse avventes. Ingen kode-/journal-/providerendring. Deretter fortsetter kontoregistrering/eierkontroll.
+
 - [x] 2026-11-21 [Kort sensorveiledning klargjort](984-2026-11-18-18-56-54-gratis-hostingplan.md) - .docs/implementation-artifacts/assessor-access.md samler URL, innlogging/e-postgrenser, lokal demo og hovedflyt. README/hostingplan/sjekkliste lenker dit;56 lokale lenker kontrollert. Ingen innloggingsopplysninger eller meldinger sendt. Privat overlevering og praktisk kontroll av annen konto står fortsatt under Story4.1 (klargjort21.11).
 
 - [x] 2026-11-21 [Synlig slettetilbakemelding i PDF-prøven](995-2026-11-12-18-37-30-pdf-eksperiment.md) - Studenten presiserte «mulig jeg bare overså den, vi kan gå videre». Dokumentet forsvant;7 lokale kontroller viste fullføringsmeldingen. Lukket som ubekreftet observasjon, ikke som rettet feil eller ny bekreftelse av meldingen i faktisk visning. Undersøk ved gjentakelse; ingen appretting (avklart21.11).
