@@ -1,6 +1,6 @@
 # Åpne punkter
 
-- [ ] 2026-11-21 [Synlig slettetilbakemelding i PDF-prøven](995-2026-11-12-18-37-30-pdf-eksperiment.md) - Studenten så testdokumentet forsvinne fra listen, men ingen fullføringsmelding. Koden har statusmelding/fokus, og7 målrettede lokale syntetiske slettekontroller bestod med meldingen synlig. Årsak/synlighet i faktisk visning er uavklart; ingen appretting eller gjentatt sletting av andre dokumenter. Se pdf-acceptance-2026-11-21.md.
+- [x] 2026-11-21 [Synlig slettetilbakemelding i PDF-prøven](995-2026-11-12-18-37-30-pdf-eksperiment.md) - Studenten presiserte «mulig jeg bare overså den, vi kan gå videre». Dokumentet forsvant;7 lokale kontroller viste fullføringsmeldingen. Lukket som ubekreftet observasjon, ikke som rettet feil eller ny bekreftelse av meldingen i faktisk visning. Undersøk ved gjentakelse; ingen appretting (avklart21.11).
 
 - [x] 2026-11-21 [Avstemt leveransedokumentasjon](984-2026-11-18-18-56-54-gratis-hostingplan.md) - README, sprintstatus, leveransesjekkliste, sensoroversikt og hostingplan er oppdatert mot publisering/mobiltilgang og manuell backup/import20.11. Story4.1 er in-progress; åpne sluttkontroller består. Refleksjonsrapporten avventer etter studentens ønske; rapportfilene er urørt (løst21.11).
 
