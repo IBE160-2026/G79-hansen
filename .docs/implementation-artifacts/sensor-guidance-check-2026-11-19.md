@@ -18,6 +18,18 @@ ord beholdes som malens forventning, ikke et nytt bekreftet krav fra denne PDF-e
 
 ## Konsekvens for omfanget
 
+**Statusoppdatering21.11:** Den opprinnelige avstemmingen nedenfor er fra19.11.
+Senere ble offentlig skoleutprøving aktivert20.11, mobiltilgang brukerbekreftet,
+reservekonto valgt og manuell kryptert appbackup/import kontrollert.
+README har en leserute for sensor og oppdatert tilgangsbeskrivelse.
+Se [publisering og åpne kontroller](hosting-acceptance.md),
+[backupresultater](backup-local-4-1.md) og [gjeldende leveransesjekkliste](delivery-checklist-2026-11-19.md).
+Senere21.11 er én kort PDF-hovedflyt og toveis fysisk PC/mobil-fremdrift,
+uavhengig utlogging og ny innlogging/bevart materiale etter appomstart
+brukerbekreftet. Se de daterte rapportene for grenser. Full sluttakseptanse
+er fortsatt åpen. Refleksjonsrapporten
+avventer studenten etter ønsket21.11.
+
 Oppgavealternativet beskriver en enkel app som lager sammendrag, flashcards og
 quiz fra PDF/tekst, med begreper og kilde-/sidereferanser. Innlogging kreves hvis
 materiale lagres eller deles. LLM/konfidensialitet, detaljnivå, figurer/tabeller
@@ -43,8 +55,8 @@ ikke en påstand om at alle kriterier er ferdig oppfylt.
 
 | Kriterium | Vekt | Eksisterende grunnlag | Gjenstående leveransearbeid |
 | --- | --- | --- | --- |
-| Prosess og KI-styring | 30% | [Brief](../planning-artifacts/briefs/brief-G79-hansen-2026-09-26/brief.md), PRD, [arkitektur](../planning-artifacts/architecture/architecture-G79-hansen-2026-11-01/architecture-explained.md), Git-historikk og [beslutnings-/KI-notater](../../.reflection-doc/refleksjonsnotater.md). | Lag en kort leserute fra konkrete krav til kode, kontroll og studentens korrigeringer; kontroller samsvar med godkjent proposal. |
-| Funksjonalitet og omfang | 20% | [Kilder/PDF](source-acceptance.md), [generering](generation-acceptance.md), [innholdskontroll](content-evaluation.md), [lagring](save-acceptance.md), [bibliotek](library-acceptance.md), [fremdrift](progress-acceptance.md) og [sletting](deletion-acceptance.md). | Én samlet manuell live-hovedflyt med syntetiske data; avklar sensorens praktiske tilgang uten å dele hemmeligheter i Git. Behold dokumenterte avgrensninger/åpne tilgangsporter. |
+| Prosess og KI-styring | 30% | [Brief](../planning-artifacts/briefs/brief-G79-hansen-2026-09-26/brief.md), PRD, [arkitektur](../planning-artifacts/architecture/architecture-G79-hansen-2026-11-01/architecture-explained.md), Git-historikk og [beslutnings-/KI-notater](../../.reflection-doc/refleksjonsnotater.md). README har nå leserute fra krav til kode, kontroll og studentens korrigeringer. | Kontroller samsvar med godkjent proposal og endelig leveranse. |
+| Funksjonalitet og omfang | 20% | [Kilder/PDF](source-acceptance.md), [generering](generation-acceptance.md), [innholdskontroll](content-evaluation.md), [lagring](save-acceptance.md), [bibliotek](library-acceptance.md), [fremdrift](progress-acceptance.md) og [sletting](deletion-acceptance.md). Kort PDF-flyt, toveis fysisk fremdrift, uavhengig utlogging og gjenåpning etter omstart er brukerbekreftet21.11. | Fullfør gjenværende PDF-/feilflyt/eierisolasjon og overlever sensorens reservekonto privat. Behold dokumenterte avgrensninger/åpne tilgangsporter. |
 | Kvalitetssikring og testing | 15% | README har Python-/nettleserkommandoer; funksjonsnotatene skiller simulerte og reelle kontroller. Konkret statusfeil er rettet i `2494ce9`. | Sluttkontroll av relevante kommandoer og feilinput fra aktuell leveranseversjon. Gjenbruk eldre evidens med dato; ikke kall den en fersk full test. |
 | Design og brukeropplevelse | 10% | [Instrumentert brukskontroll](usability-check-2026-11-19.md), [brukerbekreftet Narrator-demo](screen-reader-check-2026-11-19.md) og UX-planlegging. | Kontroller tydelige feil og tastatur i innlogget hovedflyt. Den avgrensede demoen er ikke full tilgjengelighetsakseptanse. |
 | Kodekvalitet og arkitektur | 10% | Python/FastAPI, statiske klientfiler, låste avhengigheter, arkitektur og eksisterende gjennomganger. | Kort samsvarskontroll mellom faktisk struktur, konfigurasjon og dokumentasjon; beskriv Windows-begrensningen for PDF. Ingen ny arkitektur trengs for denne avstemmingen. |
@@ -53,10 +65,12 @@ ikke en påstand om at alle kriterier er ferdig oppfylt.
 
 ## Kort prioritert restliste
 
-1. Samlet manuell live-hovedflyt med tillatte syntetiske data og de eksisterende
-   sikkerhetsgrensene; test nye hull fremfor å kjøre alle eldre tester om igjen nå.
-2. Kort inngang til prosessevidens og en praktisk oppskrift for sensorens
-   live-kontroll. En egen foreleserkonto er valgt; e-post er fortsatt uavklart.
+1. Fullfør gjenværende PDF-/feilflyt, innlogget tilgjengelighet og eierisolasjon
+   med tillatte testdata. Kort PDF-hovedflyt og fysisk toveis fremdrift/
+   uavhengig utlogging/gjenåpning etter omstart er brukerbekreftet21.11.
+   Test gjenværende hull med de eksisterende sikkerhetsgrensene.
+2. README har nå prosessleserute og offentlig tilgangsbeskrivelse. Selvregistrering
+   er brukerbekreftet og reservekonto valgt; privat kontooverlevering gjenstår.
 3. Studentens egne refleksjoner og studentinfo, og avklaring av overordnet
    veiledning/del2/innleveringsformat før rapporten sluttføres.
 4. Samlet sjekk av aktuell kode, README, tester og repo før arbeidsmålet8.12.

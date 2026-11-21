@@ -1,5 +1,14 @@
 # Hostingplan – Story 4.1
 
+## Sensortilgang – klargjøring21.11
+
+[Kort sensorveiledning](assessor-access.md) samler den publiserte URL-en,
+innlogging/e-postgrenser, lokal demo ved driftsavbrudd og en avgrenset prøve.
+Den inneholder ingen innloggingsopplysninger. Eksisterende reservekonto er
+fortsatt valgt; privat overlevering gjenstår. Praktisk kontroll mellom kontoen
+som eier Synk-testen og en annen eksisterende konto pågår.
+De daterte forslags-/aktiveringsnotatene nedenfor er historikk.
+
 ## Offentlig aktivering20.11 kl.17:07 – separat godkjent
 
 Studenten svarte «ok» på det konkrete publiseringsforslaget. Funnel10000 er nå
@@ -8,8 +17,13 @@ identiske før/etter, og443/8765 samt8443/3000 forblir private. Ingen omstart,
 provider-/redirect-/policyendring, e-post eller modellkall.
 HTTPS konto/arbeidsflate/auth-status svarte200 og hemmelige filstier404.
 [Akseptansenotatet](hosting-acceptance.md) skiller vertsmaskinkontrollen fra
-telefonens mobilnettkontroll, som avventer studentens svar. Tidligere seksjoner
-nedenfor er historikk; Story4.1 og de avtalte test-/retensjonsgrensene består.
+telefonens mobilnettkontroll, som studenten bekreftet med «fungerer» kl.17:11.
+Toveis fysisk PC/mobil-fremdrift, uavhengig utlogging og ny innlogging/
+gjenåpning med bevart fremdrift etter appomstart er brukerbekreftet21.11.
+Resterende eierisolasjon mellom ulike kontoer og privat kontooverlevering
+gjenstår. Status er avstemt21.11 mot de daterte resultatene;
+tidligere seksjoner nedenfor er historikk. Story4.1 og de avtalte
+test-/retensjonsgrensene består.
 
 ## Sluttkontroll20.11 kl.17:03 – konkret forslag klart for separat godkjenning
 

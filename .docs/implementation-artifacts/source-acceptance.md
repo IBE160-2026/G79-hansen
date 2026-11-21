@@ -135,6 +135,18 @@ this story. Restart ends prior sessions; sign in again before using `/workspace`
 
 ## Acceptance limits
 
+**21 November update:** a local seven-page ordinary PDF (the assessment guide)
+passed contained extraction and exact API/UI source comparison. All seven
+rendered pages were visually inspected; damaged-file rejection, recovery and
+logout passed. The existing28 browser scenarios and3 additional checks passed,
+with synthetic authentication and zero live model/provider calls. See
+[dated results and reading-order limits](pdf-acceptance-2026-11-21.md).
+Subsequently, the student confirmed the ordinary upload/generate/save/reopen/
+delete/logout flow for the supplied one-page Context engineering PDF, with one
+answer/page reference checked. The deletion success message was not observed;
+this remains an open UI observation. Broader course/slide PDFs, full error flows
+and physical retention remain separate; see the same dated report for exact limits.
+
 This establishes integrated upload/authentication/UI/resource behavior on the
 tested Windows host with known synthetic inputs. Existing PDF containment and
 stress tests remain relevant evidence; it is not acceptance of arbitrary course

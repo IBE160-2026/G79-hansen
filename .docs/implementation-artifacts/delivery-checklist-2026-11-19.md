@@ -1,19 +1,65 @@
 # Fram til innlevering15.12.2026
 
-Avtalt19.11: lokal leveranse først, eksisterende kjerne/Supabase beholdes,
-offentlig lenke og videre hosting-/backupautomatisering utsettes.
+Avtalt19.11: lokal leveranse først, eksisterende kjerne/Supabase beholdes.
+Offentlig lenke var et valgfritt tillegg og ble senere godkjent/aktivert20.11;
+videre driftsautomatisering utsettes. Status avstemt21.11 mot daterte resultater.
 Kjerne senest1.12; samlet applikasjon, README og rapport klar8.12; siste uke buffer.
 Se [avgrensning](leveranseavgrensning-2026-11-19.md).
 
-**Tilgangsoppdatering20.11:** Privat HTTPS-registrering/e-postbekreftelse,
+**Tilgangsoppdatering20.11:** HTTPS-registrering/e-postbekreftelse,
 utlogging og vanlig passordinnlogging er brukerbekreftet. Studenten har valgt
 selvregistrering og den eksisterende bekreftede `+test1`-kontoen som reserve;
 kontrollen fant0 lagrede dokumenter. Faktisk testadresse/StudyBuddy-passord
 overleveres privat, uten passord i repoet. Oppdatert kryptert appbackup inkluderer
-konto og e-postjournal. Dette er ikke offentlig aktivering eller ferdig
-innlevering; [gjeldende plan og usendt tilgangstekst](hosting-plan-4-1.md).
+konto og e-postjournal. Offentlig Funnel10000 ble aktivert kl.17:07 og
+mobiltilgang brukerbekreftet kl.17:11. Toveis fysisk fremdrift, uavhengig
+utlogging og ny innlogging/bevart materiale etter appomstart er
+brukerbekreftet21.11. Resterende eierisolasjon og privat kontooverlevering gjenstår;
+se [publisering og kontrollgrenser](hosting-acceptance.md) og
+[gjeldende plan og usendt tilgangstekst](hosting-plan-4-1.md).
 
 ## Ferdig kontrollert
+
+- [x] Kort [sensorveiledning](assessor-access.md) klargjort21.11: offentlig
+  URL, innlogging/e-postgrenser, lokal demo og en konkret hovedflyt. Ingen
+  innloggingsopplysninger er skrevet eller sendt; privat reserveoverlevering
+  og den praktiske kontrollen med en annen eksisterende konto gjenstår.
+
+- [x] Toveis fysisk PC/mobil-prøve21.11: samme lagrede Synk-test ble åpnet
+  på mobilen med kort2/Quiz1 fra PC. Etter endring på mobilen ble kort1 med
+  skjult svar og fortsatt Quiz1 gjenfunnet på PC etter omlasting/gjenåpning.
+  Uavhengig mobilutlogging lot PC-økten fortsette. Kontrollert appomstart
+  krevde ny innlogging og bevarte dokumentet/kort1/Quiz1 med skjulte svar.
+  [Brukerbekreftelser og grenser](hosting-acceptance.md). Dette gjelder samme
+  konto på to enheter; resterende eierisolasjon mellom ulike kontoer er separat.
+
+- [x] Avgrenset lokal PDF-kontroll21.11 med sensorveiledningen: 7 sider /
+  15 614 tegn, gjengitte sider visuelt sammenholdt med uttak, 28 eksisterende
+  nettleserscenarier og 3 ekstra PDF-/feil-/utloggingsscenarier bestod.
+  [Resultater og grenser](pdf-acceptance-2026-11-21.md). Ingen ekte modell- eller
+  Supabase-kall i den lokale prøven.
+- [x] Veiledet PDF-hovedflyt21.11 med studentens Context engineering.pdf:
+  1 side/2975 tegn lokalt visuelt kontrollert. Studenten bekrefter opplasting,
+  fire læringsdeler, ett svar/Side1, lagring, gjenåpnet kort2/Quiz1 med skjulte
+  svar, bortfall etter sletting og utlogging/ny innloggingsgrense. Ingen
+  slettemelding ble observert; dette er åpent nedenfor. Budsjett11→12 forsøk /
+  USD0,55→0,60 reservert, ublokkert, ingen ny automatisert smoke.
+  [Resultater og presise grenser](pdf-acceptance-2026-11-21.md).
+
+- [x] Offentlig skoleutprøving20.11: HTTPS-aktivering og mobilnettprøve er
+  dokumentert i [akseptansenotatet](hosting-acceptance.md). Selvregistrering,
+  e-postbekreftelse og ny passordinnlogging er brukerbekreftet; reservekonto
+  er valgt for privat overlevering. Toveis fysisk fremdrift ble senere
+  brukerbekreftet21.11 som beskrevet over.
+- [x] Manuell kryptert appbackup20.11, oppdatert kl.16:10: ekte isolert
+  PostgreSQL17.11-import og samsvar mellom database og fem inkluderte
+  Storage-filer bestod. Konto/e-postjournal er med i oppdatert kopi.
+  Manuell utløsning er valgt; installert sjudagersjobb roterer arkiver.
+  [Backupresultater og grenser](backup-local-4-1.md) skiller dette fra full
+  plattform-/rolle-/live-restore og avstemming av senere slettinger/budsjett.
+- [x] Dokumentasjonsavstemming21.11: README, hostingplan, sprintstatus og
+  leveranseoversikter skiller publisert skoleutprøving fra åpne sluttkontroller.
+  Dette er dokumentarbeid med eksisterende evidens, uten ny live-/driftsprøve.
 
 - [x] Veiledet manuell **tekstflyt i live-modus**19.11: innlogging/tomtilstand,
   tre syntetiske kildeavsnitt, én ekte generering, ett svar mot kildereferanse,
@@ -78,7 +124,8 @@ innlevering; [gjeldende plan og usendt tilgangstekst](hosting-plan-4-1.md).
    leveransen; følg den korte restlisten i kravoversikten. Overordnet veiledning
    og fullstendige rapport-/innleveringskrav gjenstår; formativ PRD-tilbakemelding
    erstatter ikke disse.
-2. **README og oppsett:** Ren kopi/nytt virtuelt miljø og demooppstart er
+2. **README og oppsett:** Gjeldende publisering, e-post og manuell backup er
+   avstemt21.11. Ren kopi/nytt virtuelt miljø og demooppstart er
    kontrollert på Windows. README har kort oppskrift, portalternativ og tydelig
    demo/live-skille; tekniske detaljer er sammenleggbare. Eventuell kontroll på
    en annen maskin er fortsatt egen leveransekontroll, ikke allerede bevist.
@@ -102,12 +149,22 @@ innlevering; [gjeldende plan og usendt tilgangstekst](hosting-plan-4-1.md).
    er laget19.11, med egne refleksjoner/korrekt studentinfo og sluttkontroll
    fortsatt åpne. Ingen nye funksjoner etter1.12.
 
-## Utsatt, ikke ferdig
+## Åpent og utsatt arbeid
 
-Offentlig HTTPS/Funnel, foreleserkonto/e-post, to-fysiske-enheter og komplett
-automatisk DB+Storage-backup/isolert restore. Passordsjekken ble gjenopptatt og
-bestod19.11 med lokalt kryptert passord og eksplisitt prosjekt-CA/verify-full;
-dette er ikke komplett backup-/eksportakseptanse.
-Eksisterende rotasjonsjobb og privat `.env.hosted` beholdes urørt. Ved senere
-offentlig bruk/reelle private data gjelder tidligere sikkerhets-/tilgangs-/
-backupporter og separat publiseringsgodkjenning. Ingen slik akseptanse hevdes.
+- Resterende eierisolasjon mellom ulike kontoer og privat overlevering av
+  reservekonto til sensor. Toveis fysisk fremdrift, uavhengig utlogging og
+  ny innlogging/gjenåpning etter appomstart er brukerbekreftet21.11.
+- Flere representative PDF-/lysbildeoppsett, full feilflyt, tilgjengelighet i innlogget arbeidsområde
+  og resterende negative e-postlenke-/malkontroller.
+- Slettemeldingen ble ikke observert i brukerprøven, men studenten presiserte
+  at den kan ha blitt oversett og ønsket å gå videre.7 lokale kontroller bestod;
+  ingen bekreftet feil. Undersøk faktisk visning ved gjentakelse.
+- Eldre fysisk filrest, gjentakbart eksplisitt CA-oppsett og full
+  plattform-/rolle-/live-restore med avstemming av senere slettinger/budsjett.
+- Videre driftsautomatisering er utsatt; manuell backup er valgt. Automatisk
+  daglig eksport er ikke installert. Sjudagers arkivrotasjon er installert.
+- Refleksjonsrapporten avventer studentens videre arbeid etter ønsket21.11;
+  fullstendige rapport-/innleveringskrav og samlet leveransekontroll gjenstår.
+
+Godkjent offentlig skoleutprøving gjelder ikke-sensitivt testmateriale.
+Full sikkerhets-/produksjonsakseptanse for reelle private data hevdes ikke.

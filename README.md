@@ -5,12 +5,14 @@ Gruppeprosjekt i **IBE160 Programmering med KI** ved Høgskolen i Molde, høsten
 StudyBuddy gjør kursmateriale om til sammendrag, begreper, flashcards og quiz
 med kildehenvisninger. Prosjektet bruker Python/FastAPI og HTML/CSS/JavaScript.
 
-**Leveranseplan19.11:** Lokal kjørbarhet, eksisterende kjernefunksjoner og
-Supabase-lagring prioriteres. Offentlig lenke er et valgfritt tillegg; videre
-hosting-/backupautomatisering utsettes. Vi bruker syntetiske testdata og hevder
-ikke ferdig produksjonsdrift. Mål: fungerende kjerne1.12, innleveringsklar
-applikasjon, README og rapport8.12, fast innlevering15.12.2026.
-Se [avtalt avgrensning](.docs/implementation-artifacts/leveranseavgrensning-2026-11-19.md).
+**Leveransestatus 21.11.2026:** Lokal kjørbarhet, eksisterende kjernefunksjoner og
+Supabase-lagring prioriteres. Det valgfrie offentlige tillegget ble aktivert
+20.11; mobiltilgang er brukerbekreftet. Manuell kryptert appbackup med isolert
+databaseimport og filkontroll er dokumentert. Videre driftsautomatisering utsettes.
+Utprøvingen gjelder ikke-sensitivt testmateriale. Mål: fungerende kjerne 1.12,
+innleveringsklar applikasjon, README og rapport 8.12, fast innlevering 15.12.2026.
+Se [avtalt avgrensning](.docs/implementation-artifacts/leveranseavgrensning-2026-11-19.md)
+og [senere publisering og åpne kontroller](.docs/implementation-artifacts/hosting-acceptance.md).
 
 ## Start demoen uten nøkler
 
@@ -61,10 +63,33 @@ uv run --no-env-file uvicorn app.main:app --host 127.0.0.1 --port 8001
 | Demo uten nøkler | Fast eksempel, fire læringsdeler, kildehenvisninger og øving. Tilstanden finnes i nettleserminnet og forsvinner ved omlasting. |
 | Separat konfigurert live-modus | Egen tekst/tekstfil/PDF, modellgenerering, innlogging, Mine dokumenter, lagring, fremdrift og sletting. Krever Supabase og serverens modellnøkkel/budsjett. |
 
-PDF-støtten gjelder tekstbaserte PDF-er; OCR og tolkning av figurer/tabeller
-inngår ikke. Modellens svar må kontrolleres mot kildehenvisningene. Offentlig
-lenke og komplett automatisert backup er utsatt; løsningen er ikke dokumentert
-som ferdig produksjonsdrift.
+PDF-støtten gjelder tekstbaserte PDF-er og krever Windows-isolasjonen i live-modus;
+OCR og tolkning av figurer/tabeller inngår ikke. Modellens svar må kontrolleres
+mot kildehenvisningene. Full sluttakseptanse og videre driftsautomatisering gjenstår.
+
+## Publisert skoleutprøving
+
+[Åpne StudyBuddy](https://fredriklaptop.tail55f8dd.ts.net:10000/account).
+Offentlig HTTPS ble aktivert 20.11.2026 kl. 17:07; studenten bekreftet mobiltilgang
+kl. 17:11. Dette er daterte kontrollresultater. Appen kjører på prosjektets
+Windows-PC og trenger at PC, app og internett er tilgjengelige. Etter PC-omstart
+må appen startes manuelt. Den lokale demoen ovenfor er tilgjengelig som alternativ.
+
+Selvregistrering med e-postbekreftelse er brukerbekreftet. Åpne bekreftelseslenken
+i samme nettleser/profil som registreringen startet i, innen ti minutter.
+Registrering og glemt passord deler grensen på to e-postreservasjoner totalt
+og én per mottaker per rullerende time. En bekreftet vanlig testkonto er valgt
+som reserve for sensor; innloggingsopplysninger overleveres privat ved innlevering.
+Bruk bare ikke-sensitivt testmateriale som du har lov til å dele.
+
+[Kort tilgangs- og testveiledning for sensor](.docs/implementation-artifacts/assessor-access.md)
+samler innlogging, lokal demo ved driftsavbrudd og hovedflyten.
+
+Toveis fremdrift mellom PC og mobil, uavhengig utlogging og ny innlogging med
+bevart materiale/fremdrift etter appomstart er brukerbekreftet 21.11.
+Resterende eierisolasjon mellom ulike kontoer og privat kontooverlevering gjenstår.
+Se [publisering og akseptansegrenser](.docs/implementation-artifacts/hosting-acceptance.md)
+og [dokumentert backup med gjenopprettingsgrenser](.docs/implementation-artifacts/backup-local-4-1.md).
 
 ## Leserute for sensor
 
@@ -74,8 +99,9 @@ Etter demoen ovenfor kan utviklingsprosessen følges i denne rekkefølgen:
    beskriver studiebehovet; [PRD](.docs/planning-artifacts/prds/prd-G79-hansen-2026-09-26/prd.md)
    gir brukerreise, prioriteringer og testbare krav. Studenten ba om å redusere
    omfanget. [Beslutningen19.11](.docs/implementation-artifacts/leveranseavgrensning-2026-11-19.md)
-   prioriterer eksisterende kjerne og lokal kjørbarhet, og utsetter offentlig
-   hosting og videre driftsautomatisering. [PRD-oppfølgingen](.docs/implementation-artifacts/prd-feedback-followup-2026-11-19.md)
+   prioriterte eksisterende kjerne og lokal kjørbarhet. Offentlig skoleutprøving
+   ble senere godkjent og aktivert [20.11](.docs/implementation-artifacts/hosting-acceptance.md);
+   videre driftsautomatisering er fortsatt utsatt. [PRD-oppfølgingen](.docs/implementation-artifacts/prd-feedback-followup-2026-11-19.md)
    viser hvordan faglærerens kritikk ble behandlet.
 
 2. **Et konkret eksempel på kontroll og retting av KI-assistert kode.**
@@ -116,17 +142,19 @@ Videre dokumentasjon:
 Detaljene under trengs ikke for å starte den nøkkelfrie demoen. Live-oppsett
 bruker egne nøkler og tjenester; ikke kopier gruppens hemmeligheter til Git.
 
-## Optional Windows hosted launcher (deferred Story 4.1)
+## Windows hosted launcher (Story 4.1, acceptance in progress)
 
-`scripts/start-hosted.ps1` prepares the existing one-process application for a
-separately approved HTTPS proxy. Real startup and proxy activation remain separate
-operator actions. The launcher never activates Funnel, changes Tailscale/Supabase,
+`scripts/start-hosted.ps1` runs the one-process application behind the separately
+approved HTTPS proxy. Hosted startup and public activation were performed on
+20 November; see the dated [acceptance record](.docs/implementation-artifacts/hosting-acceptance.md).
+Startup and proxy activation are separate operator actions. The launcher never
+activates Funnel, changes Tailscale/Supabase,
 stops another process or initializes state. Existing local/demo commands above
 remain available.
 
-For local preparation, use the ignored `.env.hosted` separately from the current
+For hosted configuration, use the ignored `.env.hosted` separately from the
 local HTTP `.env`, using [.env.hosted.example](.env.hosted.example). Set the exact
-HTTPS origin, including the separate candidate proxy port `10000`, with no path
+HTTPS origin, including the StudyBuddy proxy port `10000`, with no path
 or trailing slash, and `AUTH_ALLOW_LOOPBACK_HTTP=false`. Keep real configuration
 and credentials outside Git. Ambient process environment variables take precedence
 over dotenv values, so check the effective environment deliberately. An optional
@@ -140,7 +168,7 @@ reject the entire file before loading any value.
 
 ```powershell
 .\scripts\start-hosted.ps1 -Check
-# Later, after separate approval and with port 8000 available:
+# Operator startup only when port 8000 is available; leave a running app intact:
 .\scripts\start-hosted.ps1
 ```
 
@@ -185,27 +213,24 @@ complete plaintext bundle is limited to 64 MiB and exists only in memory while
 packing. Each fresh Fernet key is protected with Windows DPAPI CurrentUser,
 normally binding recovery to the same account/profile/PC.
 
-For the separate credential preparation, manually run
-`.\scripts\save-backup-password.ps1` in an interactive PowerShell window and enter
-the existing database password only at its masked local prompt. It exclusively
-creates `C:\StudyBuddy-Backup\.database-password.dpapi` under the already private
-operator/SYSTEM/Administrators directory; it never overwrites or changes a
-database password. The UTF-8 password is protected with DPAPI CurrentUser and
-must be read by the same Windows account/profile. Keep it out of chat, clipboard,
-command arguments and logs. After capture, explicitly run
-`uv run --locked --no-env-file python -m scripts.check_backup_connection` for a
-bounded read-only check of the fixed Paris session pooler with verified TLS.
-It sends the password through stdin to the existing local PostgreSQL client and
-prints only `connection-ok` or a safe failure category. This check establishes
-neither an export nor a complete backup; live verification remains pending.
+**Documented result, 20 November:** a manually triggered encrypted application
+backup was created and refreshed at16:10. A real isolated PostgreSQL17.11 import
+and checks of all five included Storage files passed. The refreshed copy includes
+four Auth users and the email journal. The student selected manual triggering;
+daily export is not installed. The seven-day archive expiry task was installed
+on19 November and runs when its Windows operator/session is available.
 
-See [the exact source contract, commands and recovery limits](.docs/implementation-artifacts/backup-local-4-1.md).
-Coverage is **prepared export only**. Live exports/administrative access,
-consistent snapshot capture, daily scheduling, actual PostgreSQL/Storage import,
-monotonic budget/journal reconciliation and replay of post-snapshot deletions
-remain pending. Never replace current state with quarantined older copies.
-Rotation occurs only on invocation and cannot expire copies while the PC is off;
-same-PC risk is accepted through submission on 15 December 2026.
+Database authentication with an explicit project CA was verified on19 November.
+The ordinary connection checker still uses system roots; repeatable explicit CA
+configuration remains open. Do not repeat credential capture or replace existing
+state as setup. See [the source contract, dated evidence and recovery limits](.docs/implementation-artifacts/backup-local-4-1.md).
+
+The shipped component packages **prepared exports**; the one-off live export and
+restore helpers are not a shipped routine exporter. Full Supabase platform/role
+recovery, restored live Auth/Storage access, post-snapshot deletion reconciliation
+and monotonic budget/journal reconciliation remain open. Never replace current
+state with quarantined older copies. Expiry cannot run while the PC is off;
+same-PC risk is accepted through submission on15 December2026.
 
 ## API og avgrensning for demoen
 
@@ -220,20 +245,32 @@ Demoen trenger ingen konfigurasjon og gjør ingen Supabase-kall. `/account` tilb
 
 ## Konto og Supabase (Story 2.1)
 
-Følg [oppsett og akseptanse for autentisering](.docs/implementation-artifacts/auth-setup.md): organisasjonen **Study Buddy** på **Free**, prosjektet **studybuddy-test** i **Paris (`eu-west-3`)**, med e-postbekreftelse og bare autoriserte teamtestere. Studenten godkjente Paris for det eksisterende testprosjektet 14.11.2026 som en endring fra opprinnelig Frankfurt-plan. Prosjekttilgang og aktiv e-postbekreftelse er kontrollert. Studenten rapporterer vellykket registrering/bekreftelse og separat privat innlogging. To administrative testkontoer bestod 20 HTTP-kontroller, 18 ekstra kontroller av øktlevetid/omstart/fornyelse og 24 kontroller i ekte nettlesere. Tidsgrenser var forkortet bare i en egen testserver; fornyelse brukte ekte Supabase-tokens med instrumentert lokal utløpsmetadata. Gjenværende hosted-tester av e-postbekreftelseslenker og malinspeksjon står åpne før endelig Story 2.1-akseptanse.
+Følg [oppsett og akseptanse for autentisering](.docs/implementation-artifacts/auth-setup.md):
+organisasjonen **Study Buddy** på **Free**, prosjektet **studybuddy-test** i
+**Paris (`eu-west-3`)**, med e-postbekreftelse. Studenten godkjente Paris
+14.11.2026 som en endring fra opprinnelig Frankfurt-plan. De første kontrollene
+brukte autoriserte teamtestere. To testkontoer bestod 20 HTTP-kontroller,
+18 ekstra kontroller av øktlevetid/omstart/fornyelse og 24 nettleserkontroller.
+Tidsgrenser var forkortet bare i en egen testserver; fornyelse brukte ekte
+Supabase-tokens med instrumentert lokal utløpsmetadata. Senere ble
+selvregistrering/e-postbekreftelse via HTTPS og vanlig passordinnlogging
+brukerbekreftet 20.11; se [hostingplanen](.docs/implementation-artifacts/hosting-plan-4-1.md).
+Negative bekreftelseslenketester og malinspeksjon står fortsatt åpne før
+endelig Story 2.1-akseptanse.
 
 Serveren leser `AUTH_ENABLED=true`, `APP_ORIGIN`, `SUPABASE_URL` og `SUPABASE_PUBLISHABLE_KEY` fra prosessmiljøet. `.env.example` er kun dokumentasjon og lastes ikke automatisk. Bruk bare publishable/anon-nøkkel, aldri service_role/secret-nøkkel. Lokal HTTP krever også `AUTH_ALLOW_LOOPBACK_HTTP=true` og loopback-adresse. Andre oppsett krever HTTPS. Manglende/ugyldig konfigurasjon stenger autentiseringen uten å påvirke demoen.
 
 Den lokale ignorerte `.env` kan lastes eksplisitt med `uv run --env-file .env uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1`. Åpne deretter `http://127.0.0.1:8000/account`. Dette aktiverer den konfigurerte innloggingen; vanlig demooppstart laster fortsatt ingen `.env`.
 
-Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i begrenset serverminne; nettleseren får tilfeldige HttpOnly-cookies. Bekreftelsen må åpnes innen ti minutter i nettleseren/profilen der registreringen startet. Økten utløper etter 30 minutter uten aktivitet, senest etter 12 timer, og ved serverrestart. Standarddemoen forblir tilgjengelig uten konto. Lokal utlogging, midlertidig kildekontroll og KI-generering av alle fire læringsdeler er implementert; eksplisitt privat lagring er implementert i Story 3.1 med separat aktivering. Utrulling krever egen godkjenning.
+Kjør med **én prosess / én worker**. Tokens og PKCE-forsøk finnes bare i begrenset serverminne; nettleseren får tilfeldige HttpOnly-cookies. Bekreftelsen må åpnes innen ti minutter i nettleseren/profilen der registreringen startet. Økten utløper etter 30 minutter uten aktivitet, senest etter 12 timer, og ved serverrestart. Standarddemoen forblir tilgjengelig uten konto. Lokal utlogging, midlertidig kildekontroll og KI-generering av alle fire læringsdeler er implementert; eksplisitt privat lagring er implementert i Story 3.1 med separat aktivering. Den avgrensede offentlige skoleutprøvingen ble separat godkjent og aktivert 20.11.
 
 **Glemt passord (Story 2.2)** sender en generell kvittering og bruker en egen PKCE-lenke som må åpnes i samme nettleser/profil innen ti minutter. Lenken gir bare tilgang til skjemaet for nytt passord; den logger deg ikke inn. Et innsendt endringsforsøk bruker opp denne tilgangen før leverandørkallet. Etterpå må du logge inn på vanlig måte. Ved tidsavbrudd kan passordet allerede være endret: prøv innlogging eller be om en ny lenke. Innlogging og gjenoppretting deler maksimalt 1 000 lokale økter; registrering og gjenoppretting deler maksimalt 1 000 ventende forsøk og fire per nettleser. Reell e-post og passordendring krever uttrykkelig testerautorisasjon og er ikke utført av implementasjonstestene. Se [oppsettet](.docs/implementation-artifacts/auth-setup.md) for den ekstra redirect-oppføringen og åpne akseptansepunkter.
 
-Email dispatch additionally requires `AUTH_EMAIL_ADMISSION_PATH`, a dedicated
-server-only SQLite journal. Password login and the fixed demo remain available
-without it. Before enabling email dispatch, explicitly initialize **new** state
-offline, then set the same path in the server process environment:
+Email dispatch requires `AUTH_EMAIL_ADMISSION_PATH`, a dedicated server-only
+SQLite journal. It was configured and enabled in the hosted app on20 November;
+signup mail and HTTPS confirmation were user-confirmed that day. Password login
+and the fixed demo remain available without email dispatch. For a **new independent
+installation only**, initialize new state offline, then configure the same path:
 
 ```powershell
 uv run --locked python -m scripts.email_admission init .auth-email-admission.sqlite3
@@ -253,8 +290,9 @@ replace or reinitialize them to restore capacity.
 Missing, invalid, locked or unwritable state and clock rollback refuse dispatch
 with a generic error. These app-local limits do not count provider sends made
 by other tools or projects. The rolling window uses reservation time; actual
-provider dispatch may occur later. This change is local preparation only: no real mail
-was sent, and the foreleser email/account and public activation remain deferred.
+provider dispatch may occur later. The [hosting plan](.docs/implementation-artifacts/hosting-plan-4-1.md)
+records the actual email setup and chosen assessor reserve account; private
+credential handover and remaining negative-link acceptance are still open.
 Focused offline checks: `uv run --locked pytest -q tests/test_email_admission.py tests/test_auth.py`.
 
 ## Verifisering
@@ -372,8 +410,9 @@ testene. Se [API, testkommandoer og akseptansegrenser](.docs/implementation-arti
 The action checks the current source when necessary, then requests summary,
 concepts, flashcards and quiz together. The optional source preview remains
 available. Unsaved results and selected files exist only in page memory.
-Explicit private Save is implemented in Story 3.1 below and disabled by default;
-the full library remains Story 3.2. Editing material/settings, reset,
+Explicit private Save is implemented in Story 3.1 below and disabled by default
+in a new installation; My documents, reopening and progress synchronization are
+implemented in Stories 3.2/3.3 below. Editing material/settings, reset,
 session changes and page exit clear the private result. Technical errors retain
 the draft/file/settings and offer explicit retry. Practice navigation and reveal
 controls do not call the model.
@@ -627,25 +666,27 @@ backup/physical-retention gates before real files.
 
 
 Local backup retention was **installed on19 November2026**. Preview its configuration with
-`./scripts/install-backup-retention.ps1 -Plan`; later install with
-`./scripts/install-backup-retention.ps1` under the same Windows operator.
+`./scripts/install-backup-retention.ps1 -Plan`. The task is already installed on
+the project PC; installation on a new host must use its authorized Windows operator.
 The installer refuses an existing `StudyBuddy-Backup-Rotation` task and query
 errors. The hidden limited task rotates recognized seven-day archives at03:00
 local and at same-user logon, with catchup when available. It requires that user
 to be logged on, does not wake the PC and cannot delete files while powered off.
-This schedules expiry only; daily full database/Storage backup is still pending.
+This schedules expiry only; the student selected manually triggered backups.
 Real hosted startup now completes expiry before app import, or refuses startup;
-`--check` stays read-only. Password capture/authentication is deferred at the
-student's request. One actual rotation run completed with Task Scheduler result0;
-next daily run is20 November at03:00 local. No real backup or public link was created.
+`--check` stays read-only. An actual rotation run completed with Task Scheduler
+result0 on19 November. Database authentication and the20 November backup/import
+results are documented in [the backup record](.docs/implementation-artifacts/backup-local-4-1.md).
 
-Private ignored `.env.hosted` is prepared for the candidate HTTPS origin on
-port10000, with existing model/save state and email dispatch disabled. Its ACL
-is restricted to the actual operator, SYSTEM and Administrators. Offline
-preflight validated configuration/state, then stopped with `port-busy` because
-the existing StudyBuddy PID25940 still uses8000. Nothing was restarted or
-published. Eventual launch must use the normal operator/profile and avoid
-conflicting ambient app variables; final preflight/start and backup/access
-acceptance are still pending.
+The private ignored `.env.hosted` was used for HTTPS startup on20 November,
+with existing model/save state and the subsequently enabled email journal.
+Its ACL is restricted to the actual operator, SYSTEM and Administrators.
+Public access on port10000 was activated at17:07 and mobile access was
+user-confirmed at17:11. Operator startup must preserve existing state, use
+the same Windows profile and avoid conflicting ambient app variables.
+On21 November the student confirmed physical two-way PC/mobile progress,
+independent logout and fresh login/reopening after a controlled app restart.
+Remaining cross-owner acceptance and private assessor handover remain open;
+see [the hosting record](.docs/implementation-artifacts/hosting-acceptance.md).
 
 </details>

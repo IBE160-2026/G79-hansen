@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 18-11-2026 18:41
+last_updated: 21-11-2026 10:28
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -42,6 +42,8 @@ development_status:
 
   epic-2: in-progress
   2-1-sign-up-and-sign-in-securely: in-progress
+  # 20 Nov: hosted signup email/HTTPS confirmation and password login user-confirmed.
+  # Genuine negative confirmation-link cases/template inspection remain open; not final acceptance.
   2-2-recover-a-password-through-a-restricted-session: review
   # Recovery implementation/review verified offline (213 passed/1 skipped; 23 auth + 11 demo browser scenarios).
   # 15 Nov: real recovery email/password change passed by student report; request/callback/update and later login successes observed.
@@ -90,23 +92,25 @@ development_status:
   epic-3-retrospective: optional
 
   epic-4: in-progress
-  # 19 Nov accepted scope: local submission first; public hosting/two-physical-device acceptance optional/deferred.
+  # 19 Nov accepted scope: local submission first; public hosting is an optional addition.
   # Story4.2 no longer depends on4.1. Preserve safety and existing Supabase features; synthetic data only.
   # Targets: working core1 Dec, full submission package8 Dec, hard deadline15 Dec2026.
-  # 18 Nov: Story 4.1 hosting plan/spec drafted. Student requires zero new hosting fees
-  # and an ordinary public link for assessor; proposes existing Windows PC + Tailscale Funnel.
-  # PC/Free-Paris/same-PC backup selected; assessor gets own account, email deferred.
-  # 443/8765 football + 8443/3000 SURE are tailnet-only Serve; preserve. Candidate app port10000.
-  # Local email admission subtask done/reviewed: 221 offline tests. Runtime journal/config still pending.
-  # Local startup launcher/preflight done/reviewed: 99 focused tests; actual runtime config/startup unexecuted.
-  # Local encrypted prepared-bundle/rotation/quarantine component done: 62 tests, private root ACL; no real backup.
-  # Student changed DB password; local capture/auth check explicitly deferred. No real backup.
-  # Retention job installed19 Nov; actual run13:35 result0, next20 Nov03:00. No daily export yet.
-  # Private .env.hosted prepared19 Nov; state validated, final preflight stops port-busy (PID25940).
-  # Existing state unchanged; no restart/public activation. Email remains disabled.
-  # Live consistent capture, daily backup scheduling and actual DB/Storage restore remain open.
-  # Public activation incomplete; no public deployment.
-  4-1-reach-the-app-securely-from-two-devices: backlog
+  # 20 Nov: approved Funnel10000 -> loopback8000 activated17:07; mobile access user-confirmed17:11.
+  # Existing443/8765 and8443/3000 remain private. Evidence: hosting-acceptance.md.
+  # Hosted startup/config and durable email journal enabled; signup/HTTPS confirmation user-confirmed.
+  # Self-registration plus an existing confirmed ordinary reserve account selected; private handover pending.
+  # 19 Nov: DB authentication verified with explicit project CA; routine checker CA wiring remains open.
+  # 20 Nov16:10: refreshed encrypted app backup includes4 Auth users/email journal and5 checked Storage files.
+  # Real isolated PostgreSQL17.11 import/file checks passed; not full live platform/Auth/Storage recovery.
+  # Seven-day expiry task installed19 Nov; manual backup triggering selected, no daily export installed.
+  # 21 Nov: physical PC -> mobile and mobile -> PC progress/reopen/hidden-answer state user-confirmed.
+  # 21 Nov: independent mobile logout/continued PC access and fresh login/reopen after controlled restart user-confirmed.
+  # Worker24992 ->17108; config/budget/capability/email journal unchanged. Remaining cross-owner/physical-file gates open.
+  # Post-snapshot deletion/budget reconciliation and full recovery remain open. Synthetic/nonsensitive test data only.
+  4-1-reach-the-app-securely-from-two-devices: in-progress
   # Local delivery verification started19 Nov: key-free demo11 browser scenarios passed; checklist open.
+  # 21 Nov: student-confirmed one-page PDF upload/generate/source-check/save/reopen/delete/logout flow.
+  # Deletion entry disappeared but success message was not observed;7 local deletion browser checks passed.
+  # Source report: pdf-acceptance-2026-11-21.md; broader PDF/error/device/assessor acceptance remains open.
   4-2-verify-the-full-release-and-assessor-setup: in-progress
   epic-4-retrospective: optional
