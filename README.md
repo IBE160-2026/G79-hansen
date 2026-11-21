@@ -78,7 +78,7 @@ må appen startes manuelt. Den lokale demoen ovenfor er tilgjengelig som alterna
 Selvregistrering med e-postbekreftelse er brukerbekreftet. Åpne bekreftelseslenken
 i samme nettleser/profil som registreringen startet i, innen ti minutter.
 Registrering og glemt passord deler grensen på to e-postreservasjoner totalt
-og én per mottaker per rullerende time. En bekreftet vanlig testkonto er valgt
+og to per mottaker per rullerende time. En bekreftet vanlig testkonto er valgt
 som reserve for sensor; innloggingsopplysninger overleveres privat ved innlevering.
 Bruk bare ikke-sensitivt testmateriale som du har lov til å dele.
 
@@ -278,14 +278,32 @@ uv run --locked python -m scripts.email_admission init .auth-email-admission.sql
 
 Initialization refuses existing state or SQLite sidecars. The ignored
 `.auth-email-admission*` files must stay private; for another path, ignore its
-journal and `-journal`, `-wal`, `-shm` sidecars too. HTTP requests never initialize
-or reset state. Signup and password recovery share fixed rolling-hour limits of
-two reservations globally and one per stripped, casefolded recipient across all
+journal and `-journal`, `-wal`, `-shm` sidecars too. HTTP requests never initialize,
+upgrade or reset state. Signup and password recovery share fixed rolling-hour limits of
+two reservations globally and two per stripped, casefolded recipient across all
 browsers. The journal stores only a locally generated secret, keyed recipient
 digests, timestamps and schema metadata. Atomic durable reservations precede
 provider calls; failed or uncertain calls retain their reservation across restart
 until the rolling window expires. Preserve state and sidecars; do not delete,
 replace or reinitialize them to restore capacity.
+
+Existing version1 journals require an explicit offline upgrade to version2.
+Stop only the checked StudyBuddy worker, retain the existing journal and sidecars,
+and run against its configured path (never use `init` on an existing installation):
+
+```powershell
+uv run --locked python -m scripts.email_admission upgrade .auth-email-admission.sqlite3
+```
+
+The upgrade uses an exclusive transaction and preserves every existing digest,
+reservation timestamp, journal secret and last-seen clock, including expired rows.
+Existing reservations still count; this command grants no refund. A valid version2
+journal is reported as already current without changing it. Invalid, locked,
+unwritable or sidecar-bearing state fails closed and must be investigated without
+deleting or repairing history. Verify with hosted `-Check`, then restart through
+the hosted launcher. An older application rejects version2: recover forward with
+compatible code; never restore an older journal to regain capacity. Same-address
+provider cooldowns remain separate from these local limits.
 
 Missing, invalid, locked or unwritable state and clock rollback refuse dispatch
 with a generic error. These app-local limits do not count provider sends made
@@ -293,7 +311,7 @@ by other tools or projects. The rolling window uses reservation time; actual
 provider dispatch may occur later. The [hosting plan](.docs/implementation-artifacts/hosting-plan-4-1.md)
 records the actual email setup and chosen assessor reserve account; private
 credential handover and remaining negative-link acceptance are still open.
-Focused offline checks: `uv run --locked pytest -q tests/test_email_admission.py tests/test_auth.py`.
+Focused offline checks: `uv run --locked pytest -q tests/test_email_admission.py tests/test_auth.py tests/test_hosted_startup.py`.
 
 ## Verifisering
 

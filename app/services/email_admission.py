@@ -21,11 +21,14 @@ WINDOW_SECONDS = 3600
 MAX_FILE_BYTES = 65536
 _slots = BoundedSemaphore(2)
 _jobs = set()
-_SCHEMA = (
+_LEGACY_SCHEMA = (
     "CREATE TABLE metadata (id INTEGER PRIMARY KEY CHECK (id = 1), "
     "version INTEGER NOT NULL, secret BLOB NOT NULL, last_seen REAL NOT NULL)",
     "CREATE TABLE reservations (recipient BLOB PRIMARY KEY NOT NULL, reserved_at REAL NOT NULL)",
 )
+_SCHEMA = (_LEGACY_SCHEMA[0],
+           "CREATE TABLE reservations (recipient BLOB NOT NULL, reserved_at REAL NOT NULL)")
+SCHEMA_VERSION = 2
 
 
 def _timestamp(value):
@@ -57,8 +60,8 @@ class EmailAdmission:
                 connection.execute('BEGIN EXCLUSIVE')
                 for statement in _SCHEMA:
                     connection.execute(statement)
-                connection.execute('PRAGMA user_version = 1')
-                connection.execute('INSERT INTO metadata VALUES (1, 1, ?, ?)', (secrets.token_bytes(32), now))
+                connection.execute('PRAGMA user_version = 2')
+                connection.execute('INSERT INTO metadata VALUES (1, 2, ?, ?)', (secrets.token_bytes(32), now))
                 connection.commit()
             finally:
                 connection.close()
@@ -71,19 +74,41 @@ class EmailAdmission:
         except (OSError, sqlite3.Error, ValueError):
             raise AuthFailure() from None
 
+    @classmethod
+    def upgrade(cls, path, *, clock=time.time):
+        """Explicit offline v1-to-v2 upgrade; retain all usage and clock metadata."""
+        service = cls(path, clock=clock)
+        connection = None
+        try:
+            service._inspection_state()  # Never recover uncertain sidecar state.
+            connection = service._connect()
+            connection.execute('BEGIN EXCLUSIVE')
+            now = clock()
+            version = connection.execute('PRAGMA user_version').fetchone()[0]
+            if version == SCHEMA_VERSION:
+                service._validate(connection, now)
+                connection.commit()
+                return False
+            if version != 1:
+                raise AuthFailure()
+            service._validate(connection, now, version=1)
+            connection.execute('ALTER TABLE reservations RENAME TO reservations_v1')
+            connection.execute(_SCHEMA[1])
+            connection.execute('INSERT INTO reservations SELECT recipient, reserved_at FROM reservations_v1')
+            connection.execute('DROP TABLE reservations_v1')
+            connection.execute('UPDATE metadata SET version = 2 WHERE id = 1')
+            connection.execute('PRAGMA user_version = 2')
+            service._validate(connection, now)
+            connection.commit()
+            return True
+        except (OSError, sqlite3.Error, ValueError, OverflowError):
+            raise AuthFailure() from None
+        finally:
+            if connection is not None:
+                connection.close()  # Roll back every uncommitted DDL/data change.
+
     def _connect(self):
-        if self.path is None:
-            raise AuthFailure()
-        info = self.path.lstat()
-        if not stat.S_ISREG(info.st_mode) or info.st_size > MAX_FILE_BYTES:
-            raise AuthFailure()
-        for suffix in ('-journal', '-wal', '-shm'):
-            sidecar = Path(str(self.path) + suffix)
-            if sidecar.exists():
-                info = sidecar.lstat()
-                if (suffix != '-journal' or not stat.S_ISREG(info.st_mode) or
-                        info.st_size > MAX_FILE_BYTES):
-                    raise AuthFailure()
+        self._inspection_state()
         # mode=rw is essential: a missing journal must never become fresh state.
         connection = sqlite3.connect(self.path.as_uri() + '?mode=rw', uri=True, timeout=0,
                                      isolation_level=None)
@@ -98,12 +123,13 @@ class EmailAdmission:
             connection.close()
             raise
 
-    def _validate(self, connection, now):
+    def _validate(self, connection, now, *, version=SCHEMA_VERSION):
         schema = connection.execute(
             "SELECT sql FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%' ORDER BY name").fetchall()
-        if schema != [(statement,) for statement in _SCHEMA]:
+        expected_schema = _LEGACY_SCHEMA if version == 1 else _SCHEMA
+        if schema != [(statement,) for statement in expected_schema]:
             raise AuthFailure()
-        if (connection.execute('PRAGMA user_version').fetchone() != (1,) or
+        if (connection.execute('PRAGMA user_version').fetchone() != (version,) or
                 connection.execute('PRAGMA journal_mode').fetchone() != ('delete',) or
                 connection.execute('PRAGMA page_size').fetchone() != (4096,) or
                 connection.execute('PRAGMA page_count').fetchone()[0] > 16 or
@@ -113,8 +139,9 @@ class EmailAdmission:
         rows = connection.execute('SELECT recipient, reserved_at FROM reservations LIMIT 3').fetchall()
         if len(metadata) != 1 or len(rows) > 2:
             raise AuthFailure()
-        identifier, version, secret, last_seen = metadata[0]
-        if (type(identifier) is not int or identifier != 1 or type(version) is not int or version != 1 or
+        identifier, stored_version, secret, last_seen = metadata[0]
+        if (type(identifier) is not int or identifier != 1 or
+                type(stored_version) is not int or stored_version != version or
                 type(secret) is not bytes or len(secret) != 32 or not _timestamp(last_seen) or
                 not _timestamp(now) or now < last_seen):
             raise AuthFailure()
@@ -172,7 +199,7 @@ class EmailAdmission:
             digest = hmac.digest(secret, recipient.strip().casefold().encode('utf-8'), hashlib.sha256)
             connection.execute('DELETE FROM reservations WHERE reserved_at <= ?', (now - WINDOW_SECONDS,))
             rows = connection.execute('SELECT recipient FROM reservations LIMIT 3').fetchall()
-            denied = len(rows) >= 2 or (digest,) in rows
+            denied = len(rows) >= 2 or rows.count((digest,)) >= 2
             connection.execute('UPDATE metadata SET last_seen = ? WHERE id = 1', (now,))
             if not denied:
                 connection.execute('INSERT INTO reservations VALUES (?, ?)', (digest, now))

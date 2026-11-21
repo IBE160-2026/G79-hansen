@@ -2,7 +2,10 @@
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from dataclasses import replace
+import hashlib
+import hmac
 from pathlib import Path
 import sqlite3
 import stat
@@ -21,6 +24,14 @@ from app.services.email_admission import EmailAdmission, MAX_FILE_BYTES
 from test_auth import EMAIL, FakeAuth, ORIGIN, PAYLOAD, SETTINGS, headers, post
 
 
+# Literal deployed-v1 SQL: keep this independent of production migration code.
+HISTORICAL_V1_SCHEMA = (
+    "CREATE TABLE metadata (id INTEGER PRIMARY KEY CHECK (id = 1), "
+    "version INTEGER NOT NULL, secret BLOB NOT NULL, last_seen REAL NOT NULL)",
+    "CREATE TABLE reservations (recipient BLOB PRIMARY KEY NOT NULL, reserved_at REAL NOT NULL)",
+)
+
+
 @pytest.fixture
 def journal(tmp_path):
     path = tmp_path / 'synthetic.sqlite3'
@@ -34,13 +45,196 @@ def rows(path):
         return connection.execute('SELECT recipient, reserved_at FROM reservations').fetchall()
 
 
+def legacy_journal(path, count=1):
+    """Create the exact previous format with synthetic data, including expired usage."""
+    with closing(sqlite3.connect(path)) as connection, connection:
+        for statement in HISTORICAL_V1_SCHEMA:
+            connection.execute(statement)
+        connection.execute('PRAGMA user_version = 1')
+        connection.execute('INSERT INTO metadata VALUES (1, 1, ?, 5000.25)', (b's' * 32,))
+        for index in range(count):
+            connection.execute('INSERT INTO reservations VALUES (?, ?)',
+                               (bytes([index]) * 32, 1000.125 + index * 3600))
+
+
+def state(path):
+    with closing(sqlite3.connect(path)) as connection:
+        return (connection.execute('PRAGMA user_version').fetchone(),
+                connection.execute('SELECT * FROM metadata').fetchall(), rows(path),
+                connection.execute("SELECT sql FROM sqlite_schema ORDER BY name").fetchall())
+
+
+@pytest.mark.parametrize('count', [0, 1, 2])
+def test_explicit_upgrade_preserves_every_row_secret_and_clock_and_is_idempotent(tmp_path, count):
+    path = tmp_path / 'legacy.sqlite3'
+    legacy_journal(path, count)
+    before = state(path)
+    assert EmailAdmission.upgrade(path, clock=lambda: 5001) is True
+    after = state(path)
+    assert after[0] == (2,)
+    assert after[1] == [(1, 2, before[1][0][2], before[1][0][3])]
+    assert after[2] == before[2]  # Expired rows are retained by upgrade too.
+    service = EmailAdmission(path, clock=lambda: 5001)
+    service.inspect_ready()
+    content = path.read_bytes()
+    assert EmailAdmission.upgrade(path, clock=lambda: 5001) is False
+    assert path.read_bytes() == content
+
+
+def test_upgraded_active_recipient_retains_usage_until_original_expiry(tmp_path):
+    path = tmp_path / 'legacy.sqlite3'
+    legacy_journal(path, 0)
+    digest = hmac.digest(b's' * 32, EMAIL.strip().casefold().encode(), hashlib.sha256)
+    prior = (digest, 1000.125)
+    with closing(sqlite3.connect(path)) as connection, connection:
+        connection.execute('UPDATE metadata SET last_seen = 1000.25')
+        connection.execute('INSERT INTO reservations VALUES (?, ?)', prior)
+    now = [1100.0]
+    assert EmailAdmission.upgrade(path, clock=lambda: now[0])
+    assert rows(path) == [prior]
+    service = EmailAdmission(path, clock=lambda: now[0])
+    service.reserve('  ' + EMAIL.upper() + '  ')
+    assert rows(path) == [prior, (digest, 1100.0)]
+    with pytest.raises(AuthFailure, match='auth_capacity'):
+        service.reserve(EMAIL)
+    now[0] = 4600.124
+    with pytest.raises(AuthFailure, match='auth_capacity'):
+        EmailAdmission(path, clock=lambda: now[0]).reserve(EMAIL)
+    assert rows(path) == [prior, (digest, 1100.0)]
+    now[0] = 4600.125
+    service.reserve(EMAIL)
+    assert rows(path) == [(digest, 1100.0), (digest, 4600.125)]
+
+
+@pytest.mark.parametrize('failure', ['copy', 'version', 'validate', 'commit'])
+def test_upgrade_failure_rolls_back_schema_data_and_metadata(tmp_path, monkeypatch, failure):
+    path = tmp_path / 'legacy.sqlite3'
+    legacy_journal(path, 2)
+    before = path.read_bytes()
+    connect = EmailAdmission._connect
+    validate = EmailAdmission._validate
+
+    class FailingConnection:
+        def __init__(self, service):
+            self.real = connect(service)
+
+        def execute(self, statement, *args):
+            if ((failure == 'copy' and statement.startswith('INSERT INTO reservations SELECT')) or
+                    (failure == 'version' and statement == 'PRAGMA user_version = 2')):
+                raise sqlite3.OperationalError('SECRET_SENTINEL')
+            return self.real.execute(statement, *args)
+
+        def commit(self):
+            if failure == 'commit':
+                raise sqlite3.OperationalError('SECRET_SENTINEL')
+            self.real.commit()
+
+        def close(self):
+            self.real.close()
+
+    def fail_validation(service, connection, now, **kwargs):
+        if failure == 'validate' and not kwargs:
+            raise AuthFailure()
+        return validate(service, connection, now, **kwargs)
+
+    monkeypatch.setattr(EmailAdmission, '_connect', lambda service: FailingConnection(service))
+    monkeypatch.setattr(EmailAdmission, '_validate', fail_validation)
+    with pytest.raises(AuthFailure, match='^auth_unavailable$'):
+        EmailAdmission.upgrade(path, clock=lambda: 5001)
+    assert path.read_bytes() == before
+    assert not Path(str(path) + '-journal').exists()
+
+
+@pytest.mark.parametrize('kind', ['missing', 'malformed', 'clock', 'version', 'schema',
+                                  'journal', 'wal', 'shm', 'locked', 'unwritable',
+                                  'oversized', 'directory', 'metadata-version', 'secret',
+                                  'last-seen', 'digest', 'timestamp', 'future-row'])
+def test_upgrade_refuses_unsafe_existing_state_without_repair(tmp_path, kind):
+    path = tmp_path / 'legacy.sqlite3'
+    legacy_journal(path)
+    blocker = None
+    if kind == 'missing':
+        path.unlink()
+    elif kind == 'malformed':
+        path.write_bytes(b'SECRET_SENTINEL')
+    elif kind == 'oversized':
+        with path.open('ab') as target:
+            target.write(b'x' * MAX_FILE_BYTES)
+    elif kind == 'directory':
+        path.unlink()
+        path.mkdir()
+    elif kind in ('journal', 'wal', 'shm'):
+        Path(str(path) + '-' + kind).write_bytes(b'SECRET_SENTINEL')
+    elif kind == 'unwritable':
+        path.chmod(stat.S_IREAD)
+    elif kind == 'locked':
+        blocker = sqlite3.connect(path, timeout=0)
+        blocker.execute('BEGIN EXCLUSIVE')
+    elif kind in ('version', 'schema', 'metadata-version', 'secret', 'last-seen',
+                  'digest', 'timestamp', 'future-row'):
+        with closing(sqlite3.connect(path)) as connection, connection:
+            connection.execute({
+                'version': 'PRAGMA user_version = 9',
+                'schema': 'CREATE TABLE unexpected (value TEXT)',
+                'metadata-version': 'UPDATE metadata SET version = 9',
+                'secret': "UPDATE metadata SET secret = X'00'",
+                'last-seen': "UPDATE metadata SET last_seen = 'invalid'",
+                'digest': "UPDATE reservations SET recipient = X'00'",
+                'timestamp': 'UPDATE reservations SET reserved_at = -1',
+                'future-row': 'UPDATE reservations SET reserved_at = 5001',
+            }[kind])
+
+    def snapshot():
+        return {item.name: (item.stat().st_mode, item.stat().st_mtime_ns,
+                            item.read_bytes() if item.is_file() else None)
+                for item in tmp_path.iterdir()}
+
+    before = snapshot()
+    try:
+        with pytest.raises(AuthFailure, match='^auth_unavailable$'):
+            EmailAdmission.upgrade(path, clock=lambda: 4999 if kind == 'clock' else 5001)
+        assert snapshot() == before
+    finally:
+        if blocker is not None:
+            blocker.close()
+        if kind == 'unwritable':
+            path.chmod(stat.S_IREAD | stat.S_IWRITE)
+
+
+def test_equal_timestamp_retries_and_cli_explicit_upgrade(tmp_path, monkeypatch, capsys):
+    from scripts.email_admission import main
+    path = tmp_path / 'legacy.sqlite3'
+    legacy_journal(path, 0)
+    monkeypatch.setattr(sys, 'argv', ['email_admission', 'upgrade', str(path)])
+    main()
+    assert 'upgraded' in capsys.readouterr().out
+    main()
+    assert 'already current' in capsys.readouterr().out
+    service = EmailAdmission(path, clock=lambda: 253402300798)
+    service.reserve(EMAIL)
+    service.reserve(EMAIL.upper())
+    records = rows(path)
+    assert len(records) == 2 and records[0] == records[1]
+    with pytest.raises(AuthFailure, match='auth_capacity'):
+        service.reserve(EMAIL)
+
+
+@pytest.mark.parametrize('action,payload', [('signup', PAYLOAD), ('recovery/request', {'email': EMAIL})])
+def test_http_never_upgrades_legacy_state(tmp_path, action, payload):
+    path = tmp_path / 'legacy.sqlite3'
+    legacy_journal(path)
+    before = path.read_bytes()
+    client, adapter, app = client_for(EmailAdmission(path, clock=lambda: 5001))
+    assert post(client, action, payload).status_code == 503
+    assert not adapter.calls and not app.state.auth_registry.pending
+    assert path.read_bytes() == before
+
+
 def test_normalization_rolling_boundary_global_limit_and_bounded_storage(journal):
     path, now, service = journal
     service.reserve('  TÉSTER@EXAMPLE.TEST  ')
-    with pytest.raises(AuthFailure, match='auth_capacity'):
-        service.reserve('téster@example.test')
     now[0] = 1000.5
-    service.reserve('other@example.test')
+    service.reserve('téster@example.test')
     with pytest.raises(AuthFailure, match='auth_capacity'):
         service.reserve('third@example.test')
     now[0] = 4599.999
@@ -68,11 +262,13 @@ def test_exclusive_initialization_and_process_reopen_keep_reservation(journal, m
     code = ('from app.services.email_admission import EmailAdmission; '
             'from app.adapters.auth import AuthFailure; '
             's=EmailAdmission(__import__("sys").argv[1], clock=lambda: 1000); '
+            's.reserve("tester@example.test"); '
             '\ntry: s.reserve("tester@example.test")'
             '\nexcept AuthFailure as error: raise SystemExit(0 if error.code == "auth_capacity" else 2)'
             '\nraise SystemExit(3)')
     result = subprocess.run([sys.executable, '-c', code, str(path)], capture_output=True, timeout=15)
     assert result.returncode == 0, result.stderr.decode()
+    assert len(rows(path)) == 2
     from scripts.email_admission import main
     fresh = path.parent / 'cli.sqlite3'
     monkeypatch.setattr(sys, 'argv', ['email_admission', 'init', str(fresh)])
@@ -85,7 +281,7 @@ def test_exclusive_initialization_and_process_reopen_keep_reservation(journal, m
 
 
 @pytest.mark.parametrize('kind', ['missing', 'corrupt', 'schema', 'version', 'secret', 'clock',
-                                  'future_row', 'oversized', 'sidecar'])
+                                  'future_row', 'oversized', 'sidecar', 'journal', 'shm'])
 def test_unsafe_journal_fails_closed_without_reset(journal, kind):
     path, now, service = journal
     service.reserve(EMAIL)
@@ -96,15 +292,15 @@ def test_unsafe_journal_fails_closed_without_reset(journal, kind):
     elif kind == 'oversized':
         with path.open('ab') as target:
             target.write(b'x' * MAX_FILE_BYTES)
-    elif kind == 'sidecar':
-        Path(str(path) + '-wal').write_bytes(b'unsafe')
+    elif kind in ('sidecar', 'journal', 'shm'):
+        Path(str(path) + '-' + ('wal' if kind == 'sidecar' else kind)).write_bytes(b'unsafe')
     elif kind == 'clock':
         now[0] -= .001
     else:
         with sqlite3.connect(path) as connection:
             connection.execute({
                 'schema': 'CREATE TABLE unexpected (value TEXT)',
-                'version': 'UPDATE metadata SET version = 2',
+                'version': 'UPDATE metadata SET version = 1',
                 'secret': "UPDATE metadata SET secret = X'00'",
                 'future_row': 'UPDATE reservations SET reserved_at = 1001',
             }[kind])
@@ -148,11 +344,15 @@ def test_concurrent_separate_instances_never_exceed_combined_limits(journal, sam
     with ThreadPoolExecutor(max_workers=8) as pool:
         admitted = list(pool.map(reserve, range(8)))
     # Zero-timeout contenders may all reject; progress is checked without contention.
-    assert 0 <= sum(admitted) <= (1 if same_recipient else 2)
+    assert 0 <= sum(admitted) <= 2
     assert len(rows(path)) == sum(admitted)
-    if not any(admitted):
-        EmailAdmission(path, clock=lambda: now[0]).reserve(EMAIL)
-        assert len(rows(path)) == 1
+    service = EmailAdmission(path, clock=lambda: now[0])
+    for index in range(2 - sum(admitted)):
+        service.reserve(EMAIL if same_recipient else f'fill-{index}@example.test')
+    assert len(rows(path)) == 2
+    with pytest.raises(AuthFailure, match='auth_capacity'):
+        service.reserve(EMAIL if same_recipient else 'third@example.test')
+    assert len(rows(path)) == 2
 
 
 def test_async_journal_jobs_have_bounded_admission(journal):
@@ -222,10 +422,9 @@ def test_fresh_browsers_share_recipient_and_global_capacity_across_purposes(jour
     assert post(client).status_code == 200
     fresh = TestClient(app, base_url=ORIGIN)
     response = post(fresh, 'recovery/request', {'email': '  TESTER@EXAMPLE.TEST  '})
-    assert response.status_code == 429
-    assert len(app.state.auth_registry.pending) == 1
-    assert adapter.calls == ['signup']
-    assert post(fresh, 'recovery/request', {'email': 'second@example.test'}).status_code == 200
+    assert response.status_code == 200
+    assert len(app.state.auth_registry.pending) == 2
+    assert post(fresh, 'recovery/request', {'email': 'second@example.test'}).status_code == 429
     third = TestClient(app, base_url=ORIGIN)
     assert post(third, payload={**PAYLOAD, 'email': 'third@example.test'}).status_code == 429
     assert adapter.calls == ['signup', 'request_recovery']
@@ -245,6 +444,10 @@ def test_provider_failure_retains_reservation_and_discards_pending(journal, acti
     assert not app.state.auth_registry.pending
     assert len(rows(path)) == 1
     restarted, offline, _ = client_for(EmailAdmission(path, clock=lambda: now[0]))
+    offline.fail = True
+    assert post(restarted, action, payload).status_code == 503
+    assert len(rows(path)) == 2
+    offline.calls.clear()
     assert post(restarted, action, payload).status_code == 429
     assert not offline.calls
 
@@ -294,9 +497,11 @@ def test_persistence_failure_prevents_http_dispatch_and_preserves_transaction_bo
         assert last_seen == 1000.0
     restarted, offline, _ = client_for(EmailAdmission(path, clock=lambda: now[0]))
     retry = post(restarted, action, payload)
-    assert retry.status_code == (429 if failure == 'after_commit' else 200)
-    assert offline.calls == ([] if failure == 'after_commit' else
-                             ['signup' if action == 'signup' else 'request_recovery'])
+    assert retry.status_code == 200
+    assert offline.calls == ['signup' if action == 'signup' else 'request_recovery']
+    assert len(rows(path)) == (2 if failure == 'after_commit' else 1)
+    if failure == 'after_commit':
+        assert post(restarted, action, payload).status_code == 429
 
 
 @pytest.mark.parametrize('action,payload', [('signup', PAYLOAD), ('recovery/request', {'email': EMAIL})])
@@ -367,6 +572,7 @@ def test_cancelled_http_waiters_keep_real_commits_without_dispatch_and_release_s
             assert all(not adapter.calls for adapter in adapters)
             for journal_path in (path, other_path):
                 assert len(rows(journal_path)) == 1
+                EmailAdmission(journal_path, clock=lambda: now[0]).reserve(EMAIL)
                 with pytest.raises(AuthFailure, match='auth_capacity'):
                     EmailAdmission(journal_path, clock=lambda: now[0]).reserve(EMAIL)
             # Both real workers must be admitted again, concurrently, after expiry.

@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 11-11-2026 18:15
-last_updated: 21-11-2026 10:28
+last_updated: 21-11-2026 11:34
 project: G79-hansen
 project_key: NOKEY
 tracking_system: file-system
@@ -98,6 +98,8 @@ development_status:
   # 20 Nov: approved Funnel10000 -> loopback8000 activated17:07; mobile access user-confirmed17:11.
   # Existing443/8765 and8443/3000 remain private. Evidence: hosting-acceptance.md.
   # Hosted startup/config and durable email journal enabled; signup/HTTPS confirmation user-confirmed.
+  # 21 Nov approved retry increase active: schema2,2 global/2 per recipient per rolling hour; history preserved.
+  # Explicit offline upgrade/restart verified;319 focused auth/admission/startup tests passed after review patches.
   # Self-registration plus an existing confirmed ordinary reserve account selected; private handover pending.
   # 19 Nov: DB authentication verified with explicit project CA; routine checker CA wiring remains open.
   # 20 Nov16:10: refreshed encrypted app backup includes4 Auth users/email journal and5 checked Storage files.

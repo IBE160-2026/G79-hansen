@@ -833,6 +833,23 @@ ved aktiveringen. Se [akseptansenotat](../.docs/implementation-artifacts/hosting
 
 **Studentens egen refleksjon:** Ikke innhentet i denne aktiveringen.
 
+## 21.11.2026 – studentgodkjent ekstra e-postforsøk
+
+**Dokumenterte fakta:** Studenten traff registreringssperren og ba om flere
+forsøk. Studenten godkjente2 per adresse og fortsatt2 totalt per time.
+KI implementerte eksplisitt versjonert SQLite-oppgradering som beholder gamle
+forsøk, hemmelighet og klokke. Parentkontroll bekreftet bevarte verdier gjennom
+fingeravtrykk og uendret modellbudsjett/konfigurasjon ved appomstart. Ingen ekte
+e-post-/modellkall ble utført av agenten. Review avdekket at migrasjonstestene
+brukte produksjonskodens egen historiske skjemakonstant; dette ble fulgt opp
+med et uavhengig låst testgrunnlag. Se
+[endringsspesifikasjonen](../.docs/implementation-artifacts/spec-expand-recipient-email-attempts.md)
+og [aktiveringsresultatet](../.docs/implementation-artifacts/hosting-acceptance.md).
+
+Endelig kontroll:319 tester bestod etter reviewoppfølgingen. Ingen utsatte funn.
+
+**Studentens egen refleksjon:** Ikke innhentet her. Rapportutkastet er urørt.
+
 ## Mal for neste hendelse
 
 

@@ -17,8 +17,10 @@ Demoen viser faste eksempler; egne dokumenter behandles i den innloggede nettutg
 
 Bruk skjemaet **Opprett konto** og bekreft den vanlige brukerkontoen via e-post.
 Åpne lenken innen ti minutter i samme nettleser/profil som registreringen startet i.
-Registrering og glemt passord deler en grense på to e-postforsøk totalt og ett
+Registrering og glemt passord deler en grense på to e-postforsøk totalt og to
 per mottaker per rullerende time; forsøk kan telle også når utsending mislykkes.
+Tidligere forsøk beholdes og teller fortsatt. Leverandørens egen ventetid for
+samme adresse gjelder i tillegg; studenten utfører eventuelle nye e-postforsøk.
 
 En eksisterende bekreftet vanlig testkonto er valgt som reserve.
 Innloggingsopplysningene overleveres separat og privat av studenten.

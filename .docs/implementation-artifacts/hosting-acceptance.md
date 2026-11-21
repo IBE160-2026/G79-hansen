@@ -84,6 +84,39 @@ Quiz1 med skjulte svar. Dette er brukerbekreftet vedvarende materiale/fremdrift
 og avsluttet gammel økt etter den faktiske appomstarten. Den anonyme
 HTTP-kontrollen over er separat og beviser ikke den private gjenåpningen.
 
+## 21.11.2026 kl.11:27 – godkjent økning av e-postforsøk
+
+Studenten godkjente to forsøk per normalisert e-postadresse og fortsatt to
+totalt per rullerende time, felles for registrering og passordgjenoppretting.
+Den gamle ett-per-adresse-grensen stoppet et nytt registreringsforsøk i
+eierkontrollen. Ingen Supabase-/SMTP-grense er endret.
+
+Etter offline verifisering og parentgjennomgang ble worker17108 identitets-
+kontrollert og stoppet. Journalen ble eksplisitt oppgradert fra versjon1 til2
+med `scripts.email_admission upgrade` mot den eksisterende konfigurerte stien.
+Alle eksisterende mottakerdigester/reservasjonstidspunkter, antall poster,
+hemmelighet og last-seen-klokke er kontrollert bevart gjennom fingeravtrykk.
+Konfigurasjon, modellbudsjett og signeringsnøkkel er også uendret.
+
+Hosted preflight bestod før oppstart. Ny hidden wrapper31808 / worker3092
+lytter på127.0.0.1:8000. Normal TLS ga200 på workspace/auth-status med
+available=true/authenticated=false/no-store. Journalen har én aktiv reservasjon
+og én ledig global plass ved kontrollen11:27. Modelljournal13/USD0,65/smoke4
+er uendret. Ingen nullstilling, e-post, ny konto eller modellforespørsel fra agenten.
+Ny innlogging kreves etter appomstart; studenten utfører eventuell ny registrering.
+
+Parentkjøring:310 offline tester bestod, én eksisterende TestClient-advarsel.
+En separat kontroll kjørte faktisk versjon1-kode fra den tidligere revisjonen
+mot syntetisk versjon2-journal og bekreftet avvisning uten endring. Ingen
+nettleser-/provider-/brede testsuiter ble kjørt på nytt for denne endringen.
+
+Etter uavhengig gjennomgang ble bare testgrunnlag/dokumentasjon forbedret:
+låst historisk v1-skjema, aktiv tidligere kvote, utrygge migrasjonsdata og
+presis samtidighetskapasitet. Endelig parentkjøring bestod319 tester med én
+arvet advarsel. Ingen nye produksjonskodeendringer etter aktiveringen og ingen
+utsatte reviewfunn. Read-only kontroll11:34 viste fortsatt én aktiv reservasjon
+og én ledig global plass; samme journal/historikk, ingen ny e-post sendt.
+
 ## Gjenstående kontroll
 
 - Resterende eierisolasjon mellom ulike kontoer og privat overlevering av

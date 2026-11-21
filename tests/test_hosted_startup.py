@@ -17,6 +17,7 @@ from app.config import Settings
 from app.services.email_admission import EmailAdmission
 from app.services.model_budget import ModelBudget
 from scripts import hosted_server as hosted
+from test_email_admission import legacy_journal
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -300,6 +301,24 @@ def test_inspection_sqlite_error_is_normalized(tmp_path, monkeypatch):
     monkeypatch.setattr(sqlite3, 'connect', fail)
     with pytest.raises(AuthFailure, match='^auth_unavailable$'):
         EmailAdmission(path).inspect_ready()
+
+
+def test_hosted_rejects_legacy_until_explicit_upgrade_then_inspects_without_mutation(
+        enabled, tmp_path, monkeypatch, offline, capsys):
+    path = Path(enabled.auth_email_admission_path)
+    path.unlink()
+    legacy_journal(path)
+    effective(monkeypatch, enabled)
+    before = snapshot(tmp_path)
+    assert hosted.main(['--check']) == 1
+    assert capsys.readouterr().out == 'hosted-startup: email-state-invalid\n'
+    assert snapshot(tmp_path) == before
+    hosted.probe_port.assert_not_called()
+    assert EmailAdmission.upgrade(path)
+    before = snapshot(tmp_path)
+    assert hosted.main(['--check']) == 0
+    assert snapshot(tmp_path) == before
+    offline.assert_not_called()
 
 
 def powershell():
